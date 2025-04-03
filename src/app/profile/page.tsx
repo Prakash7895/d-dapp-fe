@@ -1,4 +1,5 @@
 import GridPattern from '@/components/GridPattern';
+import ProfileMintNft from '@/components/ProfileMintNft';
 import React from 'react';
 
 const Profile = () => {
@@ -21,8 +22,10 @@ const Profile = () => {
         </div>
       </div>
       <div className='md:mx-52 mx-16 mt-20'>
-        <p>My NFT's</p>
-        
+        <div className='flex justify-between'>
+          <p>My NFT's</p>
+          <ProfileMintNft />
+        </div>
       </div>
     </div>
   );

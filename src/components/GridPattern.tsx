@@ -1,5 +1,4 @@
 'use client';
-
 import useResize from '@/hooks/useResize';
 import React, { FC } from 'react';
 

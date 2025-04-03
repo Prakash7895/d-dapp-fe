@@ -10,14 +10,16 @@
   },
   "dependencies": {
     "@tabler/icons-react": "^3.31.0",
+    "@web3-storage/w3up-client": "^17.2.0",
     "clsx": "^2.1.1",
     "ethers": "^6.13.5",
     "framer-motion": "^12.6.2",
+    "lucide-react": "^0.486.0",
     "next": "15.1.7",
-    "pinata": "^2.1.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.8",
+    "react-toastify": "^11.0.5",
     "tailwind-merge": "^3.0.2"
   },
   "devDependencies": {

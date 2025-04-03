@@ -1,32 +1,23 @@
 import React, { useState } from 'react';
 import { FileUploader } from './FileUploader';
-import { pinata } from '../../utils/config';
+import { addFileToWeb3Storage } from '@/web3Storage';
+import { toast } from 'react-toastify';
 
-const MintNFT = () => {
+const IPFSUploader = () => {
   const [uploading, setUploading] = useState(false);
   const [file, setFile] = useState<File>();
   const [uploadedFile, setUploadedFile] = useState<string>();
 
-  const uploadToPinata = async (file: File, url: string) => {
-    const upload = await pinata.upload.public.file(file).url(url);
-    console.log('upload:', upload);
-    const fileUrl = await pinata.gateways.public.convert(upload.cid);
-    console.log('fileUrl:', fileUrl);
-    setUploadedFile(fileUrl as unknown as string);
-    setUploading(false);
-  };
-
   const handleUpload = (file: File) => {
     setUploading(true);
-    fetch('/api/get-signed-url')
-      .then((res) => res.json())
+    addFileToWeb3Storage(file)
       .then((res) => {
-        console.log('RES', res);
-        uploadToPinata(file, res.url);
+        console.log('res', res);
       })
       .catch((err) => {
-        console.log('ERR', err);
-      });
+        toast.error(err?.message || 'Failed to upload file to web3 storage');
+      })
+      .finally(() => setUploading(false));
   };
 
   return (
@@ -60,4 +51,4 @@ const MintNFT = () => {
   );
 };
 
-export default MintNFT;
+export default IPFSUploader;

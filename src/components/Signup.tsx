@@ -1,32 +1,16 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import IPFSUploader from './IPFSUploader';
 import { useStateContext } from './StateProvider';
-import { connectWallet, detectConnection } from '@/utils';
-import MintNFT from './MintNFT';
+import { connectWallet } from '@/utils';
 
 const Signup = () => {
-  const { setAccounts } = useStateContext();
-
-  const [connected, setConnected] = useState(false);
-
-  useEffect(() => {
-    detectConnection()
-      .then((res) => {
-        console.log('RES', res);
-        if (res.accounts.length > 0) {
-          setConnected(true);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
+  const { connected, setConnected, setUserAddress } = useStateContext();
 
   const connect = () => {
     connectWallet().then((res) => {
-      console.log('RES', res);
-      setAccounts(res.accounts);
-      if (res.accounts.length > 0) {
+      console.log('RES3', res);
+      setUserAddress(res.address);
+      if (res.address) {
         setConnected(true);
       }
     });
@@ -55,7 +39,7 @@ const Signup = () => {
         <p className='text-center'>Mint your profile NFT to sign up</p>
       )}
       <div className='border-[1px] rounded-xl border-gray-800 border-dashed mt-5'>
-        <MintNFT />
+        <IPFSUploader />
       </div>
     </div>
   );
