@@ -1,8 +1,31 @@
+'use client';
 import GridPattern from '@/components/GridPattern';
 import ProfileMintNft from '@/components/ProfileMintNft';
-import React from 'react';
+import {
+  getActiveProfileNft,
+  getUserTokenIds,
+  getUserTokenUriById,
+  getUserTokenUris,
+} from '@/utils';
+import React, { useEffect } from 'react';
+import { toast } from 'react-toastify';
 
 const Profile = () => {
+  useEffect(() => {
+    getActiveProfileNft();
+    getUserTokenUris();
+    getUserTokenIds();
+    getUserTokenUriById(7).then((res) => {
+      if (!res) {
+        toast.error('Token Id 7 is not valid');
+      }
+    });
+    getUserTokenUriById(6);
+    getUserTokenUriById(5);
+    getUserTokenUriById(4);
+    getUserTokenUriById(3);
+  }, []);
+
   return (
     <div>
       <div className='border-b-2 border-gray-800'>

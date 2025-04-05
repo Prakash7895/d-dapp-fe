@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
+import React, { FC, useState } from 'react';
 import { FileUploader } from './FileUploader';
 import { addFileToWeb3Storage } from '@/web3Storage';
 import { toast } from 'react-toastify';
+import { mintNewNft } from '@/utils';
 
-const IPFSUploader = () => {
+interface IPFSUploaderProps {
+  onSuccess: () => void;
+}
+
+const IPFSUploader: FC<IPFSUploaderProps> = ({ onSuccess }) => {
   const [uploading, setUploading] = useState(false);
   const [file, setFile] = useState<File>();
   const [uploadedFile, setUploadedFile] = useState<string>();
@@ -13,11 +18,24 @@ const IPFSUploader = () => {
     addFileToWeb3Storage(file)
       .then((res) => {
         console.log('res', res);
+        if (res) {
+          mintNewNft(res)
+            .then((r) => {
+              console.log('R', r);
+              toast.success('Profile NFT minted successfully');
+              setUploading(false);
+              onSuccess();
+            })
+            .catch((err) => {
+              setUploading(false);
+              toast.error(err?.message || 'Error minting profile nft');
+            });
+        }
       })
       .catch((err) => {
+        setUploading(false);
         toast.error(err?.message || 'Failed to upload file to web3 storage');
-      })
-      .finally(() => setUploading(false));
+      });
   };
 
   return (

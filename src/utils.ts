@@ -80,7 +80,60 @@ export const mintNewNft = async (tokenUri: string) => {
   const transaction = await soulboundNft.createUserProfile(tokenUri, {
     value: fees.mintFeeInWei,
   });
-  // await transaction.wait();
+  await transaction.wait();
 
   console.log('transaction', transaction);
+};
+
+export const getActiveProfileNft = async () => {
+  const signer = await connectWallet();
+  const soulboundNft = await getSoulboundNft();
+
+  const transaction = await soulboundNft.getActiveProfileNft(signer.address);
+  console.log('transaction', transaction);
+};
+
+export const getUserTokenUris = async () => {
+  const signer = await connectWallet();
+  const soulboundNft = await getSoulboundNft();
+
+  const tokenUris = await soulboundNft.getUserTokenUris(signer.address);
+
+  console.log('tokenUris', Array.from(tokenUris));
+
+  return Array.from(tokenUris);
+};
+
+export const getUserTokenIds = async () => {
+  const signer = await connectWallet();
+  const soulboundNft = await getSoulboundNft();
+
+  const tokenIds = await soulboundNft.getUserNfts(signer.address);
+
+  const ids = Array.from(tokenIds).map((el) => Number(el));
+
+  return ids;
+};
+
+export const getUserTokenUriById = async (id: number) => {
+  try {
+    const soulboundNft = await getSoulboundNft();
+
+    const tokenUri = await soulboundNft.tokenURI(id);
+
+    console.log(id, '=>', tokenUri);
+
+    return tokenUri;
+  } catch (error: any) {
+    if (
+      error.code === -32000 ||
+      error.code === 3 ||
+      error.message.includes('execution reverted')
+    ) {
+      console.log('Transaction failed: Invalid tokenId or conditions not met.');
+    } else {
+      console.log('An unexpected error occurred:');
+    }
+    return false;
+  }
 };

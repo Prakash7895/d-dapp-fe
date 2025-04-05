@@ -39,7 +39,7 @@ const Signup = () => {
         <p className='text-center'>Mint your profile NFT to sign up</p>
       )}
       <div className='border-[1px] rounded-xl border-gray-800 border-dashed mt-5'>
-        <IPFSUploader />
+        <IPFSUploader onSuccess={() => {}} />
       </div>
     </div>
   );

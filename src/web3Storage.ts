@@ -28,7 +28,9 @@ export const addFileToWeb3Storage = async (file: File) => {
 
     const metaDataFile = createNFTMetadataFile(cid?.toString()!);
     const uploadedMetaFile = await web3Client?.uploadFile(metaDataFile);
-    return uploadedMetaFile?.toString();
+    const metaCID = uploadedMetaFile?.toString();
+    console.log('MetaCID', metaCID);
+    return `https://${metaCID}.ipfs.w3s.link`;
   } catch (err) {
     console.error('failed to upload file: ', err);
     return false;
