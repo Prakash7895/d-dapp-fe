@@ -1,9 +1,9 @@
 'use client';
-import IPFSUploader from './IPFSUploader';
-import { useStateContext } from './StateProvider';
 import { connectWallet } from '@/utils';
+import { useStateContext } from './StateProvider';
+import IPFSUploader from './IPFSUploader';
 
-const Signup = () => {
+const SignUpForm = () => {
   const { connected, setConnected, setUserAddress } = useStateContext();
 
   const connect = () => {
@@ -17,14 +17,7 @@ const Signup = () => {
   };
 
   return (
-    <div className='flex flex-col'>
-      <h3 className='text-4xl font-bold text-center mb-6'>
-        Welcome to our Dating Dapp!
-      </h3>
-      <p className='text-lg text-center mb-6'>
-        Find your perfect match on the blockchain.
-      </p>
-
+    <div>
       {!connected ? (
         <button className='p-[3px] relative mx-auto'>
           <div className='absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg' />
@@ -41,8 +34,9 @@ const Signup = () => {
       <div className='border-[1px] rounded-xl border-gray-800 border-dashed mt-5'>
         <IPFSUploader onSuccess={() => {}} />
       </div>
+      
     </div>
   );
 };
 
-export default Signup;
+export default SignUpForm;
