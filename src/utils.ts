@@ -1,6 +1,7 @@
 'use client';
 import { ethers, formatEther } from 'ethers';
 import soulboundNftAbi from '@/abis/SooulboundNft.json';
+import { Contract } from 'ethers';
 
 declare global {
   interface Window {
@@ -49,91 +50,164 @@ export async function connectWallet() {
 }
 
 const getSoulboundNft = async () => {
-  const signer = await connectWallet();
+  try {
+    const signer = await connectWallet();
 
-  return new ethers.Contract(
-    process.env.NEXT_PUBLIC_SOULBOUND_NFT_ADDRESS!,
-    soulboundNftAbi,
-    signer
-  );
+    return new ethers.Contract(
+      process.env.NEXT_PUBLIC_SOULBOUND_NFT_ADDRESS!,
+      soulboundNftAbi,
+      signer
+    );
+  } catch (error: any) {
+    console.log('getting SoulboundNft instance error', error);
+    return false;
+  }
 };
 
 export const getMintFee = async () => {
-  const soulboundNft = await getSoulboundNft();
+  try {
+    const soulboundNft = (await getSoulboundNft()) as Contract;
 
-  const mintFeeInWei = await soulboundNft.s_mintFee();
-  const mintFeeInEth = +formatEther(mintFeeInWei);
+    const mintFeeInWei = await soulboundNft.s_mintFee();
+    const mintFeeInEth = +formatEther(mintFeeInWei);
 
-  return {
-    mintFeeInWei,
-    mintFeeInEth,
-  };
+    return {
+      mintFeeInWei,
+      mintFeeInEth,
+    };
+  } catch (error: any) {
+    console.log('getting mint fee error', error);
+    return false;
+  }
 };
 
 export const mintNewNft = async (tokenUri: string) => {
-  const soulboundNft = await getSoulboundNft();
-  const fees = await getMintFee();
+  try {
+    const soulboundNft = (await getSoulboundNft()) as Contract;
+    const fees = await getMintFee();
 
-  console.log('tokenUri', tokenUri);
-  console.log('fees', fees);
+    if (!fees) {
+      throw new Error('Failed to get mint fee');
+    }
 
-  const transaction = await soulboundNft.createUserProfile(tokenUri, {
-    value: fees.mintFeeInWei,
-  });
-  await transaction.wait();
+    console.log('tokenUri', tokenUri);
+    console.log('fees', fees);
 
-  console.log('transaction', transaction);
+    const transaction = await soulboundNft.createUserProfile(tokenUri, {
+      value: fees.mintFeeInWei,
+    });
+    await transaction.wait();
+
+    console.log('transaction', transaction);
+  } catch (error: any) {
+    console.log('minting new Nft error', error);
+    return false;
+  }
 };
 
 export const getActiveProfileNft = async () => {
-  const signer = await connectWallet();
-  const soulboundNft = await getSoulboundNft();
+  try {
+    const signer = await connectWallet();
+    const soulboundNft = (await getSoulboundNft()) as Contract;
 
-  const transaction = await soulboundNft.getActiveProfileNft(signer.address);
-  console.log('transaction', transaction);
+    const metaDataUri = await soulboundNft.getActiveProfileNft(signer.address);
+
+    const response = await fetch(metaDataUri);
+    if (!response.ok) {
+      throw new Error('Failed to fetch metadata');
+    }
+
+    const metaData = await response.json();
+
+    console.log('metaData', metaData);
+
+    const imageUrl = metaData?.image_gateway;
+
+    if (!imageUrl) {
+      throw new Error('Image URL not found in metadata');
+    }
+
+    return imageUrl;
+  } catch (error: any) {
+    console.log('getting active profile nft error', error);
+    return false;
+  }
 };
 
 export const getUserTokenUris = async () => {
-  const signer = await connectWallet();
-  const soulboundNft = await getSoulboundNft();
+  try {
+    const signer = await connectWallet();
+    const soulboundNft = (await getSoulboundNft()) as Contract;
 
-  const tokenUris = await soulboundNft.getUserTokenUris(signer.address);
+    const tokenUris = await soulboundNft.getUserTokenUris(signer.address);
 
-  console.log('tokenUris', Array.from(tokenUris));
+    console.log('tokenUris', Array.from(tokenUris));
 
-  return Array.from(tokenUris);
+    return Array.from(tokenUris);
+  } catch (error: any) {
+    console.log('get user token uris error', error);
+    return false;
+  }
 };
 
 export const getUserTokenIds = async () => {
-  const signer = await connectWallet();
-  const soulboundNft = await getSoulboundNft();
+  try {
+    const signer = await connectWallet();
+    const soulboundNft = (await getSoulboundNft()) as Contract;
 
-  const tokenIds = await soulboundNft.getUserNfts(signer.address);
+    const tokenIds = await soulboundNft.getUserNfts(signer.address);
 
-  const ids = Array.from(tokenIds).map((el) => Number(el));
+    const ids = Array.from(tokenIds).map((el) => Number(el));
 
-  return ids;
+    return ids;
+  } catch (error: any) {
+    console.log('get user token ids error', error);
+    return false;
+  }
 };
 
 export const getUserTokenUriById = async (id: number) => {
   try {
-    const soulboundNft = await getSoulboundNft();
+    const soulboundNft = (await getSoulboundNft()) as Contract;
 
-    const tokenUri = await soulboundNft.tokenURI(id);
+    const metaDataUri = await soulboundNft.tokenURI(id);
 
-    console.log(id, '=>', tokenUri);
+    console.log(id, '=>', metaDataUri);
 
-    return tokenUri;
-  } catch (error: any) {
-    if (
-      error.code === -32000 ||
-      error.code === 3 ||
-      error.message.includes('execution reverted')
-    ) {
-      console.log('Transaction failed: Invalid tokenId or conditions not met.');
-    } else {
-      console.log('An unexpected error occurred:');
+    const response = await fetch(metaDataUri);
+    if (!response.ok) {
+      throw new Error('Failed to fetch metadata');
     }
+
+    const metaData = await response.json();
+
+    console.log('metaData', metaData);
+
+    const imageUrl = metaData?.image_gateway;
+
+    if (!imageUrl) {
+      throw new Error('Image URL not found in metadata');
+    }
+
+    return imageUrl;
+  } catch (error: any) {
+    console.log('Get token uri by id error', error);
+    return false;
+  }
+};
+
+export const changeProfileNft = async (tokenId: number) => {
+  try {
+    const soulboundNft = (await getSoulboundNft()) as Contract;
+
+    const transaction = await soulboundNft.changeProfileNft(tokenId);
+    console.log('transaction', transaction);
+    await transaction.wait();
+    console.log('transaction2', transaction);
+
+    return true;
+  } catch (error: any) {
+    console.log('get user token ids error', error);
     return false;
   }
 };

@@ -1,9 +1,16 @@
 'use client';
-import { connectWallet, detectConnection, getMintFee } from '@/utils';
+import {
+  connectWallet,
+  detectConnection,
+  getActiveProfileNft,
+  getMintFee,
+  getUserTokenIds,
+} from '@/utils';
 import React, {
   createContext,
   FC,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -16,16 +23,30 @@ const Context = createContext<{
   setUserAddress: React.Dispatch<React.SetStateAction<string>>;
   connected: boolean;
   setConnected: React.Dispatch<React.SetStateAction<boolean>>;
+  activeProfilePhoto: string;
+  setActiveProfilePhoto: React.Dispatch<React.SetStateAction<string>>;
+  tokedIds: number[];
+  setTokedIds: React.Dispatch<React.SetStateAction<number[]>>;
+  getCurrUsersTokenIds: () => void;
+  getUpdatedProfileNft: () => void;
 }>({
   userAddress: '',
   setUserAddress: () => {},
   connected: false,
   setConnected: () => {},
+  activeProfilePhoto: '',
+  setActiveProfilePhoto: () => {},
+  tokedIds: [],
+  setTokedIds: () => {},
+  getCurrUsersTokenIds: () => {},
+  getUpdatedProfileNft: () => {},
 });
 
 const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [userAddress, setUserAddress] = useState('');
   const [connected, setConnected] = useState(false);
+  const [activeProfilePhoto, setActiveProfilePhoto] = useState('');
+  const [tokedIds, setTokedIds] = useState<number[]>([]);
 
   useEffect(() => {
     const initializeProvider = async () => {
@@ -43,6 +64,10 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
         const mintFee = await getMintFee();
 
         console.log('mintFee:', mintFee);
+
+        getActiveProfileNft().then((res) => {
+          setActiveProfilePhoto(res);
+        });
       } catch (err: any) {
         console.log(err);
         toast.error(err?.message || 'Failed to detect connection');
@@ -52,9 +77,45 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
     initializeProvider();
   }, []);
 
+  const getCurrUsersTokenIds = useCallback(() => {
+    getUserTokenIds().then((res) => {
+      if (res) {
+        setTokedIds(res);
+      }
+    });
+  }, []);
+
+  const getUpdatedProfileNft = useCallback(() => {
+    getActiveProfileNft().then((p) => {
+      setActiveProfilePhoto(p);
+    });
+  }, []);
+
   const value = useMemo(
-    () => ({ userAddress, connected, setConnected, setUserAddress }),
-    [userAddress, connected, setConnected, setUserAddress]
+    () => ({
+      userAddress,
+      connected,
+      setConnected,
+      setUserAddress,
+      activeProfilePhoto,
+      setActiveProfilePhoto,
+      tokedIds,
+      setTokedIds,
+      getCurrUsersTokenIds,
+      getUpdatedProfileNft,
+    }),
+    [
+      userAddress,
+      connected,
+      setConnected,
+      setUserAddress,
+      activeProfilePhoto,
+      setActiveProfilePhoto,
+      tokedIds,
+      setTokedIds,
+      getCurrUsersTokenIds,
+      getUpdatedProfileNft,
+    ]
   );
 
   return (

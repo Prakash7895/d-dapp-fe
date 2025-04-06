@@ -3,6 +3,7 @@ import { FileUploader } from './FileUploader';
 import { addFileToWeb3Storage } from '@/web3Storage';
 import { toast } from 'react-toastify';
 import { mintNewNft } from '@/utils';
+import Loader from './Loader';
 
 interface IPFSUploaderProps {
   onSuccess: () => void;
@@ -11,7 +12,6 @@ interface IPFSUploaderProps {
 const IPFSUploader: FC<IPFSUploaderProps> = ({ onSuccess }) => {
   const [uploading, setUploading] = useState(false);
   const [file, setFile] = useState<File>();
-  const [uploadedFile, setUploadedFile] = useState<string>();
 
   const handleUpload = (file: File) => {
     setUploading(true);
@@ -40,18 +40,16 @@ const IPFSUploader: FC<IPFSUploaderProps> = ({ onSuccess }) => {
 
   return (
     <div>
-      {uploadedFile ? (
-        <div>
-          <img alt='Soulbound NFT' src={uploadedFile} />
-        </div>
-      ) : (
-        <FileUploader
-          onChange={(files) => {
-            if (files[0]) {
-              setFile(files[0]);
-            }
-          }}
-          actions={
+      <FileUploader
+        onChange={(files) => {
+          if (files[0]) {
+            setFile(files[0]);
+          }
+        }}
+        actions={
+          uploading ? (
+            <Loader />
+          ) : (
             <button
               onClick={() => file && handleUpload(file)}
               disabled={uploading}
@@ -62,9 +60,9 @@ const IPFSUploader: FC<IPFSUploaderProps> = ({ onSuccess }) => {
                 Mint Soulbound NFT
               </span>
             </button>
-          }
-        />
-      )}
+          )
+        }
+      />
     </div>
   );
 };
