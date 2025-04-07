@@ -1,10 +1,13 @@
-import { addressSchema, userSchema, userUpdateSchema } from '@/apiSchemas';
+import { addressSchema, userUpdateSchema } from '@/apiSchemas';
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '../../../../../lib/prisma';
 
-export async function GET({ params }: { params: Promise<{ slug: string }> }) {
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ slug: string }> }
+) {
   try {
-    const { slug: address } = await params;
+    const address = (await params).slug;
 
     const validationResult = addressSchema.safeParse(address);
 
@@ -24,12 +27,23 @@ export async function GET({ params }: { params: Promise<{ slug: string }> }) {
       },
     });
 
+    if (user) {
+      return NextResponse.json(
+        { status: 'success', data: user },
+        { status: 201 }
+      );
+    }
+
     return NextResponse.json(
-      { status: 'success', data: user },
-      { status: 201 }
+      { status: 'error', message: 'User not found' },
+      { status: 400 }
     );
-  } catch (err) {
+  } catch (err: any) {
     console.log(err);
+    return NextResponse.json(
+      { status: 'error', message: err?.message },
+      { status: 400 }
+    );
   }
 }
 
@@ -38,17 +52,19 @@ export async function PUT(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug: address } = await params;
+    const address = (await params).slug;
 
     const data = await request.json();
 
-    const validationResult = userUpdateSchema.safeParse(data);
+    const validationResult1 = addressSchema.safeParse(address);
+    const validationResult2 = userUpdateSchema.safeParse(data);
 
-    if (!validationResult.success) {
+    if (!validationResult1.success || !validationResult2.success) {
       return NextResponse.json(
         {
           status: 'error',
-          error: validationResult.error.errors,
+          error:
+            validationResult1.error?.errors || validationResult2.error?.errors,
         },
         { status: 400 }
       );
@@ -67,7 +83,11 @@ export async function PUT(
       { status: 'success', data: user },
       { status: 201 }
     );
-  } catch (err) {
+  } catch (err: any) {
     console.log(err);
+    return NextResponse.json(
+      { status: 'error', message: err?.message || 'Unknown error' },
+      { status: 400 }
+    );
   }
 }

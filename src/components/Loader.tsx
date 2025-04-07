@@ -1,5 +1,12 @@
+import { FC } from 'react';
 import { HashLoader } from 'react-spinners';
 
-const Loader = () => <HashLoader color='#cf29de' />;
+interface LoaderProps {
+  size?: number;
+}
+
+const Loader: FC<LoaderProps> = ({ size = 48 }) => (
+  <HashLoader size={size} color='#cf29de' />
+);
 
 export default Loader;

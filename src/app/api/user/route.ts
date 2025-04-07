@@ -30,10 +30,18 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(
-      { status: 'success', data: user },
+      {
+        status: 'success',
+        data: user,
+        message: 'User info saved successfully.',
+      },
       { status: 201 }
     );
-  } catch (err) {
+  } catch (err: any) {
     console.log(err);
+    return NextResponse.json(
+      { status: 'error', message: err?.message },
+      { status: 400 }
+    );
   }
 }

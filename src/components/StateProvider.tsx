@@ -6,6 +6,7 @@ import {
   getMintFee,
   getUserTokenIds,
 } from '@/contract';
+import { User } from '@/types/user';
 import React, {
   createContext,
   FC,
@@ -17,6 +18,12 @@ import React, {
   useState,
 } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
+import Loader from './Loader';
+
+interface OnboardedProps {
+  profileMinted: boolean;
+  userInfoSaved: null | User;
+}
 
 const Context = createContext<{
   userAddress: string;
@@ -29,6 +36,8 @@ const Context = createContext<{
   setTokedIds: React.Dispatch<React.SetStateAction<number[]>>;
   getCurrUsersTokenIds: () => void;
   getUpdatedProfileNft: () => void;
+  onboardInfo: OnboardedProps;
+  setOnboardInfo: React.Dispatch<React.SetStateAction<OnboardedProps>>;
 }>({
   userAddress: '',
   setUserAddress: () => {},
@@ -40,6 +49,8 @@ const Context = createContext<{
   setTokedIds: () => {},
   getCurrUsersTokenIds: () => {},
   getUpdatedProfileNft: () => {},
+  onboardInfo: { profileMinted: false, userInfoSaved: null },
+  setOnboardInfo: () => {},
 });
 
 const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
@@ -47,27 +58,39 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [connected, setConnected] = useState(false);
   const [activeProfilePhoto, setActiveProfilePhoto] = useState('');
   const [tokedIds, setTokedIds] = useState<number[]>([]);
+  const [onboardInfo, setOnboardInfo] = useState<OnboardedProps>({
+    profileMinted: false,
+    userInfoSaved: null,
+  });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const initializeProvider = async () => {
       try {
-        await detectConnection();
+        setLoading(true);
+        const accounts = await detectConnection();
 
-        setConnected(true);
-        const wallet = await connectWallet();
-        console.log('wallet', wallet);
-        setUserAddress(wallet.address);
-        if (wallet.address) {
+        if (accounts.length) {
           setConnected(true);
+          const wallet = await connectWallet();
+          console.log('wallet', wallet);
+          setUserAddress(wallet.address);
+          if (wallet.address) {
+            setConnected(true);
+          }
+
+          const mintFee = await getMintFee();
+
+          console.log('mintFee:', mintFee);
+
+          getActiveProfileNft().then((res) => {
+            if (res) {
+              setOnboardInfo((p) => ({ ...p, profileMinted: true }));
+              setActiveProfilePhoto(res);
+              setLoading(false);
+            }
+          });
         }
-
-        const mintFee = await getMintFee();
-
-        console.log('mintFee:', mintFee);
-
-        getActiveProfileNft().then((res) => {
-          setActiveProfilePhoto(res);
-        });
       } catch (err: any) {
         console.log(err);
         toast.error(err?.message || 'Failed to detect connection');
@@ -77,19 +100,42 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
     initializeProvider();
   }, []);
 
+  useEffect(() => {
+    if (
+      userAddress &&
+      onboardInfo.profileMinted &&
+      !onboardInfo.userInfoSaved
+    ) {
+      fetch(`/api/user/${userAddress}`)
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.data) {
+            setOnboardInfo((p) => ({ ...p, userInfoSaved: res.data }));
+          }
+        })
+        .catch((err) => {
+          toast.error(err?.message || 'Failed to get user info');
+        });
+    }
+  }, [userAddress, onboardInfo]);
+
   const getCurrUsersTokenIds = useCallback(() => {
-    getUserTokenIds().then((res) => {
-      if (res) {
-        setTokedIds(res);
-      }
-    });
-  }, []);
+    if (onboardInfo.profileMinted) {
+      getUserTokenIds().then((res) => {
+        if (res) {
+          setTokedIds(res);
+        }
+      });
+    }
+  }, [onboardInfo]);
 
   const getUpdatedProfileNft = useCallback(() => {
-    getActiveProfileNft().then((p) => {
-      setActiveProfilePhoto(p);
-    });
-  }, []);
+    if (onboardInfo.profileMinted) {
+      getActiveProfileNft().then((p) => {
+        setActiveProfilePhoto(p);
+      });
+    }
+  }, [onboardInfo]);
 
   const value = useMemo(
     () => ({
@@ -103,6 +149,8 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
       setTokedIds,
       getCurrUsersTokenIds,
       getUpdatedProfileNft,
+      onboardInfo,
+      setOnboardInfo,
     }),
     [
       userAddress,
@@ -115,13 +163,21 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
       setTokedIds,
       getCurrUsersTokenIds,
       getUpdatedProfileNft,
+      onboardInfo,
+      setOnboardInfo,
     ]
   );
 
   return (
     <Context.Provider value={value}>
       <ToastContainer />
-      {children}
+      {loading ? (
+        <div className='h-full flex justify-center items-center'>
+          <Loader size={96} />
+        </div>
+      ) : (
+        children
+      )}
     </Context.Provider>
   );
 };

@@ -1,9 +1,13 @@
 'use client';
+import { capitalizeFirstLetter } from '@/utils';
 import Loader from './Loader';
 import { useStateContext } from './StateProvider';
 
 const ProfileInfo = () => {
-  const { activeProfilePhoto } = useStateContext();
+  const {
+    activeProfilePhoto,
+    onboardInfo: { userInfoSaved: userInfo },
+  } = useStateContext();
 
   return (
     <div className='relative md:mx-52 mx-16'>
@@ -21,8 +25,10 @@ const ProfileInfo = () => {
         )}
       </div>
       <div className='pl-44 pb-3'>
-        <p className='text-3xl mb-2'>John, Doe</p>
-        <p>Male, Tokyo</p>
+        <p className='text-3xl mb-2'>
+          {userInfo?.firstName}, {userInfo?.lastName}
+        </p>
+        <p>{capitalizeFirstLetter(userInfo?.gender ?? '')}</p>
       </div>
     </div>
   );

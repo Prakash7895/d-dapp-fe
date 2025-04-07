@@ -6,12 +6,12 @@ export const GENDER = ['MALE', 'FEMALE', 'TRANS'] as const;
 export const SEXUAL_ORIENTATION = ['MALE', 'FEMALE', 'ALL'] as const;
 
 export const userSchema = z.object({
-  age: z.number(),
+  age: z.number({ message: 'age must be number greater than 0.' }),
   lastName: z.string(),
   firstName: z.string(),
   gender: z.enum(GENDER),
   sexualOrientation: z.enum(SEXUAL_ORIENTATION),
-  address: z.custom(isAddress, 'Invalid Address'),
+  address: z.custom(isAddress, 'address must be valid wallet address'),
 });
 
 export const addressSchema = z

@@ -19,9 +19,7 @@ export async function detectConnection() {
         method: 'eth_accounts',
       });
 
-      return {
-        accounts,
-      };
+      return accounts;
     } catch (err) {
       console.error('User rejected the request', err);
       throw err;

@@ -19,7 +19,7 @@ const Select: React.FC<SelectProps> = ({
   placeholder = 'Select an option',
 }) => {
   return (
-    <div className='w-full'>
+    <div className='w-full mb-4'>
       <select
         value={value}
         onChange={onChange}
