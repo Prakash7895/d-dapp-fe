@@ -1,9 +1,9 @@
 import { isAddress } from 'ethers';
 import { z } from 'zod';
 
-const GENDER = ['MALE', 'FEMALE', 'TRANS'] as const;
+export const GENDER = ['MALE', 'FEMALE', 'TRANS'] as const;
 
-const SEXUAL_ORIENTATION = ['MALE', 'FEMALE', 'ALL'] as const;
+export const SEXUAL_ORIENTATION = ['MALE', 'FEMALE', 'ALL'] as const;
 
 export const userSchema = z.object({
   age: z.number(),

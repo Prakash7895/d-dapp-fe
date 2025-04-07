@@ -5,7 +5,7 @@ import {
   getActiveProfileNft,
   getMintFee,
   getUserTokenIds,
-} from '@/utils';
+} from '@/contract';
 import React, {
   createContext,
   FC,

@@ -2,7 +2,7 @@ import React, { FC, useState } from 'react';
 import { FileUploader } from './FileUploader';
 import { addFileToWeb3Storage } from '@/web3Storage';
 import { toast } from 'react-toastify';
-import { mintNewNft } from '@/utils';
+import { mintNewNft } from '@/contract';
 import Loader from './Loader';
 
 interface IPFSUploaderProps {

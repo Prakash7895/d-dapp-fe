@@ -1,4 +1,4 @@
-import { changeProfileNft, getUserTokenUriById } from '@/utils';
+import { changeProfileNft, getUserTokenUriById } from '@/contract';
 import React, { FC, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useStateContext } from './StateProvider';
