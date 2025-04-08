@@ -21,7 +21,6 @@ const UserNft: FC<UserNftProps> = ({ tokenId }) => {
         setImageUri(res);
       }
       setLoading(false);
-      console.log('RESssss', res);
     });
   }, [tokenId]);
 
@@ -37,8 +36,6 @@ const UserNft: FC<UserNftProps> = ({ tokenId }) => {
       setUpdating(false);
     });
   };
-
-  console.log('imageUri', imageUri);
 
   return (
     <div

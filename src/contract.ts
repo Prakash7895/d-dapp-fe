@@ -33,11 +33,8 @@ export async function connectWallet() {
   } else {
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
-      // console.log('provider', provider);
 
       const signer = await provider.getSigner();
-      // console.log(signer);
-      // console.log(provider);
 
       return signer;
     } catch (err) {
@@ -88,15 +85,10 @@ export const mintNewNft = async (tokenUri: string) => {
       throw new Error('Failed to get mint fee');
     }
 
-    console.log('tokenUri', tokenUri);
-    console.log('fees', fees);
-
     const transaction = await soulboundNft.createUserProfile(tokenUri, {
       value: fees.mintFeeInWei,
     });
     await transaction.wait();
-
-    console.log('transaction', transaction);
   } catch (error: any) {
     console.log('minting new Nft error', error);
     return false;
@@ -117,8 +109,6 @@ export const getActiveProfileNft = async () => {
 
     const metaData = await response.json();
 
-    console.log('metaData', metaData);
-
     const imageUrl = metaData?.image_gateway;
 
     if (!imageUrl) {
@@ -138,8 +128,6 @@ export const getUserTokenUris = async () => {
     const soulboundNft = (await getSoulboundNft()) as Contract;
 
     const tokenUris = await soulboundNft.getUserTokenUris(signer.address);
-
-    console.log('tokenUris', Array.from(tokenUris));
 
     return Array.from(tokenUris);
   } catch (error: any) {
@@ -170,16 +158,12 @@ export const getUserTokenUriById = async (id: number) => {
 
     const metaDataUri = await soulboundNft.tokenURI(id);
 
-    console.log(id, '=>', metaDataUri);
-
     const response = await fetch(metaDataUri);
     if (!response.ok) {
       throw new Error('Failed to fetch metadata');
     }
 
     const metaData = await response.json();
-
-    console.log('metaData', metaData);
 
     const imageUrl = metaData?.image_gateway;
 
@@ -199,9 +183,7 @@ export const changeProfileNft = async (tokenId: number) => {
     const soulboundNft = (await getSoulboundNft()) as Contract;
 
     const transaction = await soulboundNft.changeProfileNft(tokenId);
-    console.log('transaction', transaction);
     await transaction.wait();
-    console.log('transaction2', transaction);
 
     return true;
   } catch (error: any) {

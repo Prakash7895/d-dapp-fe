@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { mintNewNft, getMintFee } from '@/contract';
 import Button from './Button';
-import { addFileToWeb3Storage } from '@/web3Storage';
+import { uploadFileWeb3Storage } from '@/web3Storage';
 
 export default function NftUploadMint({
   onSuccess,
@@ -24,7 +24,7 @@ export default function NftUploadMint({
           setMintFee(fee?.mintFeeInEth);
         }
       } catch (error) {
-        console.error('Error loading mint fee:', error);
+        console.log('Error loading mint fee:', error);
         toast.error('Failed to load mint fee');
       }
     };
@@ -60,7 +60,7 @@ export default function NftUploadMint({
     }
 
     setIsLoading(true);
-    addFileToWeb3Storage(selectedFile)
+    uploadFileWeb3Storage(selectedFile)
       .then((res) => {
         console.log('res', res);
         if (res) {
