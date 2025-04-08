@@ -1,9 +1,17 @@
 import { isAddress } from 'ethers';
 import { z } from 'zod';
 
-export const GENDER = ['MALE', 'FEMALE', 'TRANS'] as const;
+export const GENDER = ['MALE', 'FEMALE', 'NON-BINARY', 'OTHER'] as const;
 
-export const SEXUAL_ORIENTATION = ['MALE', 'FEMALE', 'ALL'] as const;
+export const SEXUAL_ORIENTATION = [
+  'STRAIGHT',
+  'GAY',
+  'LESBIAN',
+  'BISEXUAL',
+  'PANSEXUAL',
+  'ASEXUAL',
+  'OTHER',
+] as const;
 
 export const userSchema = z.object({
   age: z.number({ message: 'age must be number greater than 0.' }),

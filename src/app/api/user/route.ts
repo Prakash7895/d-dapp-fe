@@ -18,6 +18,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        address: data?.address,
+      },
+    });
+    if (existingUser) {
+      return NextResponse.json(
+        { status: 'error', message: 'address aleady exists' },
+        { status: 400 }
+      );
+    }
+
     const user = await prisma.user.create({
       data: {
         age: data?.age,

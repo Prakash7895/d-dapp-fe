@@ -1,29 +1,52 @@
-import React, { ChangeEventHandler, FC } from 'react';
+import React, {
+  ChangeEventHandler,
+  FC,
+  HTMLInputAutoCompleteAttribute,
+} from 'react';
 
 interface InputProps {
   placeholder?: string;
   value: string | number;
   onChange: ChangeEventHandler<HTMLInputElement>;
-  error?: string;
   name: string;
+  label: string;
+  type?: React.HTMLInputTypeAttribute;
+  className?: string;
+  inputClassName?: string;
+  autoComplete?: HTMLInputAutoCompleteAttribute;
+  labelClassName?: string;
 }
 
 const Input: FC<InputProps> = ({
   onChange,
   value,
   placeholder,
-  error,
   name,
+  label,
+  type,
+  className,
+  inputClassName,
+  autoComplete,
+  labelClassName,
 }) => (
-  <div className='flex flex-col'>
+  <div className={className}>
+    <label
+      htmlFor={name}
+      className={`block text-sm font-medium text-gray-300 ${labelClassName}`}
+    >
+      {label}
+    </label>
     <input
-      className='bg-transparent border-[1px] border-gray-700 rounded-md outline-none px-2 py-1 w-full'
-      placeholder={placeholder}
-      onChange={onChange}
-      value={value}
+      id={name}
       name={name}
+      autoComplete={autoComplete}
+      type={type ?? 'text'}
+      required
+      className={`appearance-none relative block w-full px-3 py-2 border border-gray-700 bg-gray-800 placeholder-gray-400 text-white rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm ${inputClassName}`}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
     />
-    <small className='h-4 text-red-500 text-left'>{error}</small>
   </div>
 );
 

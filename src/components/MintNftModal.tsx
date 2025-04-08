@@ -1,26 +1,28 @@
 'use client';
-import { PenLine } from 'lucide-react';
 import { Modal, ModalBody, ModalContent, ModalTrigger } from './AnimatedModal';
-import IPFSUploader from './IPFSUploader';
-import { useState } from 'react';
+import { FC, ReactNode, useState } from 'react';
 import { useStateContext } from './StateProvider';
+import NftUploadMint from './NftUploadMint';
 
-const ProfileMintNft = () => {
+interface MintNftModalProps {
+  trigger: ReactNode;
+  triggerClassName?: string;
+}
+
+const MintNftModal: FC<MintNftModalProps> = ({ trigger, triggerClassName }) => {
   const [open, setOpen] = useState(false);
   const { getCurrUsersTokenIds, getUpdatedProfileNft } = useStateContext();
 
   return (
     <Modal open={open} setOpen={setOpen}>
-      <ModalTrigger>
-        <PenLine className='cursor-pointer' />
-      </ModalTrigger>
+      <ModalTrigger className={triggerClassName}>{trigger}</ModalTrigger>
       <ModalBody className='max-w-[50%]'>
         <ModalContent>
-          <IPFSUploader
+          <NftUploadMint
             onSuccess={() => {
-              setOpen(false);
-              getCurrUsersTokenIds();
               getUpdatedProfileNft();
+              getCurrUsersTokenIds();
+              setOpen(false);
             }}
           />
         </ModalContent>
@@ -29,4 +31,4 @@ const ProfileMintNft = () => {
   );
 };
 
-export default ProfileMintNft;
+export default MintNftModal;

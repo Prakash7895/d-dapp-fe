@@ -19,4 +19,6 @@ export interface UserFormData {
   age: number | string;
   gender: string;
   sexualOrientation: string;
+  email: string;
+  password: string;
 }

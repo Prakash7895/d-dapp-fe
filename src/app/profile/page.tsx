@@ -1,10 +1,11 @@
 import GridPattern from '@/components/GridPattern';
 import ListUserNfts from '@/components/ListUserNfts';
 import ProfileInfo from '@/components/ProfileInfo';
-import ProfileMintNft from '@/components/ProfileMintNft';
+import MintNftModal from '@/components/MintNftModal';
 import React from 'react';
+import { PenLine } from 'lucide-react';
 
-const Profile = () => {
+export default function ProfilePage() {
   return (
     <div>
       <div className='border-b-2 border-gray-800'>
@@ -12,14 +13,12 @@ const Profile = () => {
         <ProfileInfo />
       </div>
       <div className='md:mx-52 mx-16 mt-20'>
-        <div className='flex justify-between'>
+        <div className='flex justify-between items-center mb-2'>
           <p>My NFT's</p>
-          <ProfileMintNft />
+          <MintNftModal trigger={<PenLine />} />
         </div>
         <ListUserNfts />
       </div>
     </div>
   );
-};
-
-export default Profile;
+}
