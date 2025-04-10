@@ -5,6 +5,8 @@ import {
   getActiveProfileNft,
   getMintFee,
   getUserTokenIds,
+  onAccountChange,
+  onChainChange,
 } from '@/contract';
 import React, {
   createContext,
@@ -19,7 +21,8 @@ import React, {
 import { toast, ToastContainer } from 'react-toastify';
 import ScreenLoader from './ScreenLoader';
 import MainLayout from './MainLayout';
-import { SessionProvider } from 'next-auth/react';
+import { User } from '@/types/user';
+import { getUserInfo } from '@/apiCalls';
 
 const Context = createContext<{
   userAddress: string;
@@ -30,6 +33,7 @@ const Context = createContext<{
   setTokedIds: React.Dispatch<React.SetStateAction<number[]>>;
   getCurrUsersTokenIds: () => void;
   getUpdatedProfileNft: () => void;
+  userInfo: User | null;
 }>({
   userAddress: '',
   setUserAddress: () => {},
@@ -39,6 +43,7 @@ const Context = createContext<{
   setTokedIds: () => {},
   getCurrUsersTokenIds: () => {},
   getUpdatedProfileNft: () => {},
+  userInfo: null,
 });
 
 const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
@@ -46,34 +51,40 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [activeProfilePhoto, setActiveProfilePhoto] = useState('');
   const [tokedIds, setTokedIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
+  const [userInfo, setUserInfo] = useState<User | null>(null);
 
   useEffect(() => {
     const initializeProvider = async () => {
       try {
         setLoading(true);
+        const info = await getUserInfo();
+        setUserInfo(info);
+
+        const savedWalletAddresses = info?.linkedAddresses;
+
         const accounts = await detectConnection();
 
         console.log('accounts', accounts);
 
-        if (accounts.length) {
+        const connectedAddress = accounts[0].toLowerCase();
+
+        const linkedWalletAddresses = accounts?.filter((a: string) =>
+          savedWalletAddresses?.includes(a)
+        );
+
+        if (linkedWalletAddresses?.includes(connectedAddress)) {
           const wallet = await connectWallet();
           console.log('wallet', wallet);
           setUserAddress(wallet.address || '');
 
-          const mintFee = await getMintFee();
-
-          console.log('mintFee:', mintFee);
-
-          getActiveProfileNft().then((res) => {
-            if (res) {
-              setActiveProfilePhoto(res);
-            }
+          getUpdatedProfileNft().then(() => {
             setLoading(false);
           });
         } else {
           setLoading(false);
         }
       } catch (err: any) {
+        setLoading(false);
         console.log(err);
         toast.error(err?.message || 'Failed to detect connection');
       }
@@ -81,6 +92,54 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
     initializeProvider();
   }, []);
+
+  // Function to handle account changes
+  const handleAccountChange = useCallback(async (accounts: string[]) => {
+    console.log('accounts:', accounts);
+    if (accounts.length === 0) {
+      // User disconnected their wallet
+      setUserAddress('');
+      setActiveProfilePhoto('');
+      setTokedIds([]);
+      setUserInfo(null);
+      toast.info('Wallet disconnected');
+    } else {
+      // User switched accounts
+      const newAddress = accounts[0];
+      setUserAddress(newAddress);
+      toast.info(
+        `Switched to account: ${newAddress.substring(
+          0,
+          6
+        )}...${newAddress.substring(38)}`
+      );
+
+      await getUpdatedProfileNft();
+      getUserTokenIds().then((res) => {
+        if (res) {
+          setTokedIds(res);
+        }
+      });
+    }
+  }, []);
+
+  // Function to handle chain changes
+  const handleChainChange = useCallback((chainId: string) => {
+    // Reload the page when chain changes to ensure everything is in sync
+    window.location.reload();
+  }, []);
+
+  // Set up account change listener
+  useEffect(() => {
+    const removeAccountListener = onAccountChange(handleAccountChange);
+    const removeChainListener = onChainChange(handleChainChange);
+
+    // Clean up listeners when component unmounts
+    return () => {
+      removeAccountListener();
+      removeChainListener();
+    };
+  }, [handleAccountChange, handleChainChange]);
 
   const getCurrUsersTokenIds = useCallback(() => {
     getUserTokenIds().then((res) => {
@@ -90,11 +149,15 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
     });
   }, []);
 
-  const getUpdatedProfileNft = useCallback(() => {
-    getActiveProfileNft().then((p) => {
-      setActiveProfilePhoto(p);
-    });
-  }, []);
+  const getUpdatedProfileNft = useCallback(
+    () =>
+      getActiveProfileNft().then((p) => {
+        if (p) {
+          setActiveProfilePhoto(p);
+        }
+      }),
+    []
+  );
 
   const value = useMemo(
     () => ({
@@ -106,6 +169,7 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
       setTokedIds,
       getCurrUsersTokenIds,
       getUpdatedProfileNft,
+      userInfo,
     }),
     [
       userAddress,
@@ -116,19 +180,14 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
       setTokedIds,
       getCurrUsersTokenIds,
       getUpdatedProfileNft,
+      userInfo,
     ]
   );
 
   return (
     <Context.Provider value={value}>
       <ToastContainer />
-      {loading ? (
-        <ScreenLoader />
-      ) : (
-        <SessionProvider>
-          <MainLayout>{children}</MainLayout>
-        </SessionProvider>
-      )}
+      {loading ? <ScreenLoader /> : <MainLayout>{children}</MainLayout>}
     </Context.Provider>
   );
 };

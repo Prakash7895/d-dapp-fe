@@ -22,7 +22,7 @@ export async function verifyWalletSignature(
     const recoveredAddress = ethers.verifyMessage(message, signature);
     return recoveredAddress.toLowerCase() === address.toLowerCase();
   } catch (error) {
-    console.error('Error verifying wallet signature:', error);
+    console.error('Error verifying signature:', error);
     return false;
   }
 }
@@ -35,36 +35,16 @@ export async function getUserByEmail(email: string) {
 
 export async function getUserByAddress(address: string) {
   return prisma.user.findFirst({
-    where: { address },
-  });
-}
-
-export async function createUser(data: {
-  email?: string;
-  password?: string;
-  address?: string;
-  firstName: string;
-  lastName: string;
-  age: number;
-  gender: string;
-  sexualOrientation: string;
-  image?: string;
-}) {
-  // Ensure required fields are provided
-  const { firstName, lastName, age, gender, sexualOrientation } = data;
-
-  // Create user with required fields
-  return prisma.user.create({
-    data: {
-      firstName,
-      lastName,
-      age,
-      gender,
-      sexualOrientation,
-      // Add optional fields if they exist
-      ...(data.email && { email: data.email }),
-      ...(data.password && { password: data.password }),
-      ...(data.address && { address: data.address }),
+    where: {
+      OR: [
+        { selectedAddress: { equals: address, mode: 'insensitive' } },
+        {
+          linkedAddresses: {
+            array_contains: address,
+            mode: 'insensitive',
+          },
+        },
+      ],
     },
   });
 }

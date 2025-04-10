@@ -1,15 +1,10 @@
 'use client';
 import { capitalizeFirstLetter } from '@/utils';
-import Loader from './Loader';
 import { useStateContext } from './StateProvider';
-import { useSession } from 'next-auth/react';
 import { BadgeCheck, BadgeInfo } from 'lucide-react';
 
 const ProfileInfo = () => {
-  const { activeProfilePhoto } = useStateContext();
-  const { data } = useSession();
-
-  const userInfo = data?.user;
+  const { activeProfilePhoto, userInfo } = useStateContext();
 
   return (
     <div className='relative md:mx-52 mx-16'>
@@ -22,7 +17,6 @@ const ProfileInfo = () => {
           />
         ) : (
           <div className='h-36 w-36 flex flex-col gap-2 items-center justify-center'>
-            {/* <Loader /> */}
             <BadgeInfo color='#f55' />
             <p className='text-center'>
               Mint Profile NFT to verify your account
@@ -32,11 +26,13 @@ const ProfileInfo = () => {
       </div>
       <div className='pl-44 pb-3'>
         <p className='text-3xl mb-2 flex items-center gap-2'>
-          {userInfo?.name}{' '}
+          {userInfo?.firstName} {userInfo?.lastName}
           {activeProfilePhoto ? <BadgeCheck color='#5f5' /> : <></>}
         </p>
         <p className='mb-2'>{userInfo?.email}</p>
-        {/* <p>{capitalizeFirstLetter(userInfo?.gender ?? '')}</p> */}
+        <p>
+          {userInfo?.age}, {capitalizeFirstLetter(userInfo?.gender ?? '')}
+        </p>
       </div>
     </div>
   );

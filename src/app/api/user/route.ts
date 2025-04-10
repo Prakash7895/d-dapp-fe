@@ -1,53 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '../../../../lib/prisma';
-import { userSchema } from '@/apiSchemas';
+import { getToken } from 'next-auth/jwt';
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const data = await request.json();
-
-    const validationResult = userSchema.safeParse(data);
-
-    if (!validationResult.success) {
-      return NextResponse.json(
-        {
-          status: 'error',
-          error: validationResult.error.errors,
-        },
-        { status: 400 }
-      );
+    const token = await getToken({ req: request });
+    if (!token) {
+      throw new Error('Not Authenticated');
     }
 
-    const existingUser = await prisma.user.findFirst({
+    const id = +token.id;
+
+    const user = await prisma.user.findFirst({
       where: {
-        address: data?.address,
+        id: +id,
       },
     });
-    if (existingUser) {
+
+    if (user) {
+      const { password, ...userInfo } = user;
+
       return NextResponse.json(
-        { status: 'error', message: 'address aleady exists' },
-        { status: 400 }
+        { status: 'success', data: userInfo },
+        { status: 201 }
       );
     }
-
-    const user = await prisma.user.create({
-      data: {
-        age: data?.age,
-        gender: data?.gender,
-        address: data?.address,
-        lastName: data?.lastName,
-        firstName: data?.firstName,
-        sexualOrientation: data?.sexualOrientation,
-      },
-    });
 
     return NextResponse.json(
-      {
-        status: 'success',
-        data: user,
-        message: 'User info saved successfully.',
-      },
-      { status: 201 }
+      { status: 'error', message: 'User not found' },
+      { status: 400 }
     );
   } catch (err: any) {
     console.log(err);

@@ -2,10 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { hashPassword, verifyWalletSignature } from '@/lib/auth';
 import { getUserByEmail, getUserByAddress } from '@/lib/auth';
+import { createUserSchema, CreateUserSchemaType } from '@/apiSchemas';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body: CreateUserSchemaType = await request.json();
+
+    const validationResult = createUserSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      return NextResponse.json(
+        {
+          status: 'error',
+          error: validationResult.error.errors,
+        },
+        { status: 400 }
+      );
+    }
+
     const {
       firstName,
       lastName,
@@ -14,17 +28,9 @@ export async function POST(request: NextRequest) {
       age,
       gender,
       sexualOrientation,
-      address,
+      selectedAddress,
       signature,
     } = body;
-
-    // Validate required fields
-    if (!firstName || !lastName || !age || !gender || !sexualOrientation) {
-      return NextResponse.json(
-        { message: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
 
     // Check if user already exists with email
     if (email) {
@@ -37,9 +43,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check if user already exists with wallet address
-    if (address) {
-      const existingUserByAddress = await getUserByAddress(address);
+    if (selectedAddress) {
+      // Check if user already exists with wallet address
+      const existingUserByAddress = await getUserByAddress(selectedAddress);
       if (existingUserByAddress) {
         return NextResponse.json(
           { message: 'User with this wallet address already exists' },
@@ -49,9 +55,13 @@ export async function POST(request: NextRequest) {
 
       // Verify wallet signature if provided
       if (signature) {
-        const message = `Sign up for Dating DApp with address ${address}`;
-        const isValid = await verifyWalletSignature(address, signature, message);
-        
+        const message = `${process.env.NEXT_PUBLIC_MESSAGE_TO_VERIFY}${selectedAddress}`;
+        const isValid = await verifyWalletSignature(
+          selectedAddress,
+          signature,
+          message
+        );
+
         if (!isValid) {
           return NextResponse.json(
             { message: 'Invalid wallet signature' },
@@ -65,7 +75,7 @@ export async function POST(request: NextRequest) {
     const userData: any = {
       firstName,
       lastName,
-      age: parseInt(age),
+      age: +age,
       gender,
       sexualOrientation,
     };
@@ -78,8 +88,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Add wallet address if provided
-    if (address) {
-      userData.address = address;
+    if (selectedAddress) {
+      userData.selectedAddress = selectedAddress;
+      userData.linkedAddresses = [selectedAddress];
     }
 
     // Create user in database
@@ -88,15 +99,15 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(
-      { 
+      {
         message: 'User registered successfully',
         user: {
           id: user.id,
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
-          address: user.address,
-        }
+          selectedAddress: user.selectedAddress,
+        },
       },
       { status: 201 }
     );
@@ -107,4 +118,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

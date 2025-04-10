@@ -44,6 +44,48 @@ export async function connectWallet() {
   }
 }
 
+/**
+ * Sets up a listener for account changes in the wallet
+ * @param callback Function to call when the account changes
+ * @returns A function to remove the listener when needed
+ */
+export function onAccountChange(
+  callback: (accounts: string[]) => void
+): () => void {
+  if (window.ethereum == null || typeof window.ethereum == 'undefined') {
+    console.warn('MetaMask is not installed');
+    return () => {};
+  }
+
+  // Add the listener
+  window.ethereum.on('accountsChanged', callback);
+
+  // Return a function to remove the listener
+  return () => {
+    window.ethereum.removeListener('accountsChanged', callback);
+  };
+}
+
+/**
+ * Sets up a listener for chain changes in the wallet
+ * @param callback Function to call when the chain changes
+ * @returns A function to remove the listener when needed
+ */
+export function onChainChange(callback: (chainId: string) => void): () => void {
+  if (window.ethereum == null || typeof window.ethereum == 'undefined') {
+    console.warn('MetaMask is not installed');
+    return () => {};
+  }
+
+  // Add the listener
+  window.ethereum.on('chainChanged', callback);
+
+  // Return a function to remove the listener
+  return () => {
+    window.ethereum.removeListener('chainChanged', callback);
+  };
+}
+
 const getSoulboundNft = async () => {
   try {
     const signer = await connectWallet();

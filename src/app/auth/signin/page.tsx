@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { connectWallet } from '@/contract';
@@ -17,7 +17,7 @@ export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | React.ReactNode>('');
   const [authMethod, setAuthMethod] = useState<'email' | 'wallet'>('email');
 
   // Redirect if already authenticated
@@ -40,12 +40,12 @@ export default function SignIn() {
       });
 
       if (result?.error) {
-        setError('Invalid email or password');
+        setError(result.error);
       } else {
         router.push('/');
       }
-    } catch (error) {
-      setError('An error occurred during sign in');
+    } catch (error: any) {
+      setError(error.message || 'An error occurred during sign in');
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -83,12 +83,30 @@ export default function SignIn() {
       });
 
       if (result?.error) {
-        setError('Failed to authenticate with wallet');
+        setError(result.error);
+        if (result.error.includes('sign up')) {
+          // Add a sign-up button if the error suggests the user needs to sign up
+          setError(
+            <>
+              {result.error}{' '}
+              <button
+                onClick={() => router.push('/auth/signup')}
+                className="text-primary-400 hover:text-primary-300 underline"
+              >
+                Sign up now
+              </button>
+            </>
+          );
+        }
       } else {
         router.push('/');
       }
-    } catch (error) {
-      setError('An error occurred during wallet sign in');
+    } catch (error: any) {
+      if (error.message.includes('User rejected')) {
+        setError('You rejected the signature request. Please try again.');
+      } else {
+        setError(error.message || 'An error occurred during wallet sign in');
+      }
       console.error(error);
     } finally {
       setIsLoading(false);

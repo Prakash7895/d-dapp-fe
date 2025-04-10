@@ -5,12 +5,14 @@ export interface User {
   id: number;
   firstName: string;
   lastName: string;
+  email: string;
   age: number;
   gender: Gender;
   sexualOrientation: SexualOrientation;
-  address: string;
+  selectedAddress: string;
   createdAt: string;
   updatedAt: string;
+  linkedAddresses: string[];
 }
 
 export interface UserFormData {

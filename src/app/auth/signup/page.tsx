@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { connectWallet } from '@/contract';
+import { connectWallet, onAccountChange } from '@/contract';
 import { ethers } from 'ethers';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
@@ -12,6 +12,7 @@ import { GENDER, SEXUAL_ORIENTATION } from '@/apiSchemas';
 import { capitalizeFirstLetter } from '@/utils';
 import { UserFormData } from '@/types/user';
 import Button from '@/components/Button';
+import { toast } from 'react-toastify';
 
 const genderOptions = GENDER.map((e) => ({
   label: capitalizeFirstLetter(e),
@@ -46,6 +47,18 @@ export default function SignUp() {
       router.replace('/');
     }
   }, [status, router]);
+
+  useEffect(() => {
+    const removeAccountListener = onAccountChange((accounts) => {
+      if (accounts?.[0]) {
+        setWalletAddress(accounts[0]);
+      }
+    });
+
+    return () => {
+      removeAccountListener();
+    };
+  }, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -155,10 +168,14 @@ export default function SignUp() {
 
       // Get the signer
       const provider = new ethers.BrowserProvider(window.ethereum);
+      console.log('provider', provider);
       const signer = await provider.getSigner();
+      console.log('signer', signer);
 
       // Sign the message
       const signature = await signer.signMessage(message);
+
+      const { password, email, ...restFormData } = formData;
 
       // Create user with wallet address
       const response = await fetch('/api/auth/register', {
@@ -167,14 +184,16 @@ export default function SignUp() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...formData,
-          age: +formData.age,
-          address: walletAddress,
+          ...restFormData,
+          age: +restFormData.age,
+          selectedAddress: walletAddress,
           signature,
         }),
       });
 
       const data = await response.json();
+
+      toast.success(data?.message);
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to register');
@@ -188,7 +207,7 @@ export default function SignUp() {
           ? error.message
           : 'An error occurred during registration'
       );
-      console.error(error);
+      console.log(error);
     } finally {
       setIsLoading(false);
     }

@@ -3,10 +3,12 @@ import Button from './Button';
 import { connectWallet } from '@/contract';
 import { useStateContext } from './StateProvider';
 import { toast } from 'react-toastify';
+import { updateWalletAddress } from '@/apiCalls';
 
 const ConnectWallet = () => {
   const [connecting, setConnecting] = useState(false);
-  const { setUserAddress } = useStateContext();
+  const { setUserAddress, userInfo, walletInfo } = useStateContext();
+  console.log('walletInfo', walletInfo);
 
   const handleConnectWallet = async () => {
     try {
@@ -14,6 +16,11 @@ const ConnectWallet = () => {
       const wallet = await connectWallet();
       if (wallet && wallet.address) {
         setUserAddress(wallet.address);
+        if (!userInfo?.selectedAddress && userInfo?.id) {
+          updateWalletAddress(+userInfo.id, {
+            selectedAddress: wallet.address,
+          });
+        }
         toast.success('Wallet connected successfully!');
       }
     } catch (error: any) {
