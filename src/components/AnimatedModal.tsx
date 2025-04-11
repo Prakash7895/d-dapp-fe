@@ -44,9 +44,11 @@ export function Modal({
 export const ModalTrigger = ({
   children,
   className,
+  disabled,
 }: {
   children: ReactNode;
   className?: string;
+  disabled?: boolean;
 }) => {
   const { setOpen } = useModal();
   return (
@@ -56,6 +58,7 @@ export const ModalTrigger = ({
         className
       )}
       onClick={() => setOpen(true)}
+      disabled={disabled}
     >
       {children}
     </button>

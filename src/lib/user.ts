@@ -18,7 +18,7 @@ export const updateUser = async (
 
     const { selectedAddress } = data;
 
-    let updatedLinkedAddresses = [...Array(savedUser.linkedAddresses)];
+    let updatedLinkedAddresses = [...Array(savedUser.linkedAddresses ?? [])];
 
     if (selectedAddress) {
       const idx = updatedLinkedAddresses.findIndex(

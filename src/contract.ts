@@ -2,12 +2,30 @@
 import { ethers, formatEther } from 'ethers';
 import soulboundNftAbi from '@/abis/SooulboundNft.json';
 import { Contract } from 'ethers';
+import { toast } from 'react-toastify';
 
 declare global {
   interface Window {
     ethereum?: any;
   }
 }
+
+const getActiveAddress = async () => {
+  const accounts = await window.ethereum.request({
+    method: 'eth_accounts',
+  });
+
+  return accounts[0];
+};
+
+const checkIfValidAddressIsConnected = async () => {
+  const savedWalletAddress = sessionStorage.getItem('savedWalletAddress');
+  const activeWalletAddress = await getActiveAddress();
+  if (savedWalletAddress === activeWalletAddress) {
+    return true;
+  }
+  throw new Error('Saved wallet address is not active');
+};
 
 export async function detectConnection() {
   // TODO: need to handle this case
@@ -21,7 +39,7 @@ export async function detectConnection() {
 
       return accounts;
     } catch (err) {
-      console.error('User rejected the request', err);
+      console.log('User rejected the request', err);
       throw err;
     }
   }
@@ -32,13 +50,14 @@ export async function connectWallet() {
     throw new Error('Please install MetaMask to use this dApp!');
   } else {
     try {
+      await checkIfValidAddressIsConnected();
       const provider = new ethers.BrowserProvider(window.ethereum);
 
       const signer = await provider.getSigner();
 
       return signer;
     } catch (err) {
-      console.error('User rejected the request', err);
+      console.log('User rejected the request', err);
       throw err;
     }
   }

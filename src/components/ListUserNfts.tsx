@@ -20,7 +20,7 @@ const ListUserNfts = () => {
           <p>Mint more NFT's, Its Free</p>
           <MintNftModal
             trigger='Mint Now'
-            triggerClassName='text-white bg-primary-500 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 transition-all'
+            triggerClassName='text-white bg-primary-500 enabled:hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 transition-all'
           />
         </div>
       )}

@@ -7,15 +7,16 @@ import { updateWalletAddress } from '@/apiCalls';
 
 const ConnectWallet = () => {
   const [connecting, setConnecting] = useState(false);
-  const { setUserAddress, userInfo, walletInfo } = useStateContext();
-  console.log('walletInfo', walletInfo);
+  const [error, setError] = useState('');
+  const { setSelectedAddress, userInfo } = useStateContext();
 
   const handleConnectWallet = async () => {
     try {
       setConnecting(true);
+      setError('');
       const wallet = await connectWallet();
       if (wallet && wallet.address) {
-        setUserAddress(wallet.address);
+        setSelectedAddress(wallet.address);
         if (!userInfo?.selectedAddress && userInfo?.id) {
           updateWalletAddress(+userInfo.id, {
             selectedAddress: wallet.address,
@@ -24,6 +25,7 @@ const ConnectWallet = () => {
         toast.success('Wallet connected successfully!');
       }
     } catch (error: any) {
+      setError(error.message || 'Failed to connect wallet');
       toast.error(error.message || 'Failed to connect wallet');
     } finally {
       setConnecting(false);
@@ -38,6 +40,11 @@ const ConnectWallet = () => {
       <p className='text-gray-300 mb-6'>
         To use this application, you need to connect your wallet first.
       </p>
+      {error && (
+        <div className='mb-4 p-3 bg-red-900 text-red-200 rounded-md'>
+          {error}
+        </div>
+      )}
       <Button
         label='Connect Wallet'
         disabled={connecting}

@@ -64,11 +64,13 @@ export const uploadFileWeb3Storage = async (file: File): Promise<string> => {
 };
 
 export const createNFTMetadataFile = (imageCID: string): File => {
+  const id = sessionStorage.getItem('id');
   const metadata = {
     name: 'Profile NFT',
     description: 'A profile NFT stored on IPFS',
     image: `ipfs://${imageCID}`,
     image_gateway: `https://${imageCID}.ipfs.w3s.link`,
+    id,
   };
 
   const blob = new Blob([JSON.stringify(metadata, null, 2)], {

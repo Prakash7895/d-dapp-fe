@@ -2,9 +2,19 @@
 import { capitalizeFirstLetter } from '@/utils';
 import { useStateContext } from './StateProvider';
 import { BadgeCheck, BadgeInfo } from 'lucide-react';
+import { useEffect } from 'react';
+import { useWalletContext } from './WalletHandler';
 
 const ProfileInfo = () => {
-  const { activeProfilePhoto, userInfo } = useStateContext();
+  const { activeProfilePhoto, userInfo, getUpdatedProfileNft } =
+    useStateContext();
+  const { connectedToValidAddress } = useWalletContext();
+
+  useEffect(() => {
+    if (!activeProfilePhoto && connectedToValidAddress) {
+      getUpdatedProfileNft();
+    }
+  }, [activeProfilePhoto, connectedToValidAddress]);
 
   return (
     <div className='relative md:mx-52 mx-16'>
