@@ -1,31 +1,31 @@
-export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
-export type SexualOrientation = 'MALE' | 'FEMALE' | 'BOTH' | 'OTHER';
+import {
+  GENDER_PREFERENCES,
+  GenderType,
+  SexualOrientationType,
+} from '@/apiSchemas';
 
-export interface User {
-  id: string;
+export type IForm = {
   firstName: string;
   lastName: string;
   email: string;
-  age?: number;
-  gender?: Gender;
-  sexualOrientation?: SexualOrientation;
+  age: number;
+  gender: GenderType;
+  sexualOrientation: SexualOrientationType;
+  bio: string;
+  interests: string[];
+  city: string;
+  country: string;
+  maxDistance: number;
+  minAge: number;
+  maxAge: number;
+  genderPreference: GENDER_PREFERENCES;
+};
+
+export type User = IForm & {
+  id: string;
   selectedAddress?: string;
   password?: string;
-  bio?: string;
-  interests?: string[];
-  location?: {
-    city: string;
-    country: string;
-  };
-  preferences?: {
-    maxDistance?: number;
-    ageRange?: {
-      min?: number;
-      max?: number;
-    };
-    showMe?: 'MALE' | 'FEMALE' | 'ALL';
-  };
-}
+};
 
 export interface UserFormData {
   firstName: string;

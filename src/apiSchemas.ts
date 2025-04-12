@@ -3,6 +3,16 @@ import { z } from 'zod';
 
 export const GENDER = ['MALE', 'FEMALE', 'NON-BINARY', 'OTHER'] as const;
 
+export enum GENDER_PREFERENCES {
+  'MALE' = 'MALE',
+  'FEMALE' = 'FEMALE',
+  'ALL' = 'ALL',
+}
+
+export type GenderType = (typeof GENDER)[number];
+
+export type SexualOrientationType = (typeof SEXUAL_ORIENTATION)[number];
+
 export const SEXUAL_ORIENTATION = [
   'STRAIGHT',
   'GAY',
@@ -42,14 +52,24 @@ export const walletAddressSchema = z
 export const emailSchema = z.string().trim().email();
 
 export const userUpdateSchema = z.object({
-  age: z.number().optional(),
-  lastName: z.string().trim().optional(),
-  firstName: z.string().trim().optional(),
-  gender: z.enum(GENDER).optional(),
-  sexualOrientation: z.enum(SEXUAL_ORIENTATION).optional(),
-  selectedAddress: walletAddressSchema.optional(),
-  email: emailSchema.optional(),
-  password: passwordSchema.optional(),
+  age: z.number(),
+  lastName: z.string().trim(),
+  firstName: z.string().trim(),
+  gender: z.enum(GENDER),
+  sexualOrientation: z.enum(SEXUAL_ORIENTATION),
+  email: emailSchema,
+  bio: z.string().trim(),
+  interests: z.array(z.string()),
+  city: z.string().trim(),
+  country: z.string().trim(),
+  maxDistance: z.number(),
+  minAge: z.number(),
+  maxAge: z.number(),
+  genderPreference: z.enum([
+    GENDER_PREFERENCES.ALL,
+    GENDER_PREFERENCES.MALE,
+    GENDER_PREFERENCES.FEMALE,
+  ]),
 });
 
 export type UserUpdateSchemaType = z.infer<typeof userUpdateSchema>;
@@ -65,6 +85,8 @@ export const createUserSchema = z
     email: emailSchema.optional(),
     password: passwordSchema.optional(),
     signature: z.string().optional(),
+    latitude: z.number(),
+    longitude: z.number(),
   })
   .refine(
     (data) => {

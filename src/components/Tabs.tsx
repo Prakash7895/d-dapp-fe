@@ -9,6 +9,7 @@ export type Tab = {
   title: string;
   value: string;
   content?: string | React.ReactNode | any;
+  onClick?: (val: string) => void;
 };
 
 export const Tabs = ({
@@ -52,6 +53,7 @@ export const Tabs = ({
             key={tab.title}
             onClick={() => {
               moveSelectedTabToTop(idx);
+              tab.onClick && tab.onClick(tab.value);
             }}
             onMouseEnter={() => setHovering(true)}
             onMouseLeave={() => setHovering(false)}
@@ -77,14 +79,16 @@ export const Tabs = ({
           </button>
         ))}
       </div>
-      <FadeInDiv
-        tabs={tabs}
-        active={active}
-        key={active.value}
-        hovering={hovering}
-        className={cn('mt-32', contentClassName)}
-        contentWrapperClassName={contentWrapperClassName}
-      />
+      {active.content && (
+        <FadeInDiv
+          tabs={tabs}
+          active={active}
+          key={active.value}
+          hovering={hovering}
+          className={cn('mt-32', contentClassName)}
+          contentWrapperClassName={contentWrapperClassName}
+        />
+      )}
     </>
   );
 };

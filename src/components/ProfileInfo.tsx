@@ -17,7 +17,7 @@ const ProfileInfo = () => {
   }, [activeProfilePhoto, connectedToValidAddress]);
 
   return (
-    <div className='relative md:mx-52 mx-16'>
+    <div className='relative md:mx-24 lg:mx-52 mx-16'>
       <div className='border-[1px] border-gray-600 bg-white dark:bg-neutral-900 absolute -top-12 rounded-lg overflow-hidden p-1'>
         {activeProfilePhoto ? (
           <img

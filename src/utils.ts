@@ -16,3 +16,9 @@ export const isEmpty = (val: any): boolean => {
 
   return true;
 };
+
+export const capitalizeEveryFirstChar = (str: String) =>
+  str
+    .split(' ')
+    .map((el) => capitalizeFirstLetter(el))
+    .join(' ');

@@ -24,6 +24,16 @@ model User {
   linkedAddresses   Json?
   email             String?   @unique
   password          String?
+  city              String?
+  country           String?
+  bio               String?
+  interests         Json?
+  latitude          Float?
+  longitude         Float?
+  maxDistance       Int?
+  minAge            Int?
+  maxAge            Int?
+  genderPreference  String?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
   accounts          Account[]

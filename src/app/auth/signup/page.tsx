@@ -13,13 +13,14 @@ import { capitalizeFirstLetter } from '@/utils';
 import { UserFormData } from '@/types/user';
 import Button from '@/components/Button';
 import { toast } from 'react-toastify';
+import { getUserLocation } from '@/lib/userLocation';
 
-const genderOptions = GENDER.map((e) => ({
+export const genderOptions = GENDER.map((e) => ({
   label: capitalizeFirstLetter(e),
   value: e,
 }));
 
-const sexualOrientationOptions = SEXUAL_ORIENTATION.map((e) => ({
+export const sexualOrientationOptions = SEXUAL_ORIENTATION.map((e) => ({
   label: capitalizeFirstLetter(e),
   value: e,
 }));
@@ -40,6 +41,7 @@ export default function SignUp() {
   const [error, setError] = useState('');
   const [authMethod, setAuthMethod] = useState<'email' | 'wallet'>('email');
   const [walletAddress, setWalletAddress] = useState('');
+  const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -58,6 +60,14 @@ export default function SignUp() {
     return () => {
       removeAccountListener();
     };
+  }, []);
+
+  useEffect(() => {
+    getUserLocation()
+      .then((res) => {
+        setLocation(res);
+      })
+      .then((err) => console.log('err', err));
   }, []);
 
   const handleInputChange = (
@@ -97,6 +107,7 @@ export default function SignUp() {
         body: JSON.stringify({
           ...formData,
           age: +formData.age,
+          ...location,
         }),
       });
 
@@ -188,6 +199,7 @@ export default function SignUp() {
           age: +restFormData.age,
           selectedAddress: walletAddress,
           signature,
+          ...location,
         }),
       });
 

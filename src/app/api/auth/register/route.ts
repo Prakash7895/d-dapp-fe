@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { hashPassword, verifyWalletSignature } from '@/lib/auth';
 import { getUserByEmail, getUserByAddress } from '@/lib/auth';
-import { createUserSchema, CreateUserSchemaType } from '@/apiSchemas';
+import {
+  createUserSchema,
+  CreateUserSchemaType,
+  GENDER_PREFERENCES,
+} from '@/apiSchemas';
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,6 +34,8 @@ export async function POST(request: NextRequest) {
       sexualOrientation,
       selectedAddress,
       signature,
+      latitude,
+      longitude,
     } = body;
 
     // Check if user already exists with email
@@ -78,6 +84,8 @@ export async function POST(request: NextRequest) {
       age: +age,
       gender,
       sexualOrientation,
+      latitude,
+      longitude,
     };
 
     // Add email and password if provided
@@ -95,7 +103,16 @@ export async function POST(request: NextRequest) {
 
     // Create user in database
     const user = await prisma.user.create({
-      data: userData,
+      data: {
+        linkedAddresses: [],
+        ...userData,
+        minAge: 20,
+        maxAge: 30,
+        bio: '',
+        genderPreference: GENDER_PREFERENCES.ALL,
+        interests: [],
+        maxDistance: 50,
+      },
     });
 
     return NextResponse.json(
