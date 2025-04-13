@@ -22,7 +22,14 @@ interface EditableFieldProps {
   value: string | number | string[] | [number, number];
   isEditing: boolean;
   onChange: (value: string | number | string[] | [number, number]) => void;
-  type?: 'text' | 'number' | 'select' | 'textarea' | 'multi-select' | 'slider';
+  type?:
+    | 'text'
+    | 'number'
+    | 'select'
+    | 'textarea'
+    | 'multi-select'
+    | 'slider'
+    | 'email';
   options?: { value: string; label: string }[];
   placeholder?: string;
   min?: number;
@@ -32,7 +39,8 @@ interface EditableFieldProps {
   className?: string;
   unit?: string;
   thumbs?: 1 | 2;
-  hasError?: boolean;
+  error?: string;
+  autoComplete?: React.HTMLInputAutoCompleteAttribute;
 }
 
 const EditableField: React.FC<EditableFieldProps> = ({
@@ -50,7 +58,8 @@ const EditableField: React.FC<EditableFieldProps> = ({
   step = 5,
   unit,
   thumbs = 1,
-  hasError,
+  error,
+  autoComplete,
 }) => {
   if (!isEditing) {
     return (
@@ -63,9 +72,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
             type === 'textarea' ? 'min-h-[105px]' : 'min-h-[42px] items-center'
           }`}
         >
-          {(typeof value === 'string'
-            ? capitalizeEveryFirstChar(value ?? '')
-            : value) || (
+          {value || (
             <span className='text-gray-500'>
               {placeholder || `No ${label.toLowerCase()} set`}
             </span>
@@ -75,7 +82,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
     );
   }
 
-  const errClassName = hasError ? 'border border-red-500' : '';
+  const errClassName = error ? 'border border-red-500' : '';
 
   return (
     <div className={className}>
@@ -111,7 +118,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
           selectedValues={(value || []) as string[]}
           onChange={(values) => onChange(values)}
           placeholder={placeholder}
-          hasError={hasError}
+          hasError={!!error}
         />
       ) : type === 'slider' ? (
         <Slider
@@ -133,8 +140,10 @@ const EditableField: React.FC<EditableFieldProps> = ({
           min={min}
           max={max}
           required={required}
+          autoComplete={autoComplete}
         />
       )}
+      <small className='text-red-500 block h-4'>{error}</small>
     </div>
   );
 };
@@ -160,20 +169,27 @@ const interestOptions = [
   'Yoga',
 ];
 
-const UserSettings: React.FC = () => {
+const UserInfo: React.FC = () => {
   const { userInfo, setUserInfo } = useStateContext();
   const [loading, setLoading] = useState(false);
-  const [isEditing, setIsEditing] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<IForm>({
-    ...(userInfo! ?? {}),
+    age: userInfo?.age ?? 0,
+    bio: userInfo?.bio ?? '',
+    city: userInfo?.city ?? '',
+    country: userInfo?.country ?? '',
+    email: userInfo?.email ?? '',
+    firstName: userInfo?.firstName ?? '',
+    lastName: userInfo?.lastName ?? '',
+    gender: userInfo?.gender!,
+    genderPreference: userInfo?.genderPreference!,
+    interests: userInfo?.interests ?? [],
+    maxAge: userInfo?.maxAge ?? 30,
+    minAge: userInfo?.minAge ?? 20,
+    maxDistance: userInfo?.maxDistance ?? 80,
+    sexualOrientation: userInfo?.sexualOrientation!,
   });
-  const [errors, setErrors] = useState<{ [key in keyof IForm]?: boolean }>({});
-
-  useEffect(() => {
-    if (userInfo) {
-      setFormData(userInfo);
-    }
-  }, [userInfo]);
+  const [errors, setErrors] = useState<{ [key in keyof IForm]?: string }>({});
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -188,6 +204,23 @@ const UserSettings: React.FC = () => {
     field: keyof IForm,
     value: string | number | string[] | [number, number]
   ) => {
+    const fieldSchema = userUpdateSchema.pick({ [field]: true } as any);
+    const fieldValidationResult = fieldSchema.safeParse({ [field]: value });
+
+    if (!fieldValidationResult.success) {
+      setErrors((p) => ({
+        ...p,
+        [field]: fieldValidationResult.error.issues?.[0]?.message,
+      }));
+    } else {
+      setErrors((p) => {
+        const updatedErr = { ...p };
+        delete updatedErr[field];
+
+        return updatedErr;
+      });
+    }
+
     setFormData((prev) => {
       if (!prev) return prev;
       return {
@@ -196,7 +229,7 @@ const UserSettings: React.FC = () => {
       };
     });
   };
-
+  console.log('formData', formData);
   const handleSave = async () => {
     if (!userInfo) return;
 
@@ -205,11 +238,11 @@ const UserSettings: React.FC = () => {
 
     if (!validationResult.success) {
       const err = validationResult.error.issues.reduce<{
-        [key in keyof IForm]?: boolean;
+        [key in keyof IForm]?: string;
       }>((acc, val) => {
         const key = val.path[0] as keyof IForm;
         if (typeof key === 'string') {
-          acc[key] = true;
+          acc[key] = val.message;
         }
         return acc;
       }, {});
@@ -219,7 +252,7 @@ const UserSettings: React.FC = () => {
     }
 
     setLoading(true);
-    updateUserInfo(+userInfo.id, formData)
+    updateUserInfo(formData)
       .then((res) => {
         if (res) {
           setUserInfo(res);
@@ -260,6 +293,8 @@ const UserSettings: React.FC = () => {
       label: 'Email',
       value: 'email',
       className: 'col-span-2',
+      type: 'email',
+      autoComplete: 'email',
     },
     {
       label: 'Age',
@@ -396,7 +431,7 @@ const UserSettings: React.FC = () => {
         </div>
       </div>
 
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         {fieldsArray.map((el) =>
           el.value === 'header' ? (
             el.content
@@ -405,10 +440,23 @@ const UserSettings: React.FC = () => {
               key={el.value}
               label={el.label!}
               value={
-                el.value === 'maxDistance'
-                  ? [0, +formData.maxDistance]
+                isEditing
+                  ? el.value === 'maxDistance'
+                    ? [0, +formData.maxDistance]
+                    : el.value === 'ageRange'
+                    ? [formData.minAge, +formData.maxAge]
+                    : formData[el.value as keyof IForm]
+                  : typeof formData[el.value as keyof IForm] === 'string' &&
+                    el.value !== 'email'
+                  ? capitalizeEveryFirstChar(
+                      formData[el.value as keyof IForm] as string
+                    )
+                  : el.value === 'maxDistance'
+                  ? `${formData[el.value as keyof IForm]} km`
                   : el.value === 'ageRange'
-                  ? [formData.minAge, +formData.maxAge]
+                  ? `${formData.minAge} - ${+formData.maxAge}`
+                  : el.value === 'interests'
+                  ? (formData[el.value as keyof IForm] as string[]).join(', ')
                   : formData[el.value as keyof IForm]
               }
               isEditing={isEditing}
@@ -424,6 +472,10 @@ const UserSettings: React.FC = () => {
                   handleFieldChange('maxDistance', max);
                   return;
                 }
+                if (el.type === 'number') {
+                  handleFieldChange(el.value! as keyof IForm, +value);
+                  return;
+                }
                 handleFieldChange(el.value! as keyof IForm, value);
               }}
               max={el.max}
@@ -435,7 +487,8 @@ const UserSettings: React.FC = () => {
               thumbs={el.thumbs}
               type={el.type}
               unit={el.unit}
-              hasError={errors[el.value as keyof IForm]}
+              error={errors[el.value as keyof IForm]}
+              autoComplete={el.autoComplete}
             />
           )
         )}
@@ -444,4 +497,4 @@ const UserSettings: React.FC = () => {
   );
 };
 
-export default UserSettings;
+export default UserInfo;

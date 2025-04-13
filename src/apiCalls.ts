@@ -1,7 +1,11 @@
 'use client';
 
 import { toast } from 'react-toastify';
-import { AddWalletAddressSchemaType, UserUpdateSchemaType } from './apiSchemas';
+import {
+  AddWalletAddressSchemaType,
+  UpdatePasswordSchemaType,
+  UserUpdateSchemaType,
+} from './apiSchemas';
 import { User } from './types/user';
 
 interface ApiResponse<T = null> {
@@ -19,16 +23,18 @@ export const updateWalletAddress = (
     method: 'PUT',
   })
     .then((res) => res.json())
-    .then((res) => res as User)
+    .then((res) => res.data as User)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
       return null;
     });
 
-export const updateUserInfo = (id: number, data: UserUpdateSchemaType) =>
-  fetch(`/api/user/${id}`, { body: JSON.stringify(data), method: 'PUT' })
+export const updateUserInfo = (
+  data: UserUpdateSchemaType | UpdatePasswordSchemaType
+) =>
+  fetch(`/api/user`, { body: JSON.stringify(data), method: 'PUT' })
     .then((res) => res.json())
-    .then((res) => res as User)
+    .then((res) => res.data as User)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
       return null;

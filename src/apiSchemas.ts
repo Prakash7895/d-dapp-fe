@@ -49,27 +49,53 @@ export const walletAddressSchema = z
   .trim()
   .refine(isAddress, 'address must be valid wallet address');
 
-export const emailSchema = z.string().trim().email();
+export const emailSchema = z
+  .string({ message: 'Email is required' })
+  .trim()
+  .email({ message: 'Must follow the email constraints' });
 
 export const userUpdateSchema = z.object({
-  age: z.number(),
-  lastName: z.string().trim(),
-  firstName: z.string().trim(),
-  gender: z.enum(GENDER),
-  sexualOrientation: z.enum(SEXUAL_ORIENTATION),
-  email: emailSchema,
-  bio: z.string().trim(),
-  interests: z.array(z.string()),
-  city: z.string().trim(),
-  country: z.string().trim(),
-  maxDistance: z.number(),
-  minAge: z.number(),
-  maxAge: z.number(),
-  genderPreference: z.enum([
-    GENDER_PREFERENCES.ALL,
-    GENDER_PREFERENCES.MALE,
-    GENDER_PREFERENCES.FEMALE,
-  ]),
+  age: z
+    .number({ message: 'Age is required' })
+    .min(18, 'Age should be above 18.')
+    .max(50, 'Age should be below 50.'),
+  lastName: z.string().nonempty('Last Name is required').trim(),
+  firstName: z.string().nonempty('First Name is required').trim(),
+  gender: z.enum(GENDER, { message: 'Gender is required' }),
+  sexualOrientation: z.enum(SEXUAL_ORIENTATION, {
+    message: 'Sexual orientation is required',
+  }),
+  email: emailSchema.nonempty('Email is required'),
+  bio: z
+    .string({ message: 'Bio is required' })
+    .trim()
+    .min(50, 'Minimum 50 characters are required.')
+    .max(500, 'Upto 500 characters are allowed.'),
+  interests: z
+    .array(z.string())
+    .min(1, 'Atleast 1 interest is required.')
+    .max(15, 'Upto 15 Interests are allowed.'),
+  city: z
+    .string()
+    .trim()
+    .nonempty('City is required')
+    .max(50, { message: 'Upto 50 characters are allowed.' }),
+  country: z
+    .string()
+    .trim()
+    .nonempty('Country is required')
+    .max(30, { message: 'Upto 30 characters are allowed.' }),
+  maxDistance: z.number().min(0).max(1000),
+  minAge: z.number({ message: 'Min Age is required' }).min(18).max(50),
+  maxAge: z.number({ message: 'Max Age is required' }).min(18).max(50),
+  genderPreference: z.enum(
+    [
+      GENDER_PREFERENCES.ALL,
+      GENDER_PREFERENCES.MALE,
+      GENDER_PREFERENCES.FEMALE,
+    ],
+    { message: 'Gender Preference is required' }
+  ),
 });
 
 export type UserUpdateSchemaType = z.infer<typeof userUpdateSchema>;
@@ -108,3 +134,14 @@ export const addWalletAddressSchema = z.object({
 });
 
 export type AddWalletAddressSchemaType = z.infer<typeof addWalletAddressSchema>;
+
+export const updatePasswordSchema = z
+  .object({
+    password: passwordSchema,
+    confirmPassword: z.string().nonempty('Confirm Password is required.'),
+  })
+  .refine((data) => data.confirmPassword === data.password, {
+    message: 'Password and confirm password should be same.',
+  });
+
+export type UpdatePasswordSchemaType = z.infer<typeof updatePasswordSchema>;

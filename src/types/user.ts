@@ -25,6 +25,7 @@ export type User = IForm & {
   id: string;
   selectedAddress?: string;
   password?: string;
+  linkedAddresses?: string[];
 };
 
 export interface UserFormData {

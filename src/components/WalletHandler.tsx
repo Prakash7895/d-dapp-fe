@@ -19,15 +19,20 @@ import {
 import WalletAlert from './WalletAlert';
 import { checkAddress, updateWalletAddress } from '@/apiCalls';
 import WalletConfirmDialog from './WalletConfirmDialog';
+import Link from 'next/link';
 
 const Context = createContext<{
   connected: boolean;
   connectedToValidAddress: boolean;
   setShowAlert: React.Dispatch<React.SetStateAction<boolean>>;
+  checkWalletStatus: () => Promise<void>;
 }>({
   connected: false,
   connectedToValidAddress: false,
   setShowAlert: () => {},
+  checkWalletStatus() {
+    return new Promise((r) => r);
+  },
 });
 
 const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
@@ -36,6 +41,7 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
   const targetWalletAddress = userInfo?.selectedAddress;
 
   const [connected, setConnected] = useState(false);
+  const [connectedAddress, setConnectedAddress] = useState('');
   const [connectedToValidAddress, setConnectedToValidAddress] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
 
@@ -49,29 +55,40 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
   const [isCheckingAddress, setIsCheckingAddress] = useState(false);
   const [newAddressError, setNewAddressError] = useState<string | undefined>();
 
-  useEffect(() => {
-    const initializeProvider = async () => {
-      try {
-        const accounts: string[] = await detectConnection();
+  const checkWalletStatus = useCallback(async () => {
+    try {
+      const accounts: string[] = await detectConnection();
 
-        console.log('accounts', accounts);
+      if (accounts.length) {
+        setConnected(true);
+        const connectedAddress = accounts[0];
+        setConnectedAddress(connectedAddress);
 
-        if (accounts.length) {
-          setConnected(true);
-          const connectedAddress = accounts[0];
-
-          if (connectedAddress === targetWalletAddress) {
-            setConnectedToValidAddress(true);
-          }
+        setConnectedToValidAddress(connectedAddress === targetWalletAddress);
+        if (connectedAddress === targetWalletAddress) {
+          getUpdatedProfileNft();
+        } else if (!userInfo?.linkedAddresses?.includes(connectedAddress)) {
+          setConfirmDialog({
+            isOpen: true,
+            newAddress: connectedAddress,
+          });
         }
-      } catch (err: any) {
-        console.log(err);
-        toast.error(err?.message || 'Failed to detect connection');
       }
-    };
+    } catch (err: any) {
+      console.log(err);
+      toast.error(err?.message || 'Failed to detect connection');
+    }
+  }, [
+    userInfo,
+    setConnected,
+    setConnectedAddress,
+    setConnectedToValidAddress,
+    setConfirmDialog,
+  ]);
 
-    initializeProvider();
-  }, []);
+  useEffect(() => {
+    checkWalletStatus();
+  }, [targetWalletAddress]);
 
   useEffect(() => {
     if (!connected || (connected && !connectedToValidAddress)) {
@@ -95,8 +112,12 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
         setConnected(true);
         const isValidAddress = targetWalletAddress === newAddress;
         setConnectedToValidAddress(isValidAddress);
+        setConnectedAddress(newAddress);
 
-        if (userInfo?.email) {
+        if (
+          userInfo?.email &&
+          !userInfo.linkedAddresses?.includes(newAddress)
+        ) {
           setConfirmDialog({
             isOpen: targetWalletAddress !== newAddress,
             newAddress,
@@ -137,7 +158,7 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
         setIsCheckingAddress(false);
         return;
       }
-
+      sessionStorage.setItem('savedWalletAddress', confirmDialog.newAddress!);
       const wallet = await connectWallet();
       setUserInfo((u) => ({ ...u!, selectedAddress: wallet.address }));
 
@@ -157,6 +178,7 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
       await getCurrUsersTokenIds();
 
       setConfirmDialog({ isOpen: false, newAddress: '' });
+      setShowAlert(false);
     } catch (error) {
       console.error('Error checking address:', error);
       setNewAddressError('Failed to verify wallet address. Please try again.');
@@ -187,9 +209,34 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
       return 'Please connect your wallet to access the app.';
     }
     if (!connectedToValidAddress) {
-      return !userInfo?.email
-        ? `Please connect with wallet address ${targetWalletAddress}, or`
-        : 'Please connect with one of your linked wallet addresses or add this address to your profile, or if already added switch to this new address in your profile';
+      return !userInfo?.email ? (
+        `Please connect with wallet address ${targetWalletAddress}, or`
+      ) : userInfo.linkedAddresses?.includes(connectedAddress) ? (
+        <>
+          <span className='block'>
+            Your wallet is active on {connectedAddress.substring(0, 6)}...
+            {connectedAddress.substring(38)}, but your profile has{' '}
+            {targetWalletAddress?.substring(0, 6)}...
+            {targetWalletAddress?.substring(38)} as active address.
+          </span>
+          <span className='block'>
+            Either switch the wallet address to{' '}
+            {targetWalletAddress?.substring(0, 6)}...
+            {targetWalletAddress?.substring(38)} or update your active address{' '}
+            {connectedAddress.substring(0, 6)}...
+            {connectedAddress.substring(38)} in{' '}
+            <Link
+              href='/profile/wallet'
+              className='font-medium underline hover:text-yellow-900'
+            >
+              profile
+            </Link>
+            .
+          </span>
+        </>
+      ) : (
+        'Please connect with one of your linked wallet addresses or add this address to your profile, or if already added switch to this new address in your profile'
+      );
     }
     return '';
   };
@@ -197,8 +244,13 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
   const showProfileLink = !userInfo?.email;
 
   const value = useMemo(
-    () => ({ connected, connectedToValidAddress, setShowAlert }),
-    [connected, connectedToValidAddress, setShowAlert]
+    () => ({
+      connected,
+      connectedToValidAddress,
+      setShowAlert,
+      checkWalletStatus,
+    }),
+    [connected, connectedToValidAddress, setShowAlert, checkWalletStatus]
   );
 
   return (

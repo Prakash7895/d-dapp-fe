@@ -1,9 +1,17 @@
-import { UserUpdateSchemaType } from '@/apiSchemas';
+import {
+  AddWalletAddressSchemaType,
+  UpdatePasswordSchemaType,
+  UserUpdateSchemaType,
+} from '@/apiSchemas';
 import { prisma } from '@/lib/prisma';
+import { hashPassword } from './auth';
 
 export const updateUser = async (
   id: number,
-  data: UserUpdateSchemaType,
+  data:
+    | UserUpdateSchemaType
+    | UpdatePasswordSchemaType
+    | AddWalletAddressSchemaType,
   removeAddress?: boolean
 ) => {
   try {
@@ -16,9 +24,11 @@ export const updateUser = async (
       throw new Error('User not found');
     }
 
-    const { selectedAddress } = data;
+    const { selectedAddress } = data as AddWalletAddressSchemaType;
 
-    let updatedLinkedAddresses = [...Array(savedUser.linkedAddresses ?? [])];
+    let updatedLinkedAddresses = [
+      ...Array.from((savedUser.linkedAddresses as string[]) ?? []),
+    ];
 
     if (selectedAddress) {
       const idx = updatedLinkedAddresses.findIndex(
@@ -33,8 +43,17 @@ export const updateUser = async (
           (e) => e !== selectedAddress
         );
 
-        data.selectedAddress = (updatedLinkedAddresses?.[0] as string) ?? null;
+        (data as AddWalletAddressSchemaType).selectedAddress =
+          (updatedLinkedAddresses?.[0] as string) ?? null;
       }
+    }
+
+    const passwordData = data as UpdatePasswordSchemaType;
+    if (passwordData.password) {
+      const hashedPassword = await hashPassword(passwordData.password);
+      (passwordData as UpdatePasswordSchemaType).password = hashedPassword;
+      const { confirmPassword, ...updateData } = passwordData;
+      data = updateData as UpdatePasswordSchemaType;
     }
 
     const user = await prisma.user.update({

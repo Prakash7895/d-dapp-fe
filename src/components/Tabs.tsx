@@ -19,6 +19,7 @@ export const Tabs = ({
   tabClassName,
   contentClassName,
   contentWrapperClassName,
+  activeTabValue,
 }: {
   tabs: Tab[];
   containerClassName?: string;
@@ -26,8 +27,13 @@ export const Tabs = ({
   tabClassName?: string;
   contentClassName?: string;
   contentWrapperClassName?: string;
+  activeTabValue?: string;
 }) => {
-  const [active, setActive] = useState<Tab>(propTabs[0]);
+  const [active, setActive] = useState<Tab>(
+    activeTabValue
+      ? propTabs.find((el) => el.value === activeTabValue) ?? propTabs[0]
+      : propTabs[0]
+  );
   const [tabs, setTabs] = useState<Tab[]>(propTabs);
 
   const moveSelectedTabToTop = (idx: number) => {

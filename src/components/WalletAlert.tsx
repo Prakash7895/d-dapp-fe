@@ -1,10 +1,10 @@
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import Link from 'next/link';
 import { X } from 'lucide-react';
 
 interface WalletAlertProps {
   title: string;
-  message: string;
+  message: ReactNode;
   showProfileLink?: boolean;
   onClose?: () => void;
 }

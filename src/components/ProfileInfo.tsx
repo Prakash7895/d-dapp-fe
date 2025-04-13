@@ -18,7 +18,7 @@ const ProfileInfo = () => {
 
   return (
     <div className='relative md:mx-24 lg:mx-52 mx-16'>
-      <div className='border-[1px] border-gray-600 bg-white dark:bg-neutral-900 absolute -top-12 rounded-lg overflow-hidden p-1'>
+      <div className='border-[1px] border-gray-600 bg-white dark:bg-neutral-900 absolute -bottom-4 rounded-lg overflow-hidden p-1'>
         {activeProfilePhoto ? (
           <img
             src={activeProfilePhoto}
@@ -34,15 +34,21 @@ const ProfileInfo = () => {
           </div>
         )}
       </div>
-      <div className='pl-44 pb-3'>
-        <p className='text-3xl mb-2 flex items-center gap-2'>
+      <div className='pl-44 pb-3 absolute -bottom-0 space-y-1.5'>
+        <p className='text-3xl flex items-center gap-2'>
           {userInfo?.firstName} {userInfo?.lastName}
           {activeProfilePhoto ? <BadgeCheck color='#5f5' /> : <></>}
         </p>
-        <p className='mb-2'>{userInfo?.email}</p>
+        <p>{userInfo?.email}</p>
         <p>
           {userInfo?.age}, {capitalizeFirstLetter(userInfo?.gender ?? '')}
         </p>
+        {userInfo?.city && userInfo?.country && (
+          <p>
+            {capitalizeFirstLetter(userInfo.city)},{' '}
+            {capitalizeFirstLetter(userInfo.country)}
+          </p>
+        )}
       </div>
     </div>
   );

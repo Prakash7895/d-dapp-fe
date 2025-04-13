@@ -25,7 +25,7 @@ const Context = createContext<{
   setActiveProfilePhoto: React.Dispatch<React.SetStateAction<string>>;
   tokedIds: number[];
   setTokedIds: React.Dispatch<React.SetStateAction<number[]>>;
-  getCurrUsersTokenIds: () => void;
+  getCurrUsersTokenIds: () => Promise<boolean>;
   getUpdatedProfileNft: () => Promise<void>;
   userInfo: User | null;
   setUserInfo: React.Dispatch<React.SetStateAction<User | null>>;
@@ -36,7 +36,7 @@ const Context = createContext<{
   setActiveProfilePhoto: () => {},
   tokedIds: [],
   setTokedIds: () => {},
-  getCurrUsersTokenIds: () => {},
+  getCurrUsersTokenIds: () => new Promise((r) => r),
   getUpdatedProfileNft: () => new Promise((r) => r),
   userInfo: null,
   setUserInfo: () => {},
@@ -61,8 +61,6 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
       }
     });
   }, []);
-  console.log('userInfo', userInfo);
-  console.log('selectedAddress', selectedAddress);
 
   useEffect(() => {
     if (userInfo) {
@@ -71,13 +69,22 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
     }
   }, [userInfo]);
 
-  const getCurrUsersTokenIds = useCallback(() => {
-    getUserTokenIds().then((res) => {
-      if (res) {
-        setTokedIds(res);
-      }
-    });
-  }, []);
+  const getCurrUsersTokenIds = useCallback(
+    () =>
+      new Promise<boolean>((resolve) => {
+        getUserTokenIds()
+          .then((res) => {
+            if (res) {
+              setTokedIds(res);
+              resolve(true);
+            } else {
+              resolve(false);
+            }
+          })
+          .catch(() => resolve(false));
+      }),
+    []
+  );
 
   const getUpdatedProfileNft = useCallback(
     () =>

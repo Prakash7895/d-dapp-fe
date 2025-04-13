@@ -9,7 +9,7 @@ interface UserNftProps {
 }
 
 const UserNft: FC<UserNftProps> = ({ tokenId }) => {
-  const { getUpdatedProfileNft } = useStateContext();
+  const { getUpdatedProfileNft, activeProfilePhoto } = useStateContext();
   const [imageUri, setImageUri] = useState('');
   const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
@@ -37,17 +37,19 @@ const UserNft: FC<UserNftProps> = ({ tokenId }) => {
     });
   };
 
+  const isActive = activeProfilePhoto === imageUri;
+
   return (
     <div
-      className={`relative group overflow-hidden ${
-        imageUri ? 'cursor-pointer' : ''
+      className={`relative group overflow-hidden rounded-lg border-2 ${
+        isActive ? 'border-primary-500' : 'border-gray-700'
       }`}
     >
       <div className='border-[1px] border-gray-600 bg-white dark:bg-neutral-900 rounded-lg overflow-hidden p-1'>
         {imageUri ? (
           <img
             src={imageUri}
-            alt='User Profile Image'
+            alt={`NFT #${tokenId}`}
             className='h-52 w-52 object-cover rounded-md'
           />
         ) : loading ? (
@@ -55,7 +57,9 @@ const UserNft: FC<UserNftProps> = ({ tokenId }) => {
             <Loader />
           </div>
         ) : (
-          <div className='h-52 w-52 p-2'>Not Available</div>
+          <div className='w-full h-64 bg-gray-700 flex items-center justify-center'>
+            <span className='text-gray-400'>Image not available</span>
+          </div>
         )}
       </div>
       {imageUri && (
@@ -71,22 +75,36 @@ const UserNft: FC<UserNftProps> = ({ tokenId }) => {
             } group-hover:bottom-0 z-10 h-full w-full transition-all duration-300 ease-in-out rounded-md flex justify-center items-center`}
           >
             <div>
-              {updating ? (
-                <Loader />
+              {isActive ? (
+                <div className='bg-primary-500 text-white px-4 py-2 rounded-md'>
+                  Active Profile Photo
+                </div>
               ) : (
                 <button
-                  className='p-[3px] relative'
-                  onClick={handleProfileNftChange}
+                  onClick={() => handleProfileNftChange()}
+                  disabled={updating}
+                  className={`${
+                    updating ? '' : 'bg-primary-600 hover:bg-primary-700'
+                  } text-white px-4 py-2 rounded-md transition-colors disabled:opacity-50`}
                 >
-                  <div className='absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg' />
-                  <div className='px-4 py-2 bg-black rounded-[6px]  relative group transition duration-200 text-white hover:bg-transparent'>
-                    Use as Profile Photo
-                  </div>
+                  {updating ? (
+                    <div className='flex flex-col items-center gap-2'>
+                      <Loader />
+                      <span className='ml-2'>Updating...</span>
+                    </div>
+                  ) : (
+                    'Set as Profile Photo'
+                  )}
                 </button>
               )}
             </div>
           </div>
         </>
+      )}
+      {isActive && (
+        <div className='absolute top-2 right-2 bg-primary-500 text-white px-2 py-1 rounded-full text-xs'>
+          Active
+        </div>
       )}
     </div>
   );
