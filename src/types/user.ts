@@ -37,3 +37,10 @@ export interface UserFormData {
   email: string;
   password: string;
 }
+
+type ProfileCardForm = Omit<IForm, 'email' | 'minAge' | 'maxAge'>;
+
+export type ProfileCard = ProfileCardForm & {
+  id: number;
+  photos: string[];
+};
