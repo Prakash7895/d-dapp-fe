@@ -2,16 +2,18 @@
 
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useStateContext } from './StateProvider';
 import { BadgeInfo } from 'lucide-react';
+import useClickOutside from '@/hooks/useClickOutside';
 
 export default function Navbar() {
   const { data: session } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const { activeProfilePhoto } = useStateContext();
+  const divRef = useRef<HTMLDivElement>(null);
 
   const isNftMinted = !!activeProfilePhoto;
 
@@ -25,6 +27,14 @@ export default function Navbar() {
     await signOut({ callbackUrl: '/auth/signin' });
   };
 
+  useClickOutside(
+    divRef,
+    () => {
+      setIsMenuOpen(false);
+    },
+    [divRef]
+  );
+
   return (
     <nav className='bg-gray-900 border-b border-gray-800'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
@@ -37,7 +47,7 @@ export default function Navbar() {
 
           <div className='flex items-center'>
             {session ? (
-              <div className='relative'>
+              <div ref={divRef} className='relative'>
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   className='flex items-center space-x-2 text-gray-300 hover:text-white focus:outline-none'
