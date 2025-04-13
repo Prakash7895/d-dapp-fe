@@ -7,19 +7,23 @@ import ProfileCardComponent from './ProfileCard';
 
 interface CardStackProps {
   profiles: ProfileCard[];
-  onSwipe: (direction: 'left' | 'right', profile: ProfileCard) => void;
+  onSwipe: (direction: 'left' | 'right' | 'up', profile: ProfileCard) => void;
 }
 
 const CardStack: React.FC<CardStackProps> = ({ profiles, onSwipe }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState<'left' | 'right' | null>(null);
+  const [direction, setDirection] = useState<'left' | 'right' | 'up' | null>(
+    null
+  );
   const [isAnimating, setIsAnimating] = useState(false);
-  const touchStart = useRef<number | null>(null);
-  const touchEnd = useRef<number | null>(null);
+  const xTouchStart = useRef<number | null>(null);
+  const xTouchEnd = useRef<number | null>(null);
+  const yTouchStart = useRef<number | null>(null);
+  const yTouchEnd = useRef<number | null>(null);
 
   const visibleCards = profiles.slice(currentIndex, currentIndex + 4);
 
-  const handleSwipe = (dir: 'left' | 'right') => {
+  const handleSwipe = (dir: 'left' | 'right' | 'up') => {
     if (isAnimating) return;
     setDirection(dir);
     setIsAnimating(true);
@@ -33,28 +37,38 @@ const CardStack: React.FC<CardStackProps> = ({ profiles, onSwipe }) => {
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    touchStart.current = e.touches[0].clientX;
+    xTouchStart.current = e.touches[0].clientX;
+    yTouchStart.current = e.touches[0].clientY;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    touchEnd.current = e.touches[0].clientX;
+    xTouchEnd.current = e.touches[0].clientX;
+    yTouchEnd.current = e.touches[0].clientY;
   };
 
   const handleTouchEnd = () => {
-    if (!touchStart.current || !touchEnd.current) return;
+    if (!xTouchStart.current || !xTouchEnd.current) return;
+    if (!yTouchStart.current || !yTouchEnd.current) return;
 
-    const distance = touchStart.current - touchEnd.current;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
+    const distanceY = yTouchStart.current - yTouchEnd.current;
+    const isUpSwipe = distanceY > 50;
 
-    if (isLeftSwipe) {
+    const distanceX = xTouchStart.current - xTouchEnd.current;
+    const isLeftSwipe = distanceX > 50;
+    const isRightSwipe = distanceX < -50;
+
+    if (Math.abs(distanceY) > Math.abs(distanceX) && isUpSwipe) {
+      handleSwipe('up');
+    } else if (isLeftSwipe) {
       handleSwipe('left');
     } else if (isRightSwipe) {
       handleSwipe('right');
     }
 
-    touchStart.current = null;
-    touchEnd.current = null;
+    xTouchStart.current = null;
+    xTouchEnd.current = null;
+    yTouchStart.current = null;
+    yTouchEnd.current = null;
   };
 
   return (
@@ -80,18 +94,22 @@ const CardStack: React.FC<CardStackProps> = ({ profiles, onSwipe }) => {
               initial={{ scale: 1, y: 0 }}
               animate={{
                 scale,
-                y: yOffset,
+                y: isTopCard && direction === 'up' ? -1000 : yOffset,
                 x:
                   isTopCard && direction
                     ? direction === 'left'
                       ? -1000
-                      : 1000
+                      : direction === 'right'
+                      ? 1000
+                      : 0
                     : 0,
                 rotate:
                   isTopCard && direction
                     ? direction === 'left'
                       ? -30
-                      : 30
+                      : direction === 'right'
+                      ? 30
+                      : 0
                     : 0,
               }}
               transition={{

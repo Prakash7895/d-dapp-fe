@@ -174,9 +174,11 @@ const HomePage = () => {
     setLoading(false);
   }, []);
 
-  const handleSwipe = (direction: 'left' | 'right', profile: ProfileCard) => {
+  const handleSwipe = (
+    direction: 'left' | 'right' | 'up',
+    profile: ProfileCard
+  ) => {
     if (direction === 'right') {
-      // Simulate match
       if (Math.random() > 0.7) {
         setMatchedProfile(profile);
         setShowMatch(true);

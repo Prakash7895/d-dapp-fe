@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
+  ArrowUp,
   BadgeCheck,
   Heart,
   MapPin,
@@ -20,7 +21,7 @@ import Carousel from './Carousel';
 interface ProfileCardProps {
   profile: ProfileCardType;
   isTopCard: boolean;
-  onSwipe: (direction: 'left' | 'right') => void;
+  onSwipe: (direction: 'left' | 'right' | 'up') => void;
   stackIndex: number;
   totalCards: number;
 }
@@ -117,6 +118,16 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                 className='w-16 h-16 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center'
               >
                 <X className='h-8 w-8 text-red-500' />
+              </motion.button>
+            </CardItem>
+            <CardItem translateZ={75} as='div'>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => onSwipe('up')}
+                className='w-16 h-16 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center'
+              >
+                <ArrowUp className='h-8 w-8 text-blue-500' />
               </motion.button>
             </CardItem>
             <CardItem translateZ={75} as='div'>
