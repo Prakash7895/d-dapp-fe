@@ -26,11 +26,6 @@ export default function Navbar() {
 
   const isNftMinted = !!activeProfilePhoto;
 
-  // Hide navbar on auth pages
-  if (pathname?.startsWith('/auth/')) {
-    return null;
-  }
-
   const handleLogout = async () => {
     setIsMenuOpen(false);
     await signOut({ callbackUrl: '/auth/signin' });
@@ -39,6 +34,11 @@ export default function Navbar() {
   useClickOutside(divRef, () => {
     setIsMenuOpen(false);
   });
+
+  // Hide navbar on auth pages
+  if (pathname?.startsWith('/auth/')) {
+    return null;
+  }
 
   return (
     <nav className='fixed top-0 left-0 right-0 z-50 bg-gray-900/80 backdrop-blur-sm border-b border-gray-800/50'>

@@ -17,6 +17,11 @@ const ProfileLayout = ({ children }: { children: ReactNode }) => {
       path: '/profile',
     },
     {
+      title: 'Photos',
+      value: 'photos',
+      path: '/profile/photos',
+    },
+    {
       title: 'NFTs',
       value: 'nfts',
       path: '/profile/nfts',

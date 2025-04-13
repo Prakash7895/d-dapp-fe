@@ -145,3 +145,25 @@ export const updatePasswordSchema = z
   });
 
 export type UpdatePasswordSchemaType = z.infer<typeof updatePasswordSchema>;
+
+export enum FILE_ACCESS {
+  PRIVATE = 'PRIVATE',
+  PUBLIC = 'PUBLIC',
+}
+
+export const fileUploadSchema = z.object({
+  file: z
+    .instanceof(File)
+    .refine(
+      (file) => file.size <= 5 * 1024 * 1024, // 5MB
+      { message: 'File size must be less than 5MB' }
+    )
+    .refine(
+      (file) => ['image/png', 'image/jpeg', 'image/jpg'].includes(file.type),
+      { message: 'Only PNG, JPG, JPEG files are allowed' }
+    ),
+  access: z.enum([FILE_ACCESS.PRIVATE, FILE_ACCESS.PUBLIC], {
+    required_error: 'Access type is required',
+    invalid_type_error: 'Access must be either private or public',
+  }),
+});

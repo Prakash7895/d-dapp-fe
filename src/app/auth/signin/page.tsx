@@ -91,7 +91,7 @@ export default function SignIn() {
               {result.error}{' '}
               <button
                 onClick={() => router.push('/auth/signup')}
-                className="text-primary-400 hover:text-primary-300 underline"
+                className='text-primary-400 hover:text-primary-300 underline'
               >
                 Sign up now
               </button>
@@ -175,7 +175,7 @@ export default function SignIn() {
                   name='password'
                   type='password'
                   onChange={(e) => setPassword(e.target.value)}
-                  value={email}
+                  value={password}
                   autoComplete='current-password'
                   placeholder='Password'
                   labelClassName='sr-only'

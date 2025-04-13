@@ -68,3 +68,21 @@ export const checkAddress = (data: AddWalletAddressSchemaType) =>
       toast.error(err?.message || 'Failed to update user info');
       return { status: 'error' } as ApiResponse;
     });
+
+export const uploadPhoto = (formData: FormData) =>
+  fetch('/api/upload', {
+    method: 'POST',
+    body: formData,
+  })
+    .then((res) => res.json())
+    .then(
+      (res) =>
+        res as ApiResponse<{
+          id: number;
+          url: string;
+        }>
+    )
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to update user info');
+      return { status: 'error' } as ApiResponse;
+    });
