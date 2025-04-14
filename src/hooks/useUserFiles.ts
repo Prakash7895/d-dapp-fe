@@ -27,7 +27,7 @@ export function useUserFiles(limit: number = 10) {
         setFiles((prev) =>
           pgNo === 1 ? [...(data.data ?? [])] : [...prev, ...(data.data ?? [])]
         );
-        setHasMore(!!(data.data && data.data.length > 0));
+        setHasMore(!!(data.data && data.data.length === limit));
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch files');

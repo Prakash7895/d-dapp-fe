@@ -53,8 +53,10 @@ export async function PUT(request: NextRequest) {
         await deleteFileFromS3(user.profilePicture);
       }
 
+      const { password, ..._user } = userInfo;
+
       return NextResponse.json(
-        { status: 'success', data: userInfo },
+        { status: 'success', data: _user },
         { status: 200 }
       );
     } else {

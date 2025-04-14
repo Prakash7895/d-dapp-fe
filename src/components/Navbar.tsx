@@ -3,7 +3,7 @@
 
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useStateContext } from './StateProvider';
 import {
@@ -16,13 +16,15 @@ import {
   Settings,
 } from 'lucide-react';
 import useClickOutside from '@/hooks/useClickOutside';
+import { getSignedUrl } from '@/apiCalls';
 
 export default function Navbar() {
   const { data: session } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
-  const { activeProfilePhoto } = useStateContext();
+  const { activeProfilePhoto, userInfo } = useStateContext();
   const divRef = useRef<HTMLDivElement>(null);
+  const [profilePicture, setProfilePicture] = useState('');
 
   const isNftMinted = !!activeProfilePhoto;
 
@@ -34,6 +36,16 @@ export default function Navbar() {
   useClickOutside(divRef, () => {
     setIsMenuOpen(false);
   });
+
+  useEffect(() => {
+    if (userInfo?.profilePicture) {
+      getSignedUrl(encodeURIComponent(userInfo.profilePicture)).then((res) => {
+        if (res.status === 'success') {
+          setProfilePicture(res.data!);
+        }
+      });
+    }
+  }, [userInfo]);
 
   // Hide navbar on auth pages
   if (pathname?.startsWith('/auth/')) {
@@ -102,9 +114,9 @@ export default function Navbar() {
                   <div className='relative'>
                     <div className='w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-purple-500 p-[2px]'>
                       <div className='w-full h-full rounded-full bg-gray-900 flex items-center justify-center overflow-hidden'>
-                        {activeProfilePhoto ? (
+                        {activeProfilePhoto || profilePicture ? (
                           <img
-                            src={activeProfilePhoto}
+                            src={profilePicture || activeProfilePhoto}
                             alt='Profile'
                             className='w-full h-full object-cover'
                           />

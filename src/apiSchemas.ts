@@ -176,3 +176,7 @@ export const paginationQuerySchema = z.object({
     .max(50, { message: 'PageSize should be not exceed 50.' }),
 });
 export type PaginationQuerySchemaType = z.infer<typeof paginationQuerySchema>;
+
+export const fileKeySchema = z.object({
+  key: z.string().nonempty('key is required.'),
+});

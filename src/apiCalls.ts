@@ -130,11 +130,20 @@ export const getUserFiles = (id: number, pageNo: number, pageSize = 10) =>
 
 export const uploadProfilePicture = (formData: FormData) =>
   fetch('/api/user/upload-profile-picture', {
-    method: 'POST',
+    method: 'PUT',
     body: formData,
   })
     .then((res) => res.json())
     .then((res) => res as ApiResponse<User>)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to update user info');
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const getSignedUrl = (key: string) =>
+  fetch(`/api/files/signed-url/${key}`)
+    .then((res) => res.json())
+    .then((res) => res as ApiResponse<string>)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
       return { status: 'error' } as ApiResponse;
