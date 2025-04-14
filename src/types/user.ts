@@ -44,4 +44,6 @@ type ProfileCardForm = Omit<IForm, 'email' | 'minAge' | 'maxAge'>;
 export type ProfileCard = ProfileCardForm & {
   id: number;
   photos: string[];
+  profilePicture?: string;
+  lastActiveOn?: string;
 };

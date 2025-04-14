@@ -78,3 +78,12 @@ export const getUserById = async (id: number) =>
   await prisma.user.findFirst({
     where: { id },
   });
+
+export async function updateUserLastActive(id: number) {
+  return prisma.user.update({
+    where: { id },
+    data: {
+      lastActiveOn: new Date(),
+    },
+  });
+}

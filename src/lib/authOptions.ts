@@ -10,6 +10,7 @@ import {
 } from '@/lib/auth';
 import { JWT } from 'next-auth/jwt';
 import { Session } from 'next-auth';
+import { updateUserLastActive } from './user';
 
 // Extend the built-in session types
 declare module 'next-auth' {
@@ -68,6 +69,8 @@ export const authOptions: AuthOptions = {
           throw new Error('Invalid email or password');
         }
 
+        await updateUserLastActive(user.id);
+
         return {
           id: user.id.toString(),
           email: user.email,
@@ -107,6 +110,8 @@ export const authOptions: AuthOptions = {
         if (!isValid) {
           throw new Error('Invalid signature. Please try signing again.');
         }
+
+        await updateUserLastActive(user.id);
 
         return {
           id: user.id.toString(),

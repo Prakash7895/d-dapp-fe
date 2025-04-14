@@ -112,6 +112,7 @@ export async function POST(request: NextRequest) {
         genderPreference: GENDER_PREFERENCES.ALL,
         interests: [],
         maxDistance: 50,
+        lastActiveOn: new Date(),
       },
     });
 

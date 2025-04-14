@@ -6,6 +6,7 @@ import CardStack from '@/components/CardStack';
 import { ProfileCard } from '@/types/user';
 import Loader from '@/components/Loader';
 import { GENDER_PREFERENCES } from '@/apiSchemas';
+import { getUsers } from '@/apiCalls';
 
 const HomePage = () => {
   const { userInfo } = useStateContext();
@@ -17,6 +18,11 @@ const HomePage = () => {
   );
 
   useEffect(() => {
+    setLoading(true);
+    getUsers(1).then((res) => {
+      console.log('res', res.data?.users);
+      setLoading(false);
+    });
     const mockProfiles: ProfileCard[] = [
       {
         id: 1,
@@ -171,7 +177,6 @@ const HomePage = () => {
     ];
 
     setProfiles(mockProfiles);
-    setLoading(false);
   }, []);
 
   const handleSwipe = (

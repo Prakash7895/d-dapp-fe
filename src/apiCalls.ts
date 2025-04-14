@@ -7,7 +7,7 @@ import {
   UpdatePasswordSchemaType,
   UserUpdateSchemaType,
 } from './apiSchemas';
-import { User } from './types/user';
+import { ProfileCard, User } from './types/user';
 import { S3File } from './hooks/useUserFiles';
 
 interface ApiResponse<T = null> {
@@ -144,6 +144,15 @@ export const getSignedUrl = (key: string) =>
   fetch(`/api/files/signed-url/${key}`)
     .then((res) => res.json())
     .then((res) => res as ApiResponse<string>)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to update user info');
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const getUsers = (pageNo: number, pageSize = 10) =>
+  fetch(`/api/users?pageNo=${pageNo}&pageSize=${pageSize}`)
+    .then((res) => res.json())
+    .then((res) => res as ApiResponse<{ users: ProfileCard[]; total: number }>)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
       return { status: 'error' } as ApiResponse;
