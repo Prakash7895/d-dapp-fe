@@ -3,6 +3,7 @@ import {
   ListObjectsV2Command,
   PutObjectCommand,
   S3Client,
+  DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
@@ -14,7 +15,7 @@ const s3Client = new S3Client({
   },
 });
 
-export const uploadFile = async (
+export const uploadFileToS3 = async (
   file: File,
   userId: number,
   section: string = 'photos'
@@ -90,4 +91,46 @@ export const getAwsSignedUrl = async (key: string) => {
   return await getSignedUrl(s3Client, getObjectCommand, {
     expiresIn: 3600,
   });
+};
+
+export const deleteFileFromS3 = async (key: string) => {
+  try {
+    await s3Client.send(
+      new DeleteObjectCommand({
+        Bucket: process.env.AWS_S3_BUCKET!,
+        Key: key,
+      })
+    );
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting file:', error);
+    throw new Error('Failed to delete file');
+  }
+};
+
+export const getAwsSignedUrls = async (keys: string[]) => {
+  try {
+    const urls = await Promise.all(
+      keys.map(async (key) => {
+        const getObjectCommand = new GetObjectCommand({
+          Bucket: process.env.AWS_S3_BUCKET!,
+          Key: key,
+        });
+
+        const presignedUrl = await getSignedUrl(s3Client, getObjectCommand, {
+          expiresIn: 3600,
+        });
+
+        return {
+          key,
+          url: presignedUrl,
+        };
+      })
+    );
+
+    return urls;
+  } catch (error) {
+    console.error('Error generating presigned URLs:', error);
+    throw new Error('Failed to generate presigned URLs');
+  }
 };

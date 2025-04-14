@@ -254,10 +254,14 @@ const UserInfo: React.FC = () => {
     setLoading(true);
     updateUserInfo(formData)
       .then((res) => {
-        if (res) {
-          setUserInfo(res);
+        if (res?.status === 'success') {
+          setUserInfo(res.data!);
+          toast.success('Profile updated successfully!');
+        } else {
+          toast.error(
+            res?.message ?? 'Failed to update profile. Please try again.'
+          );
         }
-        toast.success('Profile updated successfully!');
       })
       .catch((err) => {
         console.error('Error updating profile:', err);

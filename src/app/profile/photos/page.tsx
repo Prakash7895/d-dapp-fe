@@ -1,13 +1,19 @@
 'use client';
 import PhotoUploader from '@/components/PhotoUploader';
 import UserFiles from '@/components/UserFiles';
-import React from 'react';
+import React, { useState } from 'react';
 
 const ProfilePhotos = () => {
+  const [refreshCount, setRefreshCount] = useState(0);
+
   return (
     <div>
-      <PhotoUploader />
-      <UserFiles />
+      <PhotoUploader
+        onSuccess={() => {
+          setRefreshCount((p) => p + 1);
+        }}
+      />
+      <UserFiles refreshCount={refreshCount} />
     </div>
   );
 };

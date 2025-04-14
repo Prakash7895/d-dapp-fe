@@ -1,19 +1,14 @@
 'use client';
-import { useState } from 'react';
-import { useUserFiles } from '@/hooks/useUserFiles';
+import { useEffect, useState } from 'react';
+import { S3File, useUserFiles } from '@/hooks/useUserFiles';
 import { Image as ImageIcon, Trash2, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import Loader from './Loader';
 
 interface FileCardProps {
-  file: {
-    key: string;
-    lastModified: Date;
-    size: number;
-    url: string;
-  };
-  onDelete: (key: string) => Promise<void>;
+  file: S3File;
+  onDelete: (id: number) => Promise<void>;
 }
 
 function FileCard({ file, onDelete }: FileCardProps) {
@@ -23,7 +18,7 @@ function FileCard({ file, onDelete }: FileCardProps) {
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
-      await onDelete(file.key);
+      await onDelete(file.id);
       toast.success('File deleted successfully');
     } catch (error) {
       toast.error('Failed to delete file');
@@ -75,24 +70,28 @@ function FileCard({ file, onDelete }: FileCardProps) {
       <div className='mt-2 flex items-center justify-between'>
         <div className='flex items-center gap-2'>
           <span className='text-xs text-gray-500'>
-            {new Date(file.lastModified).toLocaleDateString()}
+            {new Date(file.createdAt).toLocaleDateString()}
           </span>
         </div>
-        <span className='text-xs text-gray-500'>
+        {/* <span className='text-xs text-gray-500'>
           {(file.size / 1024 / 1024).toFixed(2)} MB
-        </span>
+        </span> */}
       </div>
     </motion.div>
   );
 }
 
-export default function UserFiles() {
+interface UserFilesProps {
+  refreshCount?: number;
+}
+
+export default function UserFiles({ refreshCount }: UserFilesProps) {
   const { files, loading, error, hasMore, loadMore, refresh } =
     useUserFiles(12);
 
-  const handleDelete = async (key: string) => {
+  const handleDelete = async (id: number) => {
     try {
-      const response = await fetch(`/api/files/${key}`, {
+      const response = await fetch(`/api/files/${id}`, {
         method: 'DELETE',
       });
 
@@ -102,10 +101,16 @@ export default function UserFiles() {
 
       refresh();
     } catch (error) {
-      console.error('Error deleting file:', error);
+      console.log('Error deleting file:', error);
       throw error;
     }
   };
+
+  useEffect(() => {
+    if (refreshCount) {
+      refresh();
+    }
+  }, [refreshCount]);
 
   if (loading && files.length === 0) {
     return (
@@ -117,14 +122,14 @@ export default function UserFiles() {
 
   if (error) {
     return (
-      <div className='p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2'>
+      <div className='p-4 mt-5 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2'>
         <span className='text-red-600'>{error}</span>
       </div>
     );
   }
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-6 mt-5'>
       {files.length === 0 ? (
         <div className='text-center py-12'>
           <ImageIcon className='w-12 h-12 mx-auto text-gray-400' />

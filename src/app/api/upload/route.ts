@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/lib/authOptions';
-import { getAwsSignedUrl, uploadFile } from '@/lib/aws';
+import { getAwsSignedUrl, uploadFileToS3 } from '@/lib/aws';
 import { fileUploadSchema } from '@/apiSchemas';
 
 export async function POST(request: Request) {
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
 
     const { access, file } = validationResult.data;
 
-    const s3Key = await uploadFile(file, +session.user.id);
+    const s3Key = await uploadFileToS3(file, +session.user.id);
 
     const userFile = await prisma.userFile.create({
       data: {
@@ -52,18 +52,21 @@ export async function POST(request: Request) {
 
     const signedUrl = await getAwsSignedUrl(s3Key);
 
-    return NextResponse.json({
-      success: 'success',
-      data: {
-        id: userFile.id,
-        url: signedUrl,
+    return NextResponse.json(
+      {
+        status: 'success',
+        data: {
+          id: userFile.id,
+          url: signedUrl,
+        },
       },
-    });
+      { status: 201 }
+    );
   } catch (error: any) {
     console.log('Upload error:', error);
     return NextResponse.json(
       { error: 'Failed to upload file', message: error.message },
-      { status: 500 }
+      { status: 400 }
     );
   }
 }

@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { status: 'error', message: 'Not authenticated' },
-        { status: 401 }
+        { status: 400 }
       );
     }
 
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     console.error('Error checking address:', err);
     return NextResponse.json(
       { status: 'error', message: err?.message || 'Failed to check address' },
-      { status: 500 }
+      { status: 400 }
     );
   }
 }

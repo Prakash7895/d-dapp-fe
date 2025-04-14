@@ -1,16 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/authOptions';
 import { paginationQuerySchema } from '@/apiSchemas';
+import { authOptions } from '@/lib/authOptions';
 import { getUserFiles } from '@/lib/userFiles';
+import { getServerSession } from 'next-auth';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const userId = (await params).id;
+
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const userId = session.user.id;
 
     const searchParams = new URL(request.url).searchParams;
     const pageSize = +searchParams.get('pageSize')!;

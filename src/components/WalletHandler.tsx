@@ -165,7 +165,7 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
       const updatedUserInfo = await updateWalletAddress(+userInfo?.id!, {
         selectedAddress: confirmDialog.newAddress,
       });
-      setUserInfo(updatedUserInfo);
+      setUserInfo(updatedUserInfo?.data!);
 
       toast.info(
         `Connected to new wallet: ${confirmDialog.newAddress.substring(

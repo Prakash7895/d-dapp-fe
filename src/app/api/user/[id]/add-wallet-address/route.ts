@@ -27,7 +27,7 @@ export async function PUT(
 
     return NextResponse.json(
       { status: 'success', data: userInfo },
-      { status: 201 }
+      { status: 200 }
     );
   } catch (err: any) {
     console.log(err);

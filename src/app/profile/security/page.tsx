@@ -52,9 +52,11 @@ const Security = () => {
     setLoading(true);
     updateUserInfo(formData)
       .then((res) => {
-        if (res) {
+        if (res?.status === 'success') {
           toast.success('Password updated successfully!');
           setFormData({ confirmPassword: '', password: '' });
+        } else {
+          toast.error(res?.message ?? 'Failed to update user.');
         }
       })
       .catch((err) => {

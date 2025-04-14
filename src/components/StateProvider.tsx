@@ -52,9 +52,12 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
   useEffect(() => {
     setLoading(true);
     getUserInfo().then((res) => {
-      if (res) {
-        setUserInfo(res);
-        sessionStorage.setItem('savedWalletAddress', res.selectedAddress!);
+      if (res?.status === 'success') {
+        setUserInfo(res.data!);
+        sessionStorage.setItem(
+          'savedWalletAddress',
+          res.data?.selectedAddress!
+        );
         setLoading(false);
       } else {
         signOut({ callbackUrl: '/auth/signin' });

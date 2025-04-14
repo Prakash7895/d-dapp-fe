@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json(
         { status: 'success', data: userInfo },
-        { status: 201 }
+        { status: 200 }
       );
     }
 
@@ -77,7 +77,7 @@ export async function PUT(request: NextRequest) {
 
       return NextResponse.json(
         { status: 'success', data: userInfo },
-        { status: 201 }
+        { status: 200 }
       );
     } else {
       throw new Error('No data to update');

@@ -1,16 +1,11 @@
+import { getFiles } from '@/apiCalls';
 import { useState, useEffect } from 'react';
 
-interface S3File {
+export interface S3File {
   key: string;
-  lastModified: Date;
-  size: number;
+  id: number;
   url: string;
-}
-
-interface PaginatedFiles {
-  files: S3File[];
-  nextContinuationToken?: string;
-  hasMore: boolean;
+  createdAt: string;
 }
 
 export function useUserFiles(limit: number = 10) {
@@ -18,36 +13,22 @@ export function useUserFiles(limit: number = 10) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
-  const [continuationToken, setContinuationToken] = useState<string | undefined>();
 
-  const fetchFiles = async (token?: string) => {
+  const [pageNo, setPageNo] = useState(1);
+
+  const fetchFiles = async (pgNo: number) => {
     try {
       setLoading(true);
       setError(null);
 
-      const params = new URLSearchParams({
-        limit: limit.toString(),
-      });
-
-      if (token) {
-        params.append('continuationToken', token);
+      const data = await getFiles(pgNo, limit);
+      if (data.status === 'success') {
+        setPageNo(pgNo);
+        setFiles((prev) =>
+          pgNo === 1 ? [...(data.data ?? [])] : [...prev, ...(data.data ?? [])]
+        );
+        setHasMore(!!(data.data && data.data.length > 0));
       }
-
-      const response = await fetch(`/api/files?${params.toString()}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch files');
-      }
-
-      const data: PaginatedFiles = await response.json();
-      
-      if (token) {
-        setFiles(prev => [...prev, ...data.files]);
-      } else {
-        setFiles(data.files);
-      }
-      
-      setHasMore(data.hasMore);
-      setContinuationToken(data.nextContinuationToken);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch files');
     } finally {
@@ -56,13 +37,13 @@ export function useUserFiles(limit: number = 10) {
   };
 
   const loadMore = () => {
-    if (hasMore && continuationToken) {
-      fetchFiles(continuationToken);
+    if (hasMore) {
+      fetchFiles(pageNo + 1);
     }
   };
 
   useEffect(() => {
-    fetchFiles();
+    fetchFiles(1);
   }, []);
 
   return {
@@ -71,6 +52,9 @@ export function useUserFiles(limit: number = 10) {
     error,
     hasMore,
     loadMore,
-    refresh: () => fetchFiles(),
+    refresh: () => {
+      setPageNo(1);
+      fetchFiles(1);
+    },
   };
-} 
+}

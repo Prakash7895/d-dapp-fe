@@ -3,10 +3,12 @@
 import { toast } from 'react-toastify';
 import {
   AddWalletAddressSchemaType,
+  FILE_ACCESS,
   UpdatePasswordSchemaType,
   UserUpdateSchemaType,
 } from './apiSchemas';
 import { User } from './types/user';
+import { S3File } from './hooks/useUserFiles';
 
 interface ApiResponse<T = null> {
   status: 'success' | 'error';
@@ -23,7 +25,7 @@ export const updateWalletAddress = (
     method: 'PUT',
   })
     .then((res) => res.json())
-    .then((res) => res.data as User)
+    .then((res) => res as ApiResponse<User>)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
       return null;
@@ -34,7 +36,7 @@ export const updateUserInfo = (
 ) =>
   fetch(`/api/user`, { body: JSON.stringify(data), method: 'PUT' })
     .then((res) => res.json())
-    .then((res) => res.data as User)
+    .then((res) => res as ApiResponse<User>)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
       return null;
@@ -43,7 +45,7 @@ export const updateUserInfo = (
 export const getUserInfo = () =>
   fetch(`/api/user`)
     .then((res) => res.json())
-    .then((res) => res?.data as User)
+    .then((res) => res as ApiResponse<User>)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
       return null;
@@ -82,6 +84,57 @@ export const uploadPhoto = (formData: FormData) =>
           url: string;
         }>
     )
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to update user info');
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const getFiles = (pageNo: number, pageSize = 10) =>
+  fetch(`/api/files?pageNo=${pageNo}&pageSize=${pageSize}`)
+    .then((res) => res.json())
+    .then((res) => res as ApiResponse<S3File[]>)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to update user info');
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const deleteFile = (fileId: number) =>
+  fetch(`/api/files/${fileId}`, { method: 'DELETE' })
+    .then((res) => res.json())
+    .then((res) => res as ApiResponse)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to update user info');
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const udpateFileAccess = (fileId: number, access: FILE_ACCESS) =>
+  fetch(`/api/files/${fileId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ access }),
+  })
+    .then((res) => res.json())
+    .then((res) => res as ApiResponse)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to update user info');
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const getUserFiles = (id: number, pageNo: number, pageSize = 10) =>
+  fetch(`/api/user/${id}/files?pageNo=${pageNo}&pageSize=${pageSize}`)
+    .then((res) => res.json())
+    .then((res) => res as ApiResponse<S3File[]>)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to update user info');
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const uploadProfilePicture = (formData: FormData) =>
+  fetch('/api/user/upload-profile-picture', {
+    method: 'POST',
+    body: formData,
+  })
+    .then((res) => res.json())
+    .then((res) => res as ApiResponse<User>)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
       return { status: 'error' } as ApiResponse;

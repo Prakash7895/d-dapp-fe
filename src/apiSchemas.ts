@@ -167,3 +167,12 @@ export const fileUploadSchema = z.object({
     invalid_type_error: 'Access must be either private or public',
   }),
 });
+
+export const paginationQuerySchema = z.object({
+  pageNo: z.number().min(1, { message: 'PageNo should be atleast 1.' }),
+  pageSize: z
+    .number()
+    .min(1, { message: 'PageSize should be atleast 1.' })
+    .max(50, { message: 'PageSize should be not exceed 50.' }),
+});
+export type PaginationQuerySchemaType = z.infer<typeof paginationQuerySchema>;

@@ -1,13 +1,18 @@
 'use client';
-import React, { useState } from 'react';
+import React, { FC, useState } from 'react';
 import FileUploader from './FileUploader';
 import { FILE_ACCESS } from '@/apiSchemas';
 import { uploadPhoto } from '@/apiCalls';
 import { toast } from 'react-toastify';
 import { Modal, ModalBody, ModalContent, ModalTrigger } from './AnimatedModal';
 import RadioButton from './RadioButton';
+import { Upload } from 'lucide-react';
 
-const PhotoUploader = () => {
+interface PhotoUploaderProps {
+  onSuccess?: () => void;
+}
+
+const PhotoUploader: FC<PhotoUploaderProps> = ({ onSuccess }) => {
   const [open, setOpen] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -40,6 +45,8 @@ const PhotoUploader = () => {
       uploadPhoto(formData).then((res) => {
         if (res.status === 'success') {
           toast.success('Photo uploaded successfully!');
+          onSuccess?.();
+          setOpen(false);
         } else {
           toast.error('Error uploading Photo');
         }
@@ -54,7 +61,9 @@ const PhotoUploader = () => {
   return (
     <div>
       <Modal open={open} setOpen={setOpen}>
-        <ModalTrigger className={'Hello'}>{'trigger'}</ModalTrigger>
+        <ModalTrigger className='text-white bg-primary-500 enabled:hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 transition-all flex items-center gap-2'>
+          <Upload /> Upload New Photo
+        </ModalTrigger>
         <ModalBody className='max-w-[50%]'>
           <ModalContent>
             <FileUploader
