@@ -9,6 +9,8 @@ interface FileUploaderProps {
   btnLabel?: string;
   onSubmit: (file: File) => void;
   isLoading?: boolean;
+  preview?: string;
+  isEditing?: boolean;
 }
 
 export default function FileUploader({
@@ -17,9 +19,11 @@ export default function FileUploader({
   btnLabel,
   onSubmit,
   isLoading,
+  preview,
+  isEditing,
 }: FileUploaderProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(preview ?? null);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -51,11 +55,11 @@ export default function FileUploader({
         <div className='mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-700 border-dashed rounded-lg'>
           <div className='space-y-1 text-center'>
             {previewUrl ? (
-              <div className='mb-4'>
+              <div>
                 <img
                   src={previewUrl}
                   alt='Preview'
-                  className='mx-auto h-32 w-32 object-cover rounded-full'
+                  className='mx-auto h-32 w-32 object-cover rounded-md'
                 />
               </div>
             ) : (
@@ -74,23 +78,27 @@ export default function FileUploader({
                 />
               </svg>
             )}
-            <div className='flex text-sm text-gray-400'>
-              <label
-                htmlFor='file-upload'
-                className='relative cursor-pointer mx-auto bg-gray-800 rounded-md font-medium text-primary-500 hover:text-primary-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-500'
-              >
-                <span>Upload a file</span>
-                <input
-                  id='file-upload'
-                  name='file-upload'
-                  type='file'
-                  className='sr-only'
-                  accept='image/*'
-                  onChange={handleFileSelect}
-                />
-              </label>
-            </div>
-            <p className='text-xs text-gray-400'>PNG, JPG, GIF up to 5MB</p>
+            {!isEditing && (
+              <>
+                <div className='flex text-sm text-gray-400 mt-4'>
+                  <label
+                    htmlFor='file-upload'
+                    className='relative cursor-pointer mx-auto bg-gray-800 rounded-md font-medium text-primary-500 hover:text-primary-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-500'
+                  >
+                    <span>Upload a file</span>
+                    <input
+                      id='file-upload'
+                      name='file-upload'
+                      type='file'
+                      className='sr-only'
+                      accept='image/*'
+                      onChange={handleFileSelect}
+                    />
+                  </label>
+                </div>
+                <p className='text-xs text-gray-400'>PNG, JPG, GIF up to 5MB</p>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -100,7 +108,7 @@ export default function FileUploader({
       <Button
         label={btnLabel}
         onClick={() => onSubmit(selectedFile!)}
-        disabled={!selectedFile || isLoading}
+        disabled={isEditing ? isLoading : !selectedFile || isLoading}
         isLoading={isLoading}
       />
     </div>

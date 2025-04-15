@@ -1,4 +1,5 @@
 import { getFiles } from '@/apiCalls';
+import { FILE_ACCESS } from '@/apiSchemas';
 import { useState, useEffect } from 'react';
 
 export interface S3File {
@@ -6,6 +7,7 @@ export interface S3File {
   id: number;
   url: string;
   createdAt: string;
+  access: FILE_ACCESS;
 }
 
 export function useUserFiles(limit: number = 10) {

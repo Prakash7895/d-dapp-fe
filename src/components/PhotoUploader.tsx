@@ -1,8 +1,8 @@
 'use client';
-import React, { FC, useState } from 'react';
+import React, { FC, ReactNode, useState } from 'react';
 import FileUploader from './FileUploader';
 import { FILE_ACCESS } from '@/apiSchemas';
-import { uploadPhoto } from '@/apiCalls';
+import { udpateFileAccess, uploadPhoto } from '@/apiCalls';
 import { toast } from 'react-toastify';
 import { Modal, ModalBody, ModalContent, ModalTrigger } from './AnimatedModal';
 import RadioButton from './RadioButton';
@@ -10,13 +10,23 @@ import { Upload } from 'lucide-react';
 
 interface PhotoUploaderProps {
   onSuccess?: () => void;
+  trigger?: ReactNode;
+  triggerClassName?: string;
+  isEditing?: boolean;
+  editData?: { url: string; access: FILE_ACCESS; fileId: number };
 }
 
-const PhotoUploader: FC<PhotoUploaderProps> = ({ onSuccess }) => {
+const PhotoUploader: FC<PhotoUploaderProps> = ({
+  onSuccess,
+  trigger,
+  triggerClassName,
+  isEditing = false,
+  editData,
+}) => {
   const [open, setOpen] = useState(false);
 
   const [loading, setLoading] = useState(false);
-  const [access, setAccess] = useState(FILE_ACCESS.PUBLIC);
+  const [access, setAccess] = useState(editData?.access ?? FILE_ACCESS.PUBLIC);
 
   const accessRenderer = (
     <div className='flex items-center justify-around mb-7'>
@@ -38,11 +48,16 @@ const PhotoUploader: FC<PhotoUploaderProps> = ({ onSuccess }) => {
   const onSubmit = async (file: File) => {
     try {
       const formData = new FormData();
-      formData.append('file', file);
+      if (!isEditing) {
+        formData.append('file', file);
+      }
       formData.append('access', access);
 
       setLoading(true);
-      uploadPhoto(formData).then((res) => {
+      (isEditing
+        ? udpateFileAccess(editData?.fileId!, access)
+        : uploadPhoto(formData)
+      ).then((res) => {
         if (res.status === 'success') {
           toast.success('Photo uploaded successfully!');
           onSuccess?.();
@@ -61,9 +76,13 @@ const PhotoUploader: FC<PhotoUploaderProps> = ({ onSuccess }) => {
   return (
     <div>
       <Modal open={open} setOpen={setOpen}>
-        <ModalTrigger className='text-white bg-primary-500 enabled:hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 transition-all flex items-center gap-2'>
-          <Upload /> Upload New Photo
-        </ModalTrigger>
+        {trigger ? (
+          <ModalTrigger className={triggerClassName}> {trigger}</ModalTrigger>
+        ) : (
+          <ModalTrigger className='text-white bg-primary-500 enabled:hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 transition-all flex items-center gap-2'>
+            <Upload /> Upload New Photo
+          </ModalTrigger>
+        )}
         <ModalBody className='max-w-[50%]'>
           <ModalContent>
             <FileUploader
@@ -72,6 +91,8 @@ const PhotoUploader: FC<PhotoUploaderProps> = ({ onSuccess }) => {
               onSubmit={onSubmit}
               isLoading={loading}
               contentAboveBtn={accessRenderer}
+              preview={editData?.url}
+              isEditing={isEditing}
             />
           </ModalContent>
         </ModalBody>

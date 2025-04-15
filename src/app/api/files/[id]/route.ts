@@ -50,7 +50,7 @@ export async function DELETE(
           status: 'success',
           message: 'File deleted successfully.',
         },
-        { status: 204 }
+        { status: 200 }
       );
     }
   } catch (error) {

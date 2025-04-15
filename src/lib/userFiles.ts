@@ -31,11 +31,11 @@ export const getUserFiles = async ({
   const signedUrls = await getAwsSignedUrls(userFile.map((el) => el.s3Key));
 
   return signedUrls.map((el) => {
-    const f = userFile.find((f) => f.s3Key === el.key);
+    const f = userFile.find((f) => f.s3Key === el.key)!;
+    const { s3Key, ...f1 } = f;
     return {
       ...el,
-      id: f?.id!,
-      createdAt: f?.createdAt,
+      ...f1,
     };
   });
 };
