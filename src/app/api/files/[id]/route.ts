@@ -38,7 +38,7 @@ export async function DELETE(
       );
     }
 
-    const { success } = await deleteFileFromS3(userFile?.s3Key!);
+    const { success } = await deleteFileFromS3(userFile.s3Key!);
     await prisma.userFile.delete({
       where: {
         id: +fileId,

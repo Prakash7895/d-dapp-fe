@@ -8,12 +8,11 @@ import { ethers } from 'ethers';
 import Link from 'next/link';
 import Button from '@/components/Button';
 import Input from '@/components/Input';
-import Loader from '@/components/Loader';
 import ScreenLoader from '@/components/ScreenLoader';
 
 export default function SignIn() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -44,8 +43,8 @@ export default function SignIn() {
       } else {
         router.push('/');
       }
-    } catch (error: any) {
-      setError(error.message || 'An error occurred during sign in');
+    } catch (error) {
+      setError((error as Error).message || 'An error occurred during sign in');
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -69,7 +68,7 @@ export default function SignIn() {
       const message = `${process.env.NEXT_PUBLIC_MESSAGE_TO_VERIFY}${address}`;
 
       // Get the signer
-      const provider = new ethers.BrowserProvider(window.ethereum);
+      const provider = new ethers.BrowserProvider(window.ethereum!);
       const signer = await provider.getSigner();
 
       // Sign the message
@@ -101,11 +100,13 @@ export default function SignIn() {
       } else {
         router.push('/');
       }
-    } catch (error: any) {
-      if (error.message.includes('User rejected')) {
+    } catch (error) {
+      if ((error as Error).message.includes('User rejected')) {
         setError('You rejected the signature request. Please try again.');
       } else {
-        setError(error.message || 'An error occurred during wallet sign in');
+        setError(
+          (error as Error).message || 'An error occurred during wallet sign in'
+        );
       }
       console.error(error);
     } finally {
@@ -221,7 +222,7 @@ export default function SignIn() {
               href='/auth/signup'
               className='text-primary-400 hover:text-primary-300'
             >
-              Don't have an account? Sign up
+              {"Don't have an account? Sign up"}
             </Link>
           </div>
         </div>

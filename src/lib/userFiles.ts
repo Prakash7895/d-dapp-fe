@@ -32,6 +32,7 @@ export const getUserFiles = async ({
 
   return signedUrls.map((el) => {
     const f = userFile.find((f) => f.s3Key === el.key)!;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { s3Key, ...f1 } = f;
     return {
       ...el,

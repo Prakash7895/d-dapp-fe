@@ -55,7 +55,7 @@ const PhotoUploader: FC<PhotoUploaderProps> = ({
 
       setLoading(true);
       (isEditing
-        ? udpateFileAccess(editData?.fileId!, access)
+        ? udpateFileAccess(editData!.fileId!, access)
         : uploadPhoto(formData)
       ).then((res) => {
         if (res.status === 'success') {

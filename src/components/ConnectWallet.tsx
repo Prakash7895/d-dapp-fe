@@ -24,9 +24,9 @@ const ConnectWallet = () => {
         }
         toast.success('Wallet connected successfully!');
       }
-    } catch (error: any) {
-      setError(error.message || 'Failed to connect wallet');
-      toast.error(error.message || 'Failed to connect wallet');
+    } catch (error) {
+      setError((error as Error).message || 'Failed to connect wallet');
+      toast.error((error as Error).message || 'Failed to connect wallet');
     } finally {
       setConnecting(false);
     }

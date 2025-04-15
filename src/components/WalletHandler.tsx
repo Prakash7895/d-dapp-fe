@@ -74,9 +74,9 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
           });
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.log(err);
-      toast.error(err?.message || 'Failed to detect connection');
+      toast.error((err as Error)?.message || 'Failed to detect connection');
     }
   }, [
     userInfo,
@@ -128,7 +128,7 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
     [userInfo]
   );
 
-  const handleChainChange = useCallback((chainId: string) => {
+  const handleChainChange = useCallback(() => {
     window.location.reload();
   }, []);
 
@@ -162,10 +162,10 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
       const wallet = await connectWallet();
       setUserInfo((u) => ({ ...u!, selectedAddress: wallet.address }));
 
-      const updatedUserInfo = await updateWalletAddress(+userInfo?.id!, {
+      const updatedUserInfo = await updateWalletAddress(+userInfo!.id, {
         selectedAddress: confirmDialog.newAddress,
       });
-      setUserInfo(updatedUserInfo?.data!);
+      setUserInfo(updatedUserInfo!.data!);
 
       toast.info(
         `Connected to new wallet: ${confirmDialog.newAddress.substring(

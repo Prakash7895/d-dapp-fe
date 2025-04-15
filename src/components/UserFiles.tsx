@@ -31,8 +31,8 @@ function FileCard({ file, onDelete, refresh }: FileCardProps) {
       setIsDeleting(true);
       await onDelete(file.id);
       toast.success('File deleted successfully');
-    } catch (error) {
-      toast.error('Failed to delete file');
+    } catch (err) {
+      toast.error((err as Error).message || 'Failed to delete file');
     } finally {
       setIsDeleting(false);
     }

@@ -8,7 +8,7 @@ import TabContenWrapper from './TabContenWrapper';
 export type Tab = {
   title: string;
   value: string;
-  content?: string | React.ReactNode | any;
+  content?: string | React.ReactNode;
   onClick?: (val: string) => void;
 };
 
@@ -59,7 +59,9 @@ export const Tabs = ({
             key={tab.title}
             onClick={() => {
               moveSelectedTabToTop(idx);
-              tab.onClick && tab.onClick(tab.value);
+              if (tab.onClick) {
+                tab.onClick(tab.value);
+              }
             }}
             onMouseEnter={() => setHovering(true)}
             onMouseLeave={() => setHovering(false)}

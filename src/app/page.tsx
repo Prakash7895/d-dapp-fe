@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useStateContext } from '@/components/StateProvider';
 import CardStack from '@/components/CardStack';
 import { ProfileCard } from '@/types/user';
 import Loader from '@/components/Loader';
@@ -9,7 +8,6 @@ import { GENDER_PREFERENCES } from '@/apiSchemas';
 import { getUsers } from '@/apiCalls';
 
 const HomePage = () => {
-  const { userInfo } = useStateContext();
   const [profiles, setProfiles] = useState<ProfileCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [showMatch, setShowMatch] = useState(false);
@@ -209,7 +207,7 @@ const HomePage = () => {
         <div className='fixed inset-0 flex items-center justify-center bg-black/50'>
           <div className='bg-white p-8 rounded-lg text-center'>
             <h2 className='text-2xl font-bold text-primary-500 mb-4'>
-              It's a Match!
+              {"It's a Match!"}
             </h2>
             <p className='text-gray-600'>
               You and {matchedProfile.firstName} {matchedProfile.lastName} have

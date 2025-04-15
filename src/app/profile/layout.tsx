@@ -1,7 +1,7 @@
 'use client';
 import GridPattern from '@/components/GridPattern';
 import ProfileInfo from '@/components/ProfileInfo';
-import { Tab, Tabs } from '@/components/Tabs';
+import { Tabs } from '@/components/Tabs';
 import React, { ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 

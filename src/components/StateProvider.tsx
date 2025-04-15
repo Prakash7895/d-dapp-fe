@@ -56,7 +56,7 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setUserInfo(res.data!);
         sessionStorage.setItem(
           'savedWalletAddress',
-          res.data?.selectedAddress!
+          res.data!.selectedAddress!
         );
         setLoading(false);
       } else {

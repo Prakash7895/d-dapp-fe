@@ -81,6 +81,7 @@ export async function GET(request: NextRequest) {
         data: {
           users: users.map((el) => {
             const photos = el.files.map((e) => e.s3Key);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { files, ...dt } = el;
 
             return {
@@ -93,10 +94,10 @@ export async function GET(request: NextRequest) {
       },
       { status: 200 }
     );
-  } catch (err: any) {
+  } catch (err) {
     console.log(err);
     return NextResponse.json(
-      { status: 'error', message: err?.message },
+      { status: 'error', message: (err as Error)?.message },
       { status: 400 }
     );
   }

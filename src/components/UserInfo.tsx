@@ -1,10 +1,16 @@
 'use client';
 
-import React, { useState, useEffect, ReactNode } from 'react';
+import React, { useState, ReactNode } from 'react';
 import { useStateContext } from './StateProvider';
 import { toast } from 'react-toastify';
 import { updateUserInfo } from '@/apiCalls';
-import { GENDER_PREFERENCES, userUpdateSchema } from '@/apiSchemas';
+import {
+  GENDER,
+  GENDER_PREFERENCES,
+  SEXUAL_ORIENTATION,
+  userUpdateSchema,
+  UserUpdateSchemaType,
+} from '@/apiSchemas';
 import { Pencil, X, MapPin } from 'lucide-react';
 import Loader from './Loader';
 import Button from './Button';
@@ -181,13 +187,13 @@ const UserInfo: React.FC = () => {
     email: userInfo?.email ?? '',
     firstName: userInfo?.firstName ?? '',
     lastName: userInfo?.lastName ?? '',
-    gender: userInfo?.gender!,
-    genderPreference: userInfo?.genderPreference!,
-    interests: userInfo?.interests ?? [],
+    gender: userInfo?.gender || GENDER[0],
+    genderPreference: userInfo?.genderPreference || GENDER_PREFERENCES.MALE,
+    interests: userInfo?.interests || [],
     maxAge: userInfo?.maxAge ?? 30,
     minAge: userInfo?.minAge ?? 20,
     maxDistance: userInfo?.maxDistance ?? 80,
-    sexualOrientation: userInfo?.sexualOrientation!,
+    sexualOrientation: userInfo?.sexualOrientation || SEXUAL_ORIENTATION[0],
   });
   const [errors, setErrors] = useState<{ [key in keyof IForm]?: string }>({});
 
@@ -204,7 +210,9 @@ const UserInfo: React.FC = () => {
     field: keyof IForm,
     value: string | number | string[] | [number, number]
   ) => {
-    const fieldSchema = userUpdateSchema.pick({ [field]: true } as any);
+    const fieldSchema = userUpdateSchema.pick({ [field]: true } as {
+      [K in keyof UserUpdateSchemaType]: true;
+    });
     const fieldValidationResult = fieldSchema.safeParse({ [field]: value });
 
     if (!fieldValidationResult.success) {
@@ -472,6 +480,7 @@ const UserInfo: React.FC = () => {
                   return;
                 }
                 if (el.value === 'maxDistance') {
+                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
                   const [min, max] = value as [number, number];
                   handleFieldChange('maxDistance', max);
                   return;

@@ -151,7 +151,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
                 onClick={() => handleAddItem(inputValue)}
                 className='px-4 py-2 hover:bg-gray-600 cursor-pointer flex items-center'
               >
-                <button type='button'>Add "{inputValue}"</button>
+                <button type='button'>{`Add "${inputValue}"`}</button>
               </div>
             )}
           </div>

@@ -2,15 +2,23 @@
 import { ethers, formatEther } from 'ethers';
 import soulboundNftAbi from '@/abis/SooulboundNft.json';
 import { Contract } from 'ethers';
-import { toast } from 'react-toastify';
+
+interface EthereumProvider {
+  request: (args: { method: string }) => Promise<string[]>;
+  on: (event: string, callback: (...args: never[]) => void) => void;
+  removeListener: (event: string, callback: (...args: never[]) => void) => void;
+}
 
 declare global {
   interface Window {
-    ethereum?: any;
+    ethereum?: EthereumProvider;
   }
 }
 
 const getActiveAddress = async () => {
+  if (!window.ethereum) {
+    throw new Error('MetaMask is not installed');
+  }
   const accounts = await window.ethereum.request({
     method: 'eth_accounts',
   });
@@ -71,7 +79,7 @@ export async function connectWallet() {
 export function onAccountChange(
   callback: (accounts: string[]) => void
 ): () => void {
-  if (window.ethereum == null || typeof window.ethereum == 'undefined') {
+  if (!window.ethereum) {
     console.warn('MetaMask is not installed');
     return () => {};
   }
@@ -81,7 +89,7 @@ export function onAccountChange(
 
   // Return a function to remove the listener
   return () => {
-    window.ethereum.removeListener('accountsChanged', callback);
+    window.ethereum?.removeListener('accountsChanged', callback);
   };
 }
 
@@ -91,7 +99,7 @@ export function onAccountChange(
  * @returns A function to remove the listener when needed
  */
 export function onChainChange(callback: (chainId: string) => void): () => void {
-  if (window.ethereum == null || typeof window.ethereum == 'undefined') {
+  if (!window.ethereum) {
     console.warn('MetaMask is not installed');
     return () => {};
   }
@@ -101,7 +109,7 @@ export function onChainChange(callback: (chainId: string) => void): () => void {
 
   // Return a function to remove the listener
   return () => {
-    window.ethereum.removeListener('chainChanged', callback);
+    window.ethereum?.removeListener('chainChanged', callback);
   };
 }
 
@@ -114,7 +122,7 @@ const getSoulboundNft = async () => {
       soulboundNftAbi,
       signer
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.log('getting SoulboundNft instance error', error);
     return false;
   }
@@ -131,7 +139,7 @@ export const getMintFee = async () => {
       mintFeeInWei,
       mintFeeInEth,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.log('getting mint fee error', error);
     return false;
   }
@@ -150,7 +158,7 @@ export const mintNewNft = async (tokenUri: string) => {
       value: fees.mintFeeInWei,
     });
     await transaction.wait();
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.log('minting new Nft error', error);
     return false;
   }
@@ -177,7 +185,7 @@ export const getActiveProfileNft = async () => {
     }
 
     return imageUrl;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.log('getting active profile nft error', error);
     return false;
   }
@@ -191,7 +199,7 @@ export const getUserTokenUris = async () => {
     const tokenUris = await soulboundNft.getUserTokenUris(signer.address);
 
     return Array.from(tokenUris);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.log('get user token uris error', error);
     return false;
   }
@@ -207,7 +215,7 @@ export const getUserTokenIds = async () => {
     const ids = Array.from(tokenIds).map((el) => Number(el));
 
     return ids;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.log('get user token ids error', error);
     return false;
   }
@@ -233,7 +241,7 @@ export const getUserTokenUriById = async (id: number) => {
     }
 
     return imageUrl;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.log('Get token uri by id error', error);
     return false;
   }
@@ -247,8 +255,8 @@ export const changeProfileNft = async (tokenId: number) => {
     await transaction.wait();
 
     return true;
-  } catch (error: any) {
-    console.log('get user token ids error', error);
+  } catch (error: unknown) {
+    console.log('Change profile nft error', error);
     return false;
   }
 };

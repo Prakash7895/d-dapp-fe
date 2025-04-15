@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create user data object
-    const userData: any = {
+    const userData: CreateUserSchemaType & { linkedAddresses?: string[] } = {
       firstName,
       lastName,
       age: +age,

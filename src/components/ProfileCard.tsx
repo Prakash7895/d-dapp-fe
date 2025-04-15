@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowUp,
@@ -31,7 +31,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   isTopCard,
   onSwipe,
   stackIndex,
-  totalCards,
 }) => {
   const getShadowStyle = () => {
     if (isTopCard) return 'shadow-2xl';

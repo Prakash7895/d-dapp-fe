@@ -27,7 +27,7 @@ export const sexualOrientationOptions = SEXUAL_ORIENTATION.map((e) => ({
 
 export default function SignUp() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const [formData, setFormData] = useState<UserFormData>({
     firstName: '',
     lastName: '',
@@ -178,7 +178,7 @@ export default function SignUp() {
       const message = `${process.env.NEXT_PUBLIC_MESSAGE_TO_VERIFY}${walletAddress}`;
 
       // Get the signer
-      const provider = new ethers.BrowserProvider(window.ethereum);
+      const provider = new ethers.BrowserProvider(window.ethereum!);
       console.log('provider', provider);
       const signer = await provider.getSigner();
       console.log('signer', signer);
@@ -186,6 +186,7 @@ export default function SignUp() {
       // Sign the message
       const signature = await signer.signMessage(message);
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, email, ...restFormData } = formData;
 
       // Create user with wallet address

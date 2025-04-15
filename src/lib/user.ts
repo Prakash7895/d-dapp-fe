@@ -52,6 +52,7 @@ export const updateUser = async (
     if (passwordData.password) {
       const hashedPassword = await hashPassword(passwordData.password);
       (passwordData as UpdatePasswordSchemaType).password = hashedPassword;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, ...updateData } = passwordData;
       data = updateData as UpdatePasswordSchemaType;
     }
@@ -66,11 +67,13 @@ export const updateUser = async (
       },
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...userInfo } = user;
 
     return userInfo;
-  } catch (err: any) {
-    throw new Error(err?.message || 'Failed to update user');
+  } catch (err: unknown) {
+    const error = err as Error;
+    throw new Error(error?.message || 'Failed to update user');
   }
 };
 

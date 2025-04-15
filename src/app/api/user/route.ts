@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (user) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...userInfo } = user;
 
       return NextResponse.json(
@@ -32,10 +33,10 @@ export async function GET(request: NextRequest) {
       { status: 'error', message: 'User not found' },
       { status: 400 }
     );
-  } catch (err: any) {
+  } catch (err) {
     console.log(err);
     return NextResponse.json(
-      { status: 'error', message: err?.message },
+      { status: 'error', message: (err as Error)?.message },
       { status: 400 }
     );
   }
@@ -82,10 +83,10 @@ export async function PUT(request: NextRequest) {
     } else {
       throw new Error('No data to update');
     }
-  } catch (err: any) {
+  } catch (err) {
     console.log(err);
     return NextResponse.json(
-      { status: 'error', message: err?.message },
+      { status: 'error', message: (err as Error)?.message },
       { status: 400 }
     );
   }

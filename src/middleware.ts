@@ -44,6 +44,7 @@ export async function middleware(request: NextRequest) {
   const isAuthPath = authPaths.some((path) => pathname.startsWith(path));
 
   // Check if the path is a public API path
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const isPublicApiPath = publicApiPaths.some((path) =>
     pathname.startsWith(path)
   );

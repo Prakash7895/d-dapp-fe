@@ -53,6 +53,7 @@ export async function PUT(request: NextRequest) {
         await deleteFileFromS3(user.profilePicture);
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ..._user } = userInfo;
 
       return NextResponse.json(
@@ -62,10 +63,10 @@ export async function PUT(request: NextRequest) {
     } else {
       throw new Error('No data to update');
     }
-  } catch (err: any) {
+  } catch (err) {
     console.log(err);
     return NextResponse.json(
-      { status: 'error', message: err?.message },
+      { status: 'error', message: (err as Error)?.message },
       { status: 400 }
     );
   }

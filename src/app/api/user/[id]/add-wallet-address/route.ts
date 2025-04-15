@@ -29,10 +29,10 @@ export async function PUT(
       { status: 'success', data: userInfo },
       { status: 200 }
     );
-  } catch (err: any) {
+  } catch (err) {
     console.log(err);
     return NextResponse.json(
-      { status: 'error', message: err?.message || 'Unknown error' },
+      { status: 'error', message: (err as Error)?.message },
       { status: 400 }
     );
   }

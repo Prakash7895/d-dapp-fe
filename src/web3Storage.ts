@@ -32,7 +32,7 @@ const initializeWeb3Storage = async (): Promise<Web3Storage> => {
         try {
           const uploadedFile = await client.uploadFile(file);
           const cid = uploadedFile?.toString();
-          const metaDataFile = createNFTMetadataFile(cid?.toString()!);
+          const metaDataFile = createNFTMetadataFile(cid.toString()!);
           const uploadedMetaFile = await client.uploadFile(metaDataFile);
           const metaCID = uploadedMetaFile?.toString();
           console.log('MetaCID', metaCID);

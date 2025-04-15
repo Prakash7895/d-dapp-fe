@@ -1,7 +1,16 @@
 export const capitalizeFirstLetter = (str: string = '') =>
   str.charAt(0).toUpperCase() + str.substring(1).toLowerCase();
 
-export const isEmpty = (val: any): boolean => {
+export const isEmpty = (
+  val:
+    | string
+    | number
+    | boolean
+    | null
+    | undefined
+    | unknown[]
+    | Record<string, unknown>
+): boolean => {
   if (val === null || val === undefined) return true;
 
   if (typeof val === 'string') return val.trim().length === 0;
@@ -17,7 +26,7 @@ export const isEmpty = (val: any): boolean => {
   return true;
 };
 
-export const capitalizeEveryFirstChar = (str: String) =>
+export const capitalizeEveryFirstChar = (str: string) =>
   str
     .split(' ')
     .map((el) => capitalizeFirstLetter(el))

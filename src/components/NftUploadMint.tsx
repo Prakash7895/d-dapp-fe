@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { mintNewNft, getMintFee } from '@/contract';
-import Button from './Button';
 import { uploadFileWeb3Storage } from '@/web3Storage';
 import FileUploader from './FileUploader';
 

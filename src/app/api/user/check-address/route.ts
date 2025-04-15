@@ -57,10 +57,10 @@ export async function POST(request: NextRequest) {
       },
       { status: 200 }
     );
-  } catch (err: any) {
-    console.error('Error checking address:', err);
+  } catch (err) {
+    console.log(err);
     return NextResponse.json(
-      { status: 'error', message: err?.message || 'Failed to check address' },
+      { status: 'error', message: (err as Error)?.message },
       { status: 400 }
     );
   }

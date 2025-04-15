@@ -62,10 +62,10 @@ export async function POST(request: Request) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
-    console.log('Upload error:', error);
+  } catch (err) {
+    console.log(err);
     return NextResponse.json(
-      { error: 'Failed to upload file', message: error.message },
+      { status: 'error', message: (err as Error)?.message },
       { status: 400 }
     );
   }

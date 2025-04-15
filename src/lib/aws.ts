@@ -23,7 +23,7 @@ export const uploadFileToS3 = async (
   const buffer = Buffer.from(await file.arrayBuffer());
   const s3Key = `${userId}/${section}/${new Date().getTime()}-${file.name}`;
 
-  const s3Response = await s3Client.send(
+  await s3Client.send(
     new PutObjectCommand({
       Bucket: process.env.AWS_S3_BUCKET!,
       Key: s3Key,
