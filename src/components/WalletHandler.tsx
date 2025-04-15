@@ -78,6 +78,7 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
       console.log(err);
       toast.error((err as Error)?.message || 'Failed to detect connection');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     userInfo,
     setConnected,
@@ -88,6 +89,7 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
 
   useEffect(() => {
     checkWalletStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetWalletAddress]);
 
   useEffect(() => {
@@ -125,6 +127,7 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
         }
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [userInfo]
   );
 

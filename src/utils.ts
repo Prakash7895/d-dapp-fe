@@ -1,3 +1,5 @@
+import { GENDER, SEXUAL_ORIENTATION } from './apiSchemas';
+
 export const capitalizeFirstLetter = (str: string = '') =>
   str.charAt(0).toUpperCase() + str.substring(1).toLowerCase();
 
@@ -31,3 +33,13 @@ export const capitalizeEveryFirstChar = (str: string) =>
     .split(' ')
     .map((el) => capitalizeFirstLetter(el))
     .join(' ');
+
+export const genderOptions = GENDER.map((e) => ({
+  label: capitalizeFirstLetter(e),
+  value: e,
+}));
+
+export const sexualOrientationOptions = SEXUAL_ORIENTATION.map((e) => ({
+  label: capitalizeFirstLetter(e),
+  value: e,
+}));

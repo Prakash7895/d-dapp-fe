@@ -8,22 +8,11 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import Input from '@/components/Input';
 import Select from '@/components/Select';
-import { GENDER, SEXUAL_ORIENTATION } from '@/apiSchemas';
-import { capitalizeFirstLetter } from '@/utils';
+import { genderOptions, sexualOrientationOptions } from '@/utils';
 import { UserFormData } from '@/types/user';
 import Button from '@/components/Button';
 import { toast } from 'react-toastify';
 import { getUserLocation } from '@/lib/userLocation';
-
-export const genderOptions = GENDER.map((e) => ({
-  label: capitalizeFirstLetter(e),
-  value: e,
-}));
-
-export const sexualOrientationOptions = SEXUAL_ORIENTATION.map((e) => ({
-  label: capitalizeFirstLetter(e),
-  value: e,
-}));
 
 export default function SignUp() {
   const router = useRouter();

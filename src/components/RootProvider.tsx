@@ -18,6 +18,7 @@ const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     if (status === 'unauthenticated' && !isAuthRoute) {
       router.replace('/auth/signin');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, router]);
 
   return status === 'loading' ? (

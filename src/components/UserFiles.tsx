@@ -48,6 +48,7 @@ function FileCard({ file, onDelete, refresh }: FileCardProps) {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className='aspect-square rounded-lg overflow-hidden bg-gray-100'>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={file.url}
           alt={file.key}
@@ -155,6 +156,7 @@ export default function UserFiles({ refreshCount }: UserFilesProps) {
     if (refreshCount) {
       refresh();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshCount]);
 
   if (loading && files.length === 0) {

@@ -14,11 +14,11 @@ import {
 import { Pencil, X, MapPin } from 'lucide-react';
 import Loader from './Loader';
 import Button from './Button';
-import { capitalizeEveryFirstChar } from '@/utils';
 import {
+  capitalizeEveryFirstChar,
   genderOptions,
   sexualOrientationOptions,
-} from '@/app/auth/signup/page';
+} from '@/utils';
 import MultiSelect from './MultiSelect';
 import Slider from './Slider';
 import { IForm } from '@/types/user';

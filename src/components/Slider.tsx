@@ -59,6 +59,7 @@ const Slider: FC<SliderProps> = ({
         lowerThumb.style.width = '0';
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [thumbs]);
 
   return (

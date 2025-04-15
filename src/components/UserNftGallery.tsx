@@ -13,6 +13,7 @@ const UserNftGallery: React.FC = () => {
   useEffect(() => {
     setLoading(true);
     getCurrUsersTokenIds().then(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loading) {

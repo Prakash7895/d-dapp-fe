@@ -46,6 +46,7 @@ export function useUserFiles(limit: number = 10) {
 
   useEffect(() => {
     fetchFiles(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {

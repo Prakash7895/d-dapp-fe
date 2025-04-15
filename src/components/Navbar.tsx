@@ -115,6 +115,7 @@ export default function Navbar() {
                     <div className='w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-purple-500 p-[2px]'>
                       <div className='w-full h-full rounded-full bg-gray-900 flex items-center justify-center overflow-hidden'>
                         {activeProfilePhoto || profilePicture ? (
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={profilePicture || activeProfilePhoto}
                             alt='Profile'

@@ -51,6 +51,7 @@ const Carousel: FC<CarouselProps> = ({ photos }) => {
           transition={slideTransition}
           className='absolute inset-0'
         >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={photos[currIdx]}
             alt={`Profile photo #${currIdx}`}

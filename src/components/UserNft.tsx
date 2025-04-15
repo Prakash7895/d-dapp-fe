@@ -47,6 +47,7 @@ const UserNft: FC<UserNftProps> = ({ tokenId }) => {
     >
       <div className='border-[1px] border-gray-600 bg-white dark:bg-neutral-900 rounded-lg overflow-hidden p-1'>
         {imageUri ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={imageUri}
             alt={`NFT #${tokenId}`}

@@ -56,6 +56,7 @@ export default function FileUploader({
           <div className='space-y-1 text-center'>
             {previewUrl ? (
               <div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={previewUrl}
                   alt='Preview'

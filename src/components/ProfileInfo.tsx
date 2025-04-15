@@ -18,6 +18,7 @@ const ProfileInfo = () => {
     if (!activeProfilePhoto && connectedToValidAddress) {
       getUpdatedProfileNft();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeProfilePhoto, connectedToValidAddress]);
 
   useEffect(() => {
@@ -35,6 +36,7 @@ const ProfileInfo = () => {
       <div className='border-[1px] border-gray-600 bg-white dark:bg-neutral-900 absolute -bottom-4 rounded-lg overflow-hidden p-1 z-10'>
         {activeProfilePhoto || profilePicture ? (
           <div className='h-36 w-36 relative group'>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={profilePicture || activeProfilePhoto}
               alt='User Profile Image'
