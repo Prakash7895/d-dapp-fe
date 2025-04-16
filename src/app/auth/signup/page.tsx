@@ -12,7 +12,7 @@ import { genderOptions, sexualOrientationOptions } from '@/utils';
 import { UserFormData } from '@/types/user';
 import Button from '@/components/Button';
 import { toast } from 'react-toastify';
-import { getUserLocation } from '@/lib/userLocation';
+import { getUserLocation } from '@/userLocation';
 
 export default function SignUp() {
   const router = useRouter();

@@ -1,3 +1,5 @@
+'use client';
+
 import RangeSlider, {
   ReactRangeSliderInputProps,
 } from 'react-range-slider-input';

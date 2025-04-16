@@ -1,3 +1,5 @@
+'use client';
+
 import React, { ChangeEventHandler } from 'react';
 
 interface Option {

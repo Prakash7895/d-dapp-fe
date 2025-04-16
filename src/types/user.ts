@@ -1,3 +1,5 @@
+'use client';
+
 import {
   GENDER_PREFERENCES,
   GenderType,

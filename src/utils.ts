@@ -1,3 +1,5 @@
+'use client';
+
 import { GENDER, SEXUAL_ORIENTATION } from './apiSchemas';
 
 export const capitalizeFirstLetter = (str: string = '') =>

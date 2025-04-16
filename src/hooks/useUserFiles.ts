@@ -1,3 +1,5 @@
+'use client';
+
 import { getFiles } from '@/apiCalls';
 import { FILE_ACCESS } from '@/apiSchemas';
 import { useState, useEffect } from 'react';

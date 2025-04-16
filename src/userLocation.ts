@@ -1,3 +1,5 @@
+'use client';
+
 async function getLocationFromIP() {
   try {
     // Using a free IP geolocation service

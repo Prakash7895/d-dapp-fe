@@ -1,3 +1,5 @@
+'use client';
+
 import { changeProfileNft, getUserTokenUriById } from '@/contract';
 import React, { FC, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
