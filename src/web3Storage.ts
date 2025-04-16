@@ -1,10 +1,21 @@
-'use client';
-import { create } from '@web3-storage/w3up-client';
+// import { create } from '@web3-storage/w3up-client';
 
 // Define the Web3Storage interface
 interface Web3Storage {
   uploadFile: (file: File) => Promise<string>;
 }
+
+const create = async () => {
+  return {
+    accounts: () => [],
+    login: async (st: string) => '',
+    createSpace: async (st: string, a: { account: string }) => ({
+      did: () => '',
+    }),
+    setCurrentSpace: (st: string) => {},
+    uploadFile: (f: File) => '',
+  };
+};
 
 // Create a singleton instance
 let web3StorageInstance: Web3Storage | null = null;
