@@ -8,11 +8,15 @@ interface Web3Storage {
 const create = async () => {
   return {
     accounts: () => [],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     login: async (st: string) => '',
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     createSpace: async (st: string, a: { account: string }) => ({
       did: () => '',
     }),
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setCurrentSpace: (st: string) => {},
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     uploadFile: (f: File) => '',
   };
 };
