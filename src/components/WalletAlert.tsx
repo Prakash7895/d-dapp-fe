@@ -3,12 +3,15 @@
 import { FC, ReactNode } from 'react';
 import Link from 'next/link';
 import { X } from 'lucide-react';
+import Button from './Button';
+import { connectWallet } from '@/contract';
 
 interface WalletAlertProps {
   title: string;
   message: ReactNode;
   showProfileLink?: boolean;
   onClose?: () => void;
+  showConnectBtn?: boolean;
 }
 
 const WalletAlert: FC<WalletAlertProps> = ({
@@ -16,6 +19,7 @@ const WalletAlert: FC<WalletAlertProps> = ({
   message,
   showProfileLink = false,
   onClose,
+  showConnectBtn,
 }) => (
   <div className='bg-yellow-500 shadow-lg'>
     <div className='max-w-7xl mx-auto px-4 py-3'>
@@ -36,6 +40,15 @@ const WalletAlert: FC<WalletAlertProps> = ({
             </p>
           )}
         </div>
+        {showConnectBtn && (
+          <Button
+            onClick={() => {
+              connectWallet();
+            }}
+            label='Connect Wallet'
+            className='!w-fit'
+          />
+        )}
         {onClose && (
           <button
             onClick={onClose}

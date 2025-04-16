@@ -56,7 +56,7 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setUserInfo(res.data!);
         sessionStorage.setItem(
           'savedWalletAddress',
-          res.data!.selectedAddress!
+          JSON.stringify(res.data!.selectedAddress ?? null)
         );
         setLoading(false);
       } else {
@@ -67,7 +67,10 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   useEffect(() => {
     if (userInfo) {
-      sessionStorage.setItem('savedWalletAddress', userInfo.selectedAddress!);
+      sessionStorage.setItem(
+        'savedWalletAddress',
+        JSON.stringify(userInfo.selectedAddress ?? null)
+      );
       sessionStorage.setItem('id', `${userInfo.id}`);
     }
   }, [userInfo]);

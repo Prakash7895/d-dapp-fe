@@ -163,7 +163,10 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
         setIsCheckingAddress(false);
         return;
       }
-      sessionStorage.setItem('savedWalletAddress', confirmDialog.newAddress!);
+      sessionStorage.setItem(
+        'savedWalletAddress',
+        JSON.stringify(confirmDialog.newAddress ?? null)
+      );
       const wallet = await connectWallet();
       setUserInfo((u) => ({ ...u!, selectedAddress: wallet.address }));
 
@@ -265,6 +268,7 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
           title={getTitle()}
           message={getMessage()}
           showProfileLink={showProfileLink}
+          showConnectBtn={!connected}
         />
       )}
       {confirmDialog.isOpen && (

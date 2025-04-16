@@ -24,7 +24,10 @@ const WalletInfo: React.FC = () => {
 
       if (updatedUser?.status === 'success') {
         setUserInfo(updatedUser.data!);
-        sessionStorage.setItem('savedWalletAddress', address!);
+        sessionStorage.setItem(
+          'savedWalletAddress',
+          JSON.stringify(address ?? null)
+        );
         toast.success('Wallet address updated successfully');
       } else {
         toast.error('Failed to update wallet address');
