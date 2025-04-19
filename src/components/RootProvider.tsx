@@ -1,13 +1,12 @@
 'use client';
-// import { SessionProvider, useSession } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
 import { FC, ReactNode, useEffect } from 'react';
 import ScreenLoader from './ScreenLoader';
 import StateProvider from './StateProvider';
+import useSession from '@/hooks/useSession';
 
 const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  // const { status } = useSession();
-  const status: any = 'authenticated'; // Mocking session status for demonstration
+  const { status } = useSession();
   console.log('status', status);
   const router = useRouter();
   const pathname = usePathname();

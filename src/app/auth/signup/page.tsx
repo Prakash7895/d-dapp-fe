@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { connectWallet, onAccountChange } from '@/contract';
 import { ethers } from 'ethers';
 import Link from 'next/link';
-import { useSession } from 'next-auth/react';
 import Input from '@/components/Input';
 import Select from '@/components/Select';
 import { genderOptions, sexualOrientationOptions } from '@/utils';
@@ -13,6 +12,8 @@ import { UserFormData } from '@/types/user';
 import Button from '@/components/Button';
 import { toast } from 'react-toastify';
 import { getUserLocation } from '@/userLocation';
+import useSession from '@/hooks/useSession';
+import axiosInstance from '@/apiCalls';
 
 export default function SignUp() {
   const router = useRouter();
@@ -88,26 +89,20 @@ export default function SignUp() {
       }
 
       // Create user with email/password
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      axiosInstance
+        .post('/users', {
           ...formData,
           age: +formData.age,
           ...location,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to register');
-      }
+        })
+        .then(() => {
+          router.push('/auth/signin?registered=true');
+        })
+        .catch((err) => {
+          throw new Error(err.message || 'Failed to register');
+        });
 
       // Redirect to sign in page
-      router.push('/auth/signin?registered=true');
     } catch (error) {
       setError(
         error instanceof Error
@@ -179,7 +174,7 @@ export default function SignUp() {
       const { password, email, ...restFormData } = formData;
 
       // Create user with wallet address
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch('/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

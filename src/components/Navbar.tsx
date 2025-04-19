@@ -53,6 +53,10 @@ export default function Navbar() {
 
   const activeProfilePhoto = '';
 
+  const name = session?.user
+    ? `${session.user.firstName} ${session.user.lastName}`
+    : '';
+
   return (
     <nav className='z-50 bg-gray-900/80 backdrop-blur-sm border-b border-gray-800/50'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
@@ -124,9 +128,7 @@ export default function Navbar() {
                           />
                         ) : (
                           <span className='text-white font-medium text-lg'>
-                            {session.user?.name?.[0] ||
-                              session.user?.email?.[0] ||
-                              '?'}
+                            {name?.[0] || session.user?.email?.[0] || '?'}
                           </span>
                         )}
                       </div>
@@ -134,7 +136,7 @@ export default function Navbar() {
                     <div className='absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-gray-900' />
                   </div>
                   <span className='hidden md:block text-gray-300 group-hover:text-white transition-colors'>
-                    {session.user?.name || session.user?.email || 'User'}
+                    {name || session.user?.email || 'User'}
                   </span>
                 </button>
 
@@ -142,7 +144,7 @@ export default function Navbar() {
                   <div className='absolute right-0 mt-2 w-64 rounded-xl shadow-lg bg-gray-800/95 backdrop-blur-sm border border-gray-700/50 overflow-hidden'>
                     <div className='p-4 border-b border-gray-700/50'>
                       <div className='font-medium text-white'>
-                        {session.user?.name || 'User'}
+                        {name || 'User'}
                       </div>
                       <div className='text-sm text-gray-400 truncate'>
                         {session.user?.email}

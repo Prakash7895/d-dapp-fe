@@ -51,3 +51,16 @@ export type ProfileCard = ProfileCardForm & {
   linkedAddresses?: string[];
   selectedAddress?: string;
 };
+
+export type JwtPayload = {
+  userId: string;
+  email: string | null;
+  walletAddress: string | null;
+  firstName: string | null;
+  lastName: string | null;
+};
+
+export interface SessionResponse {
+  user: JwtPayload | null;
+  expires: Date;
+}

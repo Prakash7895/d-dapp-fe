@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { connectWallet } from '@/contract';
 import { ethers } from 'ethers';
@@ -9,6 +8,8 @@ import Link from 'next/link';
 import Button from '@/components/Button';
 import Input from '@/components/Input';
 import ScreenLoader from '@/components/ScreenLoader';
+import useSession from '@/hooks/useSession';
+import { login } from '@/apiCalls';
 
 export default function SignIn() {
   const router = useRouter();
@@ -32,17 +33,16 @@ export default function SignIn() {
     setError('');
 
     try {
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
+      login({ type: 'email', email, password }).then((res) => {
+        console.log('res', res);
+        if (res.status === 'success') {
+          localStorage.setItem('accessToken', res.data?.access_token!);
+          localStorage.setItem('refreshToken', res.data?.refresh_token!);
+          router.push('/');
+        } else {
+          setError(res?.message || 'An error occurred');
+        }
       });
-
-      if (result?.error) {
-        setError(result.error);
-      } else {
-        router.push('/');
-      }
     } catch (error) {
       setError((error as Error).message || 'An error occurred during sign in');
       console.error(error);
@@ -75,31 +75,29 @@ export default function SignIn() {
       const signature = await signer.signMessage(message);
 
       // Sign in with the wallet
-      const result = await signIn('wallet', {
-        address,
-        signature,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        setError(result.error);
-        if (result.error.includes('sign up')) {
-          // Add a sign-up button if the error suggests the user needs to sign up
-          setError(
-            <>
-              {result.error}{' '}
-              <button
-                onClick={() => router.push('/auth/signup')}
-                className='text-primary-400 hover:text-primary-300 underline'
-              >
-                Sign up now
-              </button>
-            </>
-          );
+      login({
+        type: 'wallet',
+        walletAddress: address,
+        signedMessage: signature,
+      }).then((res) => {
+        if (res.status === 'success') {
+          router.push('/');
+        } else {
+          if (res.message?.includes('sign up')) {
+            setError(
+              <>
+                {res.message}{' '}
+                <button
+                  onClick={() => router.push('/auth/signup')}
+                  className='text-primary-400 hover:text-primary-300 underline'
+                >
+                  Sign up now
+                </button>
+              </>
+            );
+          }
         }
-      } else {
-        router.push('/');
-      }
+      });
     } catch (error) {
       if ((error as Error).message.includes('User rejected')) {
         setError('You rejected the signature request. Please try again.');
