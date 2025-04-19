@@ -34,17 +34,14 @@ export async function getUserByEmail(email: string) {
 }
 
 export async function getUserByAddress(address: string) {
-  return prisma.user.findFirst({
+  const t = await prisma.userWalletAddresses.findFirst({
     where: {
-      OR: [
-        { selectedAddress: { equals: address, mode: 'insensitive' } },
-        {
-          linkedAddresses: {
-            array_contains: address,
-            mode: 'insensitive',
-          },
-        },
-      ],
+      address: address.toLowerCase(),
+    },
+    select: {
+      user: true,
     },
   });
+
+  return t?.user;
 }

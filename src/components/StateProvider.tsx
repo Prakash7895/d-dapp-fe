@@ -16,7 +16,7 @@ import MainLayout from './MainLayout';
 import { User } from '@/types/user';
 import { getUserInfo } from '@/apiCalls';
 import WalletHandler from './WalletHandler';
-import { signOut } from 'next-auth/react';
+// import { signOut } from 'next-auth/react';
 
 const Context = createContext<{
   selectedAddress: string;
@@ -50,19 +50,19 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [userInfo, setUserInfo] = useState<User | null>(null);
 
   useEffect(() => {
-    setLoading(true);
-    getUserInfo().then((res) => {
-      if (res?.status === 'success') {
-        setUserInfo(res.data!);
-        sessionStorage.setItem(
-          'savedWalletAddress',
-          JSON.stringify(res.data!.selectedAddress ?? null)
-        );
-        setLoading(false);
-      } else {
-        signOut({ callbackUrl: '/auth/signin' });
-      }
-    });
+    // setLoading(true);
+    // getUserInfo().then((res) => {
+    //   if (res?.status === 'success') {
+    //     setUserInfo(res.data!);
+    //     sessionStorage.setItem(
+    //       'savedWalletAddress',
+    //       JSON.stringify(res.data!.selectedAddress ?? null)
+    //     );
+    //     setLoading(false);
+    //   } else {
+    //     // signOut({ callbackUrl: '/auth/signin' });
+    //   }
+    // });
   }, []);
 
   useEffect(() => {

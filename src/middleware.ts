@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getToken } from 'next-auth/jwt';
+// import { getToken } from 'next-auth/jwt';
 
 // Define paths that require authentication
 const protectedPaths = [
@@ -50,30 +50,30 @@ export async function middleware(request: NextRequest) {
   );
 
   // Get the token from the request
-  const token = await getToken({ req: request });
+  // const token = await getToken({ req: request });
 
   // If the path is protected and there's no token, redirect to signin
-  if (isProtectedPath && !token) {
-    const url = new URL('/auth/signin', request.url);
-    url.searchParams.set('callbackUrl', pathname);
-    return NextResponse.redirect(url);
-  }
+  // if (isProtectedPath && !token) {
+  //   const url = new URL('/auth/signin', request.url);
+  //   url.searchParams.set('callbackUrl', pathname);
+  //   return NextResponse.redirect(url);
+  // }
 
-  // If the path is a protected API path and there's no token, return 401
-  if (isProtectedApiPath && !token) {
-    return new NextResponse(
-      JSON.stringify({ error: 'Authentication required' }),
-      {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
-  }
+  // // If the path is a protected API path and there's no token, return 401
+  // if (isProtectedApiPath && !token) {
+  //   return new NextResponse(
+  //     JSON.stringify({ error: 'Authentication required' }),
+  //     {
+  //       status: 401,
+  //       headers: { 'Content-Type': 'application/json' },
+  //     }
+  //   );
+  // }
 
-  // If the path is an auth path and there's a token, redirect to home
-  if (isAuthPath && token) {
-    return NextResponse.redirect(new URL('/', request.url));
-  }
+  // // If the path is an auth path and there's a token, redirect to home
+  // if (isAuthPath && token) {
+  //   return NextResponse.redirect(new URL('/', request.url));
+  // }
 
   // Otherwise, continue to the requested page
   return NextResponse.next();

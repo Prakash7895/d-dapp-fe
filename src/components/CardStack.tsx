@@ -7,7 +7,10 @@ import ProfileCardComponent from './ProfileCard';
 
 interface CardStackProps {
   profiles: ProfileCard[];
-  onSwipe: (direction: 'left' | 'right' | 'up', profile: ProfileCard) => void;
+  onSwipe: (
+    direction: 'left' | 'right' | 'up',
+    profile: ProfileCard
+  ) => Promise<boolean | undefined>;
 }
 
 const CardStack: React.FC<CardStackProps> = ({ profiles, onSwipe }) => {
@@ -23,17 +26,29 @@ const CardStack: React.FC<CardStackProps> = ({ profiles, onSwipe }) => {
 
   const visibleCards = profiles.slice(currentIndex, currentIndex + 4);
 
-  const handleSwipe = (dir: 'left' | 'right' | 'up') => {
+  const handleSwipe = async (dir: 'left' | 'right' | 'up') => {
     if (isAnimating) return;
     setDirection(dir);
     setIsAnimating(true);
-    onSwipe(dir, profiles[currentIndex]);
+    try {
+      const success = await onSwipe(dir, profiles[currentIndex]);
 
-    setTimeout(() => {
-      setCurrentIndex((prev) => prev + 1);
+      if (success) {
+        setTimeout(() => {
+          setCurrentIndex((prev) => prev + 1);
+          setDirection(null);
+          setIsAnimating(false);
+        }, 500);
+      } else {
+        setDirection(null);
+        setIsAnimating(false);
+      }
+    } catch (error) {
+      // Reset the card if there was an error
+      console.error('Swipe error:', error);
       setDirection(null);
       setIsAnimating(false);
-    }, 500);
+    }
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -70,6 +85,44 @@ const CardStack: React.FC<CardStackProps> = ({ profiles, onSwipe }) => {
     yTouchStart.current = null;
     yTouchEnd.current = null;
   };
+
+  if (currentIndex >= profiles.length) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className='relative w-[85%] max-w-[500px] h-[85%] max-h-[800px] flex items-center justify-center'
+      >
+        <div className='text-center p-8 rounded-xl bg-gray-900/50 backdrop-blur-sm'>
+          <motion.h2
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            className='text-3xl font-bold text-white mb-4'
+          >
+            That's all for now!
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className='text-gray-300 text-lg mb-6'
+          >
+            You've seen all available profiles. Check back later for more
+            potential matches!
+          </motion.p>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className='px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors'
+            onClick={() => window.location.reload()}
+          >
+            Refresh Profiles
+          </motion.button>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <div className='relative w-[85%] max-w-[500px] h-[85%] max-h-[800px]'>

@@ -9,6 +9,7 @@ import {
   MapPin,
   Mars,
   Transgender,
+  User,
   Venus,
   VenusAndMars,
   X,
@@ -71,14 +72,22 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         </CardItem>
 
         <CardItem translateZ='100' className='w-full mt-4 sm:!h-[60%] h-1/2'>
-          <Carousel photos={profile.photos} />
+          {profile.photos && profile.photos.length > 0 ? (
+            <Carousel photos={profile.photos} />
+          ) : (
+            <div className='h-full flex items-center justify-center bg-gray-950 rounded-lg'>
+              <User className='w-32 h-32 text-gray-400' strokeWidth={1.5} />
+            </div>
+          )}
         </CardItem>
         <CardItem
           as='div'
           translateZ='60'
           className='text-neutral-500 mt-2 dark:text-neutral-300'
         >
-          <p className='text-gray-300 mb-4'>{profile.bio}</p>
+          {profile.bio?.length > 100
+            ? `${profile.bio.substring(0, 100)}...`
+            : profile.bio}
         </CardItem>
         <CardItem
           as='div'
@@ -86,7 +95,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           className='text-neutral-500 mt-2 dark:text-neutral-300'
         >
           <div className='flex flex-wrap gap-2'>
-            {profile.interests.map((interest, index) => (
+            {(profile.interests ?? []).map((interest, index) => (
               <span
                 key={index}
                 className='px-3 py-1 bg-primary-500/20 text-primary-400 rounded-full text-sm'

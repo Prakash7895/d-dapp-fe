@@ -42,14 +42,14 @@ export const updateUserInfo = (
       return null;
     });
 
-export const getUserInfo = () =>
-  fetch(`/api/user`)
-    .then((res) => res.json())
-    .then((res) => res as ApiResponse<User>)
-    .catch((err) => {
-      toast.error(err?.message || 'Failed to update user info');
-      return null;
-    });
+export const getUserInfo = () => Promise<{}>;
+// fetch(`/api/user`)
+//   .then((res) => res.json())
+//   .then((res) => res as ApiResponse<User>)
+//   .catch((err) => {
+//     toast.error(err?.message || 'Failed to update user info');
+//     return null;
+//   });
 
 export const checkAddress = (data: AddWalletAddressSchemaType) =>
   fetch(`/api/user/check-address`, {

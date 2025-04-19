@@ -11,13 +11,12 @@ export const updateUser = async (
   data:
     | UserUpdateSchemaType
     | UpdatePasswordSchemaType
-    | AddWalletAddressSchemaType,
-  removeAddress?: boolean
+    | AddWalletAddressSchemaType
 ) => {
   try {
     const savedUser = await prisma.user.findFirst({
       where: { id: id },
-      select: { linkedAddresses: true },
+      select: { UserWalletAddresses: true },
     });
 
     if (!savedUser) {
@@ -25,26 +24,17 @@ export const updateUser = async (
     }
 
     const { selectedAddress } = data as AddWalletAddressSchemaType;
-
-    let updatedLinkedAddresses = [
-      ...Array.from((savedUser.linkedAddresses as string[]) ?? []),
-    ];
-
     if (selectedAddress) {
-      const idx = updatedLinkedAddresses.findIndex(
-        (e) => e === selectedAddress
+      const addressExists = savedUser.UserWalletAddresses.some(
+        (address) => address.address === selectedAddress
       );
-
-      if (idx < 0 && !removeAddress) {
-        updatedLinkedAddresses.push(selectedAddress);
-      }
-      if (idx >= 0 && removeAddress) {
-        updatedLinkedAddresses = updatedLinkedAddresses.filter(
-          (e) => e !== selectedAddress
-        );
-
-        (data as AddWalletAddressSchemaType).selectedAddress =
-          (updatedLinkedAddresses?.[0] as string) ?? null;
+      if (!addressExists) {
+        await prisma.userWalletAddresses.create({
+          data: {
+            address: selectedAddress.toLowerCase(),
+            userId: id,
+          },
+        });
       }
     }
 
@@ -63,7 +53,6 @@ export const updateUser = async (
       },
       data: {
         ...data,
-        linkedAddresses: updatedLinkedAddresses,
       },
     });
 

@@ -4,190 +4,72 @@ import React, { useState, useEffect } from 'react';
 import CardStack from '@/components/CardStack';
 import { ProfileCard } from '@/types/user';
 import Loader from '@/components/Loader';
-import { GENDER_PREFERENCES } from '@/apiSchemas';
 import { getUsers } from '@/apiCalls';
+import MatchAnimation from '@/components/MatchAnimation';
+import { motion } from 'framer-motion';
+import { checkIfMatched, likeProfile } from '@/contract';
+import { useStateContext } from '@/components/StateProvider';
+import { toast } from 'react-toastify';
 
 const HomePage = () => {
   const [profiles, setProfiles] = useState<ProfileCard[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [showMatch, setShowMatch] = useState(false);
   const [matchedProfile, setMatchedProfile] = useState<ProfileCard | null>(
     null
   );
+  const { userInfo } = useStateContext();
 
   useEffect(() => {
-    setLoading(true);
-    getUsers(1).then((res) => {
-      console.log('res', res.data?.users);
-      setLoading(false);
-    });
-    const mockProfiles: ProfileCard[] = [
-      {
-        id: 1,
-        firstName: 'Emma',
-        lastName: 'Watson',
-        age: 28,
-        maxDistance: 5,
-        bio: 'Book lover and coffee enthusiast. Looking for meaningful connections.',
-        interests: ['Reading', 'Hiking', 'Photography'],
-        photos: ['profile1.jpg', 'profile2.avif', 'profile3.jpg'],
-        city: 'London',
-        country: 'UK',
-        gender: 'FEMALE',
-        genderPreference: GENDER_PREFERENCES.MALE,
-        sexualOrientation: 'STRAIGHT',
-      },
-      {
-        id: 2,
-        firstName: 'James',
-        lastName: 'Smith',
-        age: 32,
-        maxDistance: 10,
-        bio: 'Tech entrepreneur and adventure seeker. Love to travel and explore new cultures.',
-        interests: ['Technology', 'Travel', 'Cooking'],
-        photos: ['profile2.avif', 'profile1.jpg', 'profile3.jpg'],
-        city: 'New York',
-        country: 'USA',
-        gender: 'MALE',
-        genderPreference: GENDER_PREFERENCES.FEMALE,
-        sexualOrientation: 'STRAIGHT',
-      },
-      {
-        id: 3,
-        firstName: 'Sophia',
-        lastName: 'Chen',
-        age: 26,
-        maxDistance: 8,
-        bio: 'Art lover and yoga instructor. Passionate about wellness and creativity.',
-        interests: ['Yoga', 'Art', 'Meditation'],
-        photos: ['profile3.jpg', 'profile1.jpg', 'profile2.avif'],
-        city: 'Tokyo',
-        country: 'Japan',
-        gender: 'FEMALE',
-        genderPreference: GENDER_PREFERENCES.MALE,
-        sexualOrientation: 'STRAIGHT',
-      },
-      {
-        id: 4,
-        firstName: 'Michael',
-        lastName: 'Brown',
-        age: 30,
-        maxDistance: 15,
-        bio: 'Musician and nature enthusiast. Always up for a new adventure.',
-        interests: ['Music', 'Hiking', 'Photography'],
-        photos: ['profile1.jpg', 'profile3.jpg', 'profile2.avif'],
-        city: 'Sydney',
-        country: 'Australia',
-        gender: 'MALE',
-        genderPreference: GENDER_PREFERENCES.FEMALE,
-        sexualOrientation: 'STRAIGHT',
-      },
-      {
-        id: 5,
-        firstName: 'Isabella',
-        lastName: 'Garcia',
-        age: 27,
-        maxDistance: 7,
-        bio: 'Food blogger and travel enthusiast. Love trying new cuisines and exploring new places.',
-        interests: ['Food', 'Travel', 'Photography'],
-        photos: ['profile2.avif', 'profile3.jpg', 'profile1.jpg'],
-        city: 'Barcelona',
-        country: 'Spain',
-        gender: 'FEMALE',
-        genderPreference: GENDER_PREFERENCES.MALE,
-        sexualOrientation: 'STRAIGHT',
-      },
-      {
-        id: 6,
-        firstName: 'David',
-        lastName: 'Kim',
-        age: 31,
-        maxDistance: 12,
-        bio: 'Software developer and fitness enthusiast. Love coding and working out.',
-        interests: ['Coding', 'Fitness', 'Gaming'],
-        photos: ['profile3.jpg', 'profile2.avif', 'profile1.jpg'],
-        city: 'Seoul',
-        country: 'South Korea',
-        gender: 'MALE',
-        genderPreference: GENDER_PREFERENCES.FEMALE,
-        sexualOrientation: 'STRAIGHT',
-      },
-      {
-        id: 7,
-        firstName: 'Olivia',
-        lastName: 'Martinez',
-        age: 29,
-        maxDistance: 6,
-        bio: 'Fashion designer and art lover. Passionate about creativity and style.',
-        interests: ['Fashion', 'Art', 'Design'],
-        photos: ['profile1.jpg', 'profile2.avif', 'profile3.jpg'],
-        city: 'Paris',
-        country: 'France',
-        gender: 'FEMALE',
-        genderPreference: GENDER_PREFERENCES.MALE,
-        sexualOrientation: 'STRAIGHT',
-      },
-      {
-        id: 8,
-        firstName: 'Alexander',
-        lastName: 'Wong',
-        age: 33,
-        maxDistance: 9,
-        bio: 'Entrepreneur and foodie. Love building businesses and trying new restaurants.',
-        interests: ['Business', 'Food', 'Travel'],
-        photos: ['profile2.avif', 'profile1.jpg', 'profile3.jpg'],
-        city: 'Singapore',
-        country: 'Singapore',
-        gender: 'MALE',
-        genderPreference: GENDER_PREFERENCES.FEMALE,
-        sexualOrientation: 'STRAIGHT',
-      },
-      {
-        id: 9,
-        firstName: 'Ava',
-        lastName: 'Johnson',
-        age: 25,
-        maxDistance: 8,
-        bio: 'Yoga instructor and wellness coach. Passionate about helping others live healthier lives.',
-        interests: ['Yoga', 'Wellness', 'Meditation'],
-        photos: ['profile3.jpg', 'profile1.jpg', 'profile2.avif'],
-        city: 'Vancouver',
-        country: 'Canada',
-        gender: 'FEMALE',
-        genderPreference: GENDER_PREFERENCES.MALE,
-        sexualOrientation: 'STRAIGHT',
-      },
-      {
-        id: 10,
-        firstName: 'William',
-        lastName: 'Taylor',
-        age: 34,
-        maxDistance: 11,
-        bio: 'Photographer and travel blogger. Always on the lookout for the next great shot.',
-        interests: ['Photography', 'Travel', 'Writing'],
-        photos: ['profile1.jpg', 'profile3.jpg', 'profile2.avif'],
-        city: 'Cape Town',
-        country: 'South Africa',
-        gender: 'MALE',
-        genderPreference: GENDER_PREFERENCES.FEMALE,
-        sexualOrientation: 'STRAIGHT',
-      },
-    ];
-
-    setProfiles(mockProfiles);
+    // setLoading(true);
+    // getUsers(1).then((res) => {
+    //   console.log('res', res.data?.users);
+    //   setProfiles(res.data?.users ?? []);
+    //   setLoading(false);
+    // });
   }, []);
 
-  const handleSwipe = (
+  const handleSwipe = async (
     direction: 'left' | 'right' | 'up',
     profile: ProfileCard
   ) => {
     if (direction === 'right') {
-      if (Math.random() > 0.7) {
-        setMatchedProfile(profile);
-        setShowMatch(true);
-        setTimeout(() => setShowMatch(false), 2000);
+      if (!profile.selectedAddress || !userInfo?.selectedAddress) {
+        toast.error(
+          `${
+            !userInfo?.selectedAddress
+              ? 'You'
+              : profile.firstName + ' ' + profile.lastName
+          } dont have any wallet address connected.${
+            !userInfo?.selectedAddress ? ' Connect a wallet now to like.' : ''
+          }`
+        );
+        return;
+      }
+      try {
+        // Like the profile
+        await likeProfile(profile.selectedAddress!);
+
+        // Check if it's a match
+        const isMatch = await checkIfMatched(
+          profile.selectedAddress!,
+          userInfo?.selectedAddress!
+        );
+
+        if (isMatch) {
+          setMatchedProfile(profile);
+          setShowMatch(true);
+          toast.success("It's a match! 🎉");
+        } else {
+          toast.success('Profile liked successfully! 💝');
+        }
+        return true;
+      } catch (error: any) {
+        toast.error(error?.message || 'Failed to like profile');
+        return false;
       }
     }
+    return true;
   };
 
   if (loading) {
@@ -198,24 +80,69 @@ const HomePage = () => {
     );
   }
 
+  if (profiles.length === 0) {
+    return (
+      <div className='h-full bg-gray-900 flex items-center justify-center p-4'>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className='text-center max-w-md p-8 rounded-xl bg-gray-800/50 backdrop-blur-sm'
+        >
+          <motion.div
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className='mb-6'
+          >
+            <span className='text-6xl'>🔍</span>
+          </motion.div>
+          <h2 className='text-3xl font-bold text-white mb-4'>
+            No Profiles Available
+          </h2>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <p className='text-gray-300 text-lg mb-4'>
+              We couldn't find any profiles matching your preferences right now.
+            </p>
+            <ul className='text-gray-400 text-left mb-6 space-y-2'>
+              <li>• Try adjusting your search preferences</li>
+              <li>• Expand your age range or distance settings</li>
+              <li>• Check your internet connection</li>
+            </ul>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className='mt-6 px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors'
+              onClick={() => window.location.reload()}
+            >
+              Try Again
+            </motion.button>
+          </motion.div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  console.log('showMatch', showMatch);
+  console.log('matchedProfile', matchedProfile);
+
   return (
     <div className='h-full bg-gray-900 flex items-center justify-center p-4'>
       <CardStack profiles={profiles} onSwipe={handleSwipe} />
 
-      {/* Match Animation */}
-      {showMatch && matchedProfile && (
-        <div className='fixed inset-0 flex items-center justify-center bg-black/50'>
-          <div className='bg-white p-8 rounded-lg text-center'>
-            <h2 className='text-2xl font-bold text-primary-500 mb-4'>
-              {"It's a Match!"}
-            </h2>
-            <p className='text-gray-600'>
-              You and {matchedProfile.firstName} {matchedProfile.lastName} have
-              liked each other
-            </p>
-          </div>
-        </div>
-      )}
+      <MatchAnimation
+        matchedProfile={matchedProfile}
+        showMatch={showMatch}
+        multiSigBalance={0.06}
+        onClose={() => {
+          setShowMatch(false);
+          setMatchedProfile(null);
+        }}
+      />
     </div>
   );
 };

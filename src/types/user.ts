@@ -48,4 +48,6 @@ export type ProfileCard = ProfileCardForm & {
   photos: string[];
   profilePicture?: string;
   lastActiveOn?: string;
+  linkedAddresses?: string[];
+  selectedAddress?: string;
 };

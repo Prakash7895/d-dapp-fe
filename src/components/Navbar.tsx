@@ -1,10 +1,7 @@
 // src/components/Navbar.tsx
 'use client';
 
-import { useSession, signOut } from 'next-auth/react';
-import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { usePathname } from 'next/navigation';
 import { useStateContext } from './StateProvider';
 import {
   BadgeInfo,
@@ -15,42 +12,46 @@ import {
   LogOut,
   Settings,
 } from 'lucide-react';
-import useClickOutside from '@/hooks/useClickOutside';
-import { getSignedUrl } from '@/apiCalls';
+import useSession from '../hooks/useSession';
+import useClickOutside from '../hooks/useClickOutside';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 
 export default function Navbar() {
   const { data: session } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
-  const { activeProfilePhoto, userInfo } = useStateContext();
+  // const { activeProfilePhoto, userInfo } = useStateContext();
   const divRef = useRef<HTMLDivElement>(null);
   const [profilePicture, setProfilePicture] = useState('');
 
-  const isNftMinted = !!activeProfilePhoto;
+  const isNftMinted = false; //!!activeProfilePhoto;
 
   const handleLogout = async () => {
     setIsMenuOpen(false);
-    await signOut({ callbackUrl: '/auth/signin' });
+    // await signOut({ callbackUrl: '/auth/signin' });
   };
 
   useClickOutside(divRef, () => {
     setIsMenuOpen(false);
   });
 
-  useEffect(() => {
-    if (userInfo?.profilePicture) {
-      getSignedUrl(encodeURIComponent(userInfo.profilePicture)).then((res) => {
-        if (res.status === 'success') {
-          setProfilePicture(res.data!);
-        }
-      });
-    }
-  }, [userInfo]);
+  // useEffect(() => {
+  //   if (userInfo?.profilePicture) {
+  //     // getSignedUrl(encodeURIComponent(userInfo.profilePicture)).then((res) => {
+  //     //   if (res.status === 'success') {
+  //     //     setProfilePicture(res.data!);
+  //     //   }
+  //     // });
+  //   }
+  // }, [userInfo]);
 
   // Hide navbar on auth pages
   if (pathname?.startsWith('/auth/')) {
     return null;
   }
+
+  const activeProfilePhoto = '';
 
   return (
     <nav className='z-50 bg-gray-900/80 backdrop-blur-sm border-b border-gray-800/50'>
