@@ -15,6 +15,7 @@ import Loader from './Loader';
 import PhotoUploader from './PhotoUploader';
 import { FILE_ACCESS } from '@/apiSchemas';
 import AnimatedTooltip from './AnimatedTooltip';
+import { deleteFile } from '@/apiCalls';
 
 interface FileCardProps {
   file: S3File;
@@ -30,7 +31,6 @@ function FileCard({ file, onDelete, refresh }: FileCardProps) {
     try {
       setIsDeleting(true);
       await onDelete(file.id);
-      toast.success('File deleted successfully');
     } catch (err) {
       toast.error((err as Error).message || 'Failed to delete file');
     } finally {
@@ -93,7 +93,7 @@ function FileCard({ file, onDelete, refresh }: FileCardProps) {
       <div className='mt-2'>
         <div className='flex items-center justify-between gap-2 text-sm'>
           <span className='text-gray-400'>
-            {new Date(file.createdAt).toLocaleDateString()}
+            {new Date(file.updatedAt).toLocaleDateString()}
           </span>
           {file.access === FILE_ACCESS.PRIVATE ? (
             <AnimatedTooltip
@@ -136,20 +136,12 @@ export default function UserFiles({ refreshCount }: UserFilesProps) {
     useUserFiles(12);
 
   const handleDelete = async (id: number) => {
-    try {
-      const response = await fetch(`/api/files/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete file');
+    deleteFile(id).then((res) => {
+      if (res.status === 'success') {
+        toast.success(res.message);
+        refresh();
       }
-
-      refresh();
-    } catch (error) {
-      console.log('Error deleting file:', error);
-      throw error;
-    }
+    });
   };
 
   useEffect(() => {

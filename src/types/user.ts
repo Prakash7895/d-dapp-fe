@@ -9,7 +9,7 @@ import {
 export type IForm = {
   firstName: string;
   lastName: string;
-  email: string;
+  // email: string;
   age: number;
   gender: GenderType;
   sexualOrientation: SexualOrientationType;
@@ -25,7 +25,7 @@ export type IForm = {
 
 export type User = IForm & {
   id: string;
-  selectedAddress?: string;
+  walletAddress?: string;
   password?: string;
   linkedAddresses?: string[];
   profilePicture?: string;
@@ -64,3 +64,42 @@ export interface SessionResponse {
   user: JwtPayload | null;
   expires: Date;
 }
+
+export interface UserProfile {
+  id: string;
+  userId: string;
+  firstName: string | null;
+  lastName: string | null;
+  age: number | null;
+  gender: GenderType | null;
+  sexualOrientation: SexualOrientationType | null;
+  city: string | null;
+  country: string | null;
+  bio: string | null;
+  interests: string[] | null;
+  latitude: number | null;
+  longitude: number | null;
+  maxDistance: number | null;
+  minAge: number | null;
+  maxAge: number | null;
+  genderPreference: GENDER_PREFERENCES | null;
+  profilePicture: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UserResponse {
+  id: string;
+  email: string | null;
+  profile: UserProfile;
+  walletAddress: string | null;
+}
+
+export type AllUsers = UserResponse & {
+  lastActiveOn: string | null;
+  files: string[];
+};
+
+export type LikdedUser = AllUsers & {
+  likedAt: string;
+};

@@ -1,16 +1,14 @@
-// src/components/Navbar.tsx
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { useStateContext } from './StateProvider';
+import { useRef, useState } from 'react';
 import {
   BadgeInfo,
   Home,
-  MessageSquare,
   Heart,
   User,
   LogOut,
   Settings,
+  HeartHandshake,
 } from 'lucide-react';
 import useSession from '../hooks/useSession';
 import useClickOutside from '../hooks/useClickOutside';
@@ -83,6 +81,17 @@ export default function Navbar() {
                   <span>Discover</span>
                 </Link>
                 <Link
+                  href='/liked'
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
+                    pathname === '/liked'
+                      ? 'bg-gray-800 text-white'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
+                  }`}
+                >
+                  <Heart className='h-5 w-5' />
+                  <span>Liked</span>
+                </Link>
+                <Link
                   href='/matches'
                   className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
                     pathname === '/matches'
@@ -90,10 +99,10 @@ export default function Navbar() {
                       : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
                   }`}
                 >
-                  <Heart className='h-5 w-5' />
+                  <HeartHandshake className='h-5 w-5' />
                   <span>Matches</span>
                 </Link>
-                <Link
+                {/* <Link
                   href='/messages'
                   className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
                     pathname === '/messages'
@@ -103,7 +112,7 @@ export default function Navbar() {
                 >
                   <MessageSquare className='h-5 w-5' />
                   <span>Messages</span>
-                </Link>
+                </Link> */}
               </div>
             )}
           </div>

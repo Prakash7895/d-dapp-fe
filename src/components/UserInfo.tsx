@@ -179,22 +179,25 @@ const UserInfo: React.FC = () => {
   const { userInfo, setUserInfo } = useStateContext();
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<IForm>({
-    age: userInfo?.age ?? 0,
-    bio: userInfo?.bio ?? '',
-    city: userInfo?.city ?? '',
-    country: userInfo?.country ?? '',
-    email: userInfo?.email ?? '',
-    firstName: userInfo?.firstName ?? '',
-    lastName: userInfo?.lastName ?? '',
-    gender: userInfo?.gender || GENDER[0],
-    genderPreference: userInfo?.genderPreference || GENDER_PREFERENCES.MALE,
-    interests: userInfo?.interests || [],
-    maxAge: userInfo?.maxAge ?? 30,
-    minAge: userInfo?.minAge ?? 20,
-    maxDistance: userInfo?.maxDistance ?? 80,
-    sexualOrientation: userInfo?.sexualOrientation || SEXUAL_ORIENTATION[0],
-  });
+  const initialData = {
+    age: userInfo?.profile?.age ?? 0,
+    bio: userInfo?.profile?.bio ?? '',
+    city: userInfo?.profile?.city ?? '',
+    country: userInfo?.profile?.country ?? '',
+    // email: userInfo?.email ?? '',
+    firstName: userInfo?.profile?.firstName ?? '',
+    lastName: userInfo?.profile?.lastName ?? '',
+    gender: userInfo?.profile?.gender || GENDER[0],
+    genderPreference:
+      userInfo?.profile?.genderPreference || GENDER_PREFERENCES.MALE,
+    interests: userInfo?.profile?.interests || [],
+    maxAge: userInfo?.profile?.maxAge ?? 30,
+    minAge: userInfo?.profile?.minAge ?? 20,
+    maxDistance: userInfo?.profile?.maxDistance ?? 80,
+    sexualOrientation:
+      userInfo?.profile?.sexualOrientation || SEXUAL_ORIENTATION[0],
+  };
+  const [formData, setFormData] = useState<IForm>(initialData);
   const [errors, setErrors] = useState<{ [key in keyof IForm]?: string }>({});
 
   const handleEdit = () => {
@@ -203,7 +206,7 @@ const UserInfo: React.FC = () => {
 
   const handleCancel = () => {
     setIsEditing(false);
-    setFormData(userInfo!);
+    setFormData(initialData!);
   };
 
   const handleFieldChange = (
@@ -301,13 +304,13 @@ const UserInfo: React.FC = () => {
       label: 'Last Name',
       value: 'lastName',
     },
-    {
-      label: 'Email',
-      value: 'email',
-      className: 'col-span-2',
-      type: 'email',
-      autoComplete: 'email',
-    },
+    // {
+    //   label: 'Email',
+    //   value: 'email',
+    //   className: 'col-span-2',
+    //   type: 'email',
+    //   autoComplete: 'email',
+    // },
     {
       label: 'Age',
       value: 'age',

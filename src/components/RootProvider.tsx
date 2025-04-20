@@ -19,7 +19,7 @@ const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       router.replace('/auth/signin');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, router]);
+  }, [status, router, isAuthRoute]);
 
   return status === 'loading' ? (
     <ScreenLoader />

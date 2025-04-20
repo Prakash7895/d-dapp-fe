@@ -8,7 +8,7 @@ export interface S3File {
   key: string;
   id: number;
   url: string;
-  createdAt: string;
+  updatedAt: string;
   access: FILE_ACCESS;
 }
 
@@ -29,9 +29,11 @@ export function useUserFiles(limit: number = 10) {
       if (data.status === 'success') {
         setPageNo(pgNo);
         setFiles((prev) =>
-          pgNo === 1 ? [...(data.data ?? [])] : [...prev, ...(data.data ?? [])]
+          pgNo === 1
+            ? [...(data.data?.data ?? [])]
+            : [...prev, ...(data.data?.data ?? [])]
         );
-        setHasMore(!!(data.data && data.data.length === limit));
+        setHasMore(!!(data.data && data.data?.data.length === limit));
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch files');

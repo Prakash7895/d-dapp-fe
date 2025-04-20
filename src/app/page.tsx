@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import CardStack from '@/components/CardStack';
-import { ProfileCard } from '@/types/user';
+import { AllUsers } from '@/types/user';
 import Loader from '@/components/Loader';
 import { getUsers } from '@/apiCalls';
 import MatchAnimation from '@/components/MatchAnimation';
@@ -12,48 +12,46 @@ import { useStateContext } from '@/components/StateProvider';
 import { toast } from 'react-toastify';
 
 const HomePage = () => {
-  const [profiles, setProfiles] = useState<ProfileCard[]>([]);
+  const [profiles, setProfiles] = useState<AllUsers[]>([]);
   const [loading, setLoading] = useState(false);
   const [showMatch, setShowMatch] = useState(false);
-  const [matchedProfile, setMatchedProfile] = useState<ProfileCard | null>(
-    null
-  );
+  const [matchedProfile, setMatchedProfile] = useState<AllUsers | null>(null);
   const { userInfo } = useStateContext();
 
   useEffect(() => {
-    // setLoading(true);
-    // getUsers(1).then((res) => {
-    //   console.log('res', res.data?.users);
-    //   setProfiles(res.data?.users ?? []);
-    //   setLoading(false);
-    // });
+    setLoading(true);
+    getUsers(1).then((res) => {
+      console.log('res', res.data?.users);
+      setProfiles(res.data?.users ?? []);
+      setLoading(false);
+    });
   }, []);
 
   const handleSwipe = async (
     direction: 'left' | 'right' | 'up',
-    profile: ProfileCard
+    profile: AllUsers
   ) => {
     if (direction === 'right') {
-      if (!profile.selectedAddress || !userInfo?.selectedAddress) {
+      if (!profile.walletAddress || !userInfo?.walletAddress) {
         toast.error(
           `${
-            !userInfo?.selectedAddress
+            !userInfo?.walletAddress
               ? 'You'
-              : profile.firstName + ' ' + profile.lastName
+              : profile?.profile?.firstName + ' ' + profile?.profile?.lastName
           } dont have any wallet address connected.${
-            !userInfo?.selectedAddress ? ' Connect a wallet now to like.' : ''
+            !userInfo?.walletAddress ? ' Connect a wallet now to like.' : ''
           }`
         );
         return;
       }
       try {
         // Like the profile
-        await likeProfile(profile.selectedAddress!);
+        await likeProfile(profile?.walletAddress!);
 
         // Check if it's a match
         const isMatch = await checkIfMatched(
-          profile.selectedAddress!,
-          userInfo?.selectedAddress!
+          profile?.walletAddress!,
+          userInfo?.walletAddress!
         );
 
         if (isMatch) {

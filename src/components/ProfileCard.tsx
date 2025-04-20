@@ -14,13 +14,13 @@ import {
   VenusAndMars,
   X,
 } from 'lucide-react';
-import { ProfileCard as ProfileCardType } from '@/types/user';
+import { AllUsers } from '@/types/user';
 import { CardBody, CardContainer, CardItem } from './Card3d';
 import { capitalizeFirstLetter } from '@/utils';
 import Carousel from './Carousel';
 
 interface ProfileCardProps {
-  profile: ProfileCardType;
+  profile: AllUsers;
   isTopCard: boolean;
   onSwipe: (direction: 'left' | 'right' | 'up') => void;
   stackIndex: number;
@@ -53,17 +53,17 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           className='text-xl font-bold text-neutral-600 dark:text-white'
         >
           <h2 className='text-2xl font-bold text-white flex items-center gap-5'>
-            {capitalizeFirstLetter(profile.firstName)}{' '}
-            {capitalizeFirstLetter(profile.lastName)}{' '}
-            <BadgeCheck color='#5f5' />
+            {capitalizeFirstLetter(profile?.profile?.firstName || '')}{' '}
+            {capitalizeFirstLetter(profile?.profile?.lastName || '')}{' '}
+            {profile.walletAddress && <BadgeCheck color='#5f5' />}
           </h2>
           <h3 className='flex items-center'>
-            {profile.age},{' '}
-            {profile.gender === 'MALE' ? (
+            {profile?.profile?.age},{' '}
+            {profile?.profile?.gender === 'MALE' ? (
               <Mars color='#05f' />
-            ) : profile.gender === 'FEMALE' ? (
+            ) : profile?.profile?.gender === 'FEMALE' ? (
               <Venus color='#f59' />
-            ) : profile.gender === 'OTHER' ? (
+            ) : profile?.profile?.gender === 'OTHER' ? (
               <Transgender />
             ) : (
               <VenusAndMars />
@@ -72,8 +72,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         </CardItem>
 
         <CardItem translateZ='100' className='w-full mt-4 sm:!h-[60%] h-1/2'>
-          {profile.photos && profile.photos.length > 0 ? (
-            <Carousel photos={profile.photos} />
+          {profile.files && profile.files.length > 0 ? (
+            <Carousel photos={profile.files} />
           ) : (
             <div className='h-full flex items-center justify-center bg-gray-950 rounded-lg'>
               <User className='w-32 h-32 text-gray-400' strokeWidth={1.5} />
@@ -85,9 +85,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           translateZ='60'
           className='text-neutral-500 mt-2 dark:text-neutral-300'
         >
-          {profile.bio?.length > 100
-            ? `${profile.bio.substring(0, 100)}...`
-            : profile.bio}
+          {profile?.profile?.bio?.length! > 100
+            ? `${profile?.profile?.bio?.substring(0, 100)}...`
+            : profile?.profile?.bio}
         </CardItem>
         <CardItem
           as='div'
@@ -95,7 +95,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           className='text-neutral-500 mt-2 dark:text-neutral-300'
         >
           <div className='flex flex-wrap gap-2'>
-            {(profile.interests ?? []).map((interest, index) => (
+            {(profile?.profile?.interests ?? []).map((interest, index) => (
               <span
                 key={index}
                 className='px-3 py-1 bg-primary-500/20 text-primary-400 rounded-full text-sm'
@@ -112,7 +112,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           >
             <MapPin className='h-4 w-4 scale-125 ml-1' />
             <span className='text-gray-300'>
-              {profile.city} <small>({profile.maxDistance} km away)</small>
+              {profile?.profile?.city}{' '}
+              <small>({profile?.profile?.maxDistance} km away)</small>
             </span>
           </CardItem>
         </div>

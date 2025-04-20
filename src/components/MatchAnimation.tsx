@@ -1,12 +1,12 @@
 'use client';
 
 import React from 'react';
-import { ProfileCard } from '@/types/user';
+import { AllUsers } from '@/types/user';
 import { Modal, ModalBody, ModalContent, ModalTrigger } from './AnimatedModal';
 import { motion } from 'framer-motion'; // Importing Framer Motion
 
 interface MatchAnimationProps {
-  matchedProfile: ProfileCard | null;
+  matchedProfile: AllUsers | null;
   showMatch: boolean;
   multiSigBalance: number;
   onClose: () => void;
@@ -146,8 +146,8 @@ const MatchAnimation: React.FC<MatchAnimationProps> = ({
               {"It's a Match!"}
             </motion.h2>
             <motion.p className='text-gray-700 text-lg' variants={textVariants}>
-              You and {matchedProfile?.firstName} {matchedProfile?.lastName}{' '}
-              have liked each other
+              You and {matchedProfile?.profile?.firstName}{' '}
+              {matchedProfile?.profile?.lastName} have liked each other
             </motion.p>
             <motion.p
               className='text-gray-700 text-lg mb-4'

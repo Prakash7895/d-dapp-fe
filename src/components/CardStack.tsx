@@ -2,14 +2,14 @@
 
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ProfileCard } from '@/types/user';
+import { AllUsers } from '@/types/user';
 import ProfileCardComponent from './ProfileCard';
 
 interface CardStackProps {
-  profiles: ProfileCard[];
+  profiles: AllUsers[];
   onSwipe: (
     direction: 'left' | 'right' | 'up',
-    profile: ProfileCard
+    profile: AllUsers
   ) => Promise<boolean | undefined>;
 }
 

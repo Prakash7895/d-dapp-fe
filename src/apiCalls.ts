@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 //   UpdatePasswordSchemaType,
 //   UserUpdateSchemaType,
 // } from './apiSchemas';
-import { ProfileCard, User } from './types/user';
+import { AllUsers, LikdedUser, UserResponse } from './types/user';
 import { S3File } from './hooks/useUserFiles';
 import axios from 'axios';
 
@@ -24,9 +24,71 @@ const axiosInstance = axios.create({
   },
 });
 
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 axiosInstance.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (
+      error.response?.data?.message?.includes('Unauthorized') &&
+      !originalRequest._retry
+    ) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return axiosInstance(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const refreshToken = localStorage.getItem('refreshToken');
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_BE_END_POINT}/auth/refresh`,
+          { refreshToken }
+        );
+
+        const { access_token } = response.data.data;
+        localStorage.setItem('accessToken', access_token);
+
+        axiosInstance.defaults.headers.common[
+          'Authorization'
+        ] = `Bearer ${access_token}`;
+        originalRequest.headers.Authorization = `Bearer ${access_token}`;
+
+        processQueue(null, access_token);
+        return axiosInstance(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        window.location.href = '/auth/signin';
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
     const message = error.response?.data?.message || 'Something went wrong';
     return Promise.reject({ message });
   }
@@ -43,138 +105,107 @@ axiosInstance.interceptors.request.use((config) => {
 
 export default axiosInstance;
 
-export const updateWalletAddress = (id: number, data: any) =>
-  fetch(`/api/user/${id}/add-wallet-address`, {
-    body: JSON.stringify(data),
-    method: 'PUT',
-  })
-    .then((res) => res.json())
-    .then((res) => res as ApiResponse<User>)
-    .catch((err) => {
-      toast.error(err?.message || 'Failed to update user info');
-      return null;
-    });
-
 export const updateUserInfo = (data: any) =>
-  fetch(`/api/user`, { body: JSON.stringify(data), method: 'PUT' })
-    .then((res) => res.json())
-    .then((res) => res as ApiResponse<User>)
+  axiosInstance
+    .put('/profile', data)
+    .then((res) => res.data as ApiResponse<UserResponse>)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
       return null;
     });
 
-export const getUserInfo = () => Promise<{}>;
-// fetch(`/api/user`)
-//   .then((res) => res.json())
-//   .then((res) => res as ApiResponse<User>)
-//   .catch((err) => {
-//     toast.error(err?.message || 'Failed to update user info');
-//     return null;
-//   });
-
-export const checkAddress = (data: any) =>
-  fetch(`/api/user/check-address`, {
-    body: JSON.stringify(data),
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-    .then((res) => res.json())
-    .then(
-      (res) =>
-        res as ApiResponse<{
-          isTaken: boolean;
-        }>
-    )
+export const updateUserPassword = (data: any) =>
+  axiosInstance
+    .put('/profile/password', data)
+    .then((res) => res.data as ApiResponse<UserResponse>)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
-      return { status: 'error' } as ApiResponse;
+      return null;
+    });
+
+export const getUserInfo = () =>
+  axiosInstance
+    .get('/profile')
+    .then((res) => res.data as ApiResponse<UserResponse>)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to get user info');
+      return null;
     });
 
 export const uploadPhoto = (formData: FormData) =>
-  fetch('/api/upload', {
-    method: 'POST',
-    body: formData,
-  })
-    .then((res) => res.json())
-    .then(
-      (res) =>
-        res as ApiResponse<{
-          id: number;
-          url: string;
-        }>
-    )
+  axiosInstance
+    .put('/profile/photo', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    .then((res) => res.data as ApiResponse)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
       return { status: 'error' } as ApiResponse;
     });
 
 export const getFiles = (pageNo: number, pageSize = 10) =>
-  fetch(`/api/files?pageNo=${pageNo}&pageSize=${pageSize}`)
-    .then((res) => res.json())
-    .then((res) => res as ApiResponse<S3File[]>)
+  axiosInstance
+    .get(`/profile/photos?pageNo=${pageNo}&pageSize=${pageSize}`)
+    .then(
+      (res) =>
+        res.data as ApiResponse<{
+          data: S3File[];
+          total: number;
+        }>
+    )
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
       return { status: 'error' } as ApiResponse;
     });
 
 export const deleteFile = (fileId: number) =>
-  fetch(`/api/files/${fileId}`, { method: 'DELETE' })
-    .then((res) => res.json())
-    .then((res) => res as ApiResponse)
+  axiosInstance
+    .delete(`/profile/photo/${fileId}`)
+    .then((res) => res.data as ApiResponse)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
       return { status: 'error' } as ApiResponse;
     });
 
 export const udpateFileAccess = (fileId: number, access: any) =>
-  fetch(`/api/files/${fileId}`, {
-    method: 'PUT',
-    body: JSON.stringify({ access }),
-  })
-    .then((res) => res.json())
-    .then((res) => res as ApiResponse)
-    .catch((err) => {
-      toast.error(err?.message || 'Failed to update user info');
-      return { status: 'error' } as ApiResponse;
-    });
-
-export const getUserFiles = (id: number, pageNo: number, pageSize = 10) =>
-  fetch(`/api/user/${id}/files?pageNo=${pageNo}&pageSize=${pageSize}`)
-    .then((res) => res.json())
-    .then((res) => res as ApiResponse<S3File[]>)
+  axiosInstance
+    .put(`/profile/photo/${fileId}`, { access })
+    .then((res) => res.data as ApiResponse)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
       return { status: 'error' } as ApiResponse;
     });
 
 export const uploadProfilePicture = (formData: FormData) =>
-  fetch('/api/user/upload-profile-picture', {
-    method: 'PUT',
-    body: formData,
-  })
-    .then((res) => res.json())
-    .then((res) => res as ApiResponse<User>)
+  axiosInstance
+    .put('/profile/picture', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    .then((res) => res.data as ApiResponse<UserResponse>)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
       return { status: 'error' } as ApiResponse;
     });
 
 export const getSignedUrl = (key: string) =>
-  fetch(`/api/files/signed-url/${key}`)
-    .then((res) => res.json())
-    .then((res) => res as ApiResponse<string>)
+  axiosInstance
+    .get(`/docs/${key}`)
+    .then((res) => res.data as ApiResponse<string>)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
       return { status: 'error' } as ApiResponse;
     });
 
 export const getUsers = (pageNo: number, pageSize = 10) =>
-  fetch(`/api/users?pageNo=${pageNo}&pageSize=${pageSize}`)
-    .then((res) => res.json())
-    .then((res) => res as ApiResponse<{ users: ProfileCard[]; total: number }>)
+  axiosInstance
+    .get(`/users?pageNo=${pageNo}&pageSize=${pageSize}`)
+    .then(
+      (res) => res.data as ApiResponse<{ users: AllUsers[]; total: number }>
+    )
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
       return { status: 'error' } as ApiResponse;
@@ -214,6 +245,17 @@ export const logout = () =>
   axiosInstance
     .post('/auth/logout')
     .then((res) => res.data as ApiResponse)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to update user info');
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const getLikedUsers = (pageNo: number, pageSize = 10) =>
+  axiosInstance
+    .get(`/users/liked?pageNo=${pageNo}&pageSize=${pageSize}`)
+    .then(
+      (res) => res.data as ApiResponse<{ users: LikdedUser[]; total: number }>
+    )
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
       return { status: 'error' } as ApiResponse;

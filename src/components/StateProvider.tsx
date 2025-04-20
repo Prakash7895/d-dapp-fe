@@ -13,7 +13,7 @@ import React, {
 import { ToastContainer } from 'react-toastify';
 import ScreenLoader from './ScreenLoader';
 import MainLayout from './MainLayout';
-import { User } from '@/types/user';
+import { UserResponse } from '@/types/user';
 import { getUserInfo } from '@/apiCalls';
 import WalletHandler from './WalletHandler';
 // import { signOut } from 'next-auth/react';
@@ -27,8 +27,8 @@ const Context = createContext<{
   setTokedIds: React.Dispatch<React.SetStateAction<number[]>>;
   getCurrUsersTokenIds: () => Promise<boolean>;
   getUpdatedProfileNft: () => Promise<void>;
-  userInfo: User | null;
-  setUserInfo: React.Dispatch<React.SetStateAction<User | null>>;
+  userInfo: UserResponse | null;
+  setUserInfo: React.Dispatch<React.SetStateAction<UserResponse | null>>;
 }>({
   selectedAddress: '',
   setSelectedAddress: () => {},
@@ -47,29 +47,29 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [activeProfilePhoto, setActiveProfilePhoto] = useState('');
   const [tokedIds, setTokedIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
-  const [userInfo, setUserInfo] = useState<User | null>(null);
+  const [userInfo, setUserInfo] = useState<UserResponse | null>(null);
 
   useEffect(() => {
-    // setLoading(true);
-    // getUserInfo().then((res) => {
-    //   if (res?.status === 'success') {
-    //     setUserInfo(res.data!);
-    //     sessionStorage.setItem(
-    //       'savedWalletAddress',
-    //       JSON.stringify(res.data!.selectedAddress ?? null)
-    //     );
-    //     setLoading(false);
-    //   } else {
-    //     // signOut({ callbackUrl: '/auth/signin' });
-    //   }
-    // });
+    setLoading(true);
+    getUserInfo().then((res) => {
+      if (res?.status === 'success') {
+        setUserInfo(res.data!);
+        sessionStorage.setItem(
+          'savedWalletAddress',
+          JSON.stringify(res.data!.walletAddress ?? null)
+        );
+        setLoading(false);
+        // } else {
+        // signOut({ callbackUrl: '/auth/signin' });
+      }
+    });
   }, []);
 
   useEffect(() => {
     if (userInfo) {
       sessionStorage.setItem(
         'savedWalletAddress',
-        JSON.stringify(userInfo.selectedAddress ?? null)
+        JSON.stringify(userInfo.walletAddress ?? null)
       );
       sessionStorage.setItem('id', `${userInfo.id}`);
     }

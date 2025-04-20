@@ -4,7 +4,7 @@ import { passwordSchema } from '@/apiSchemas';
 import Button from '@/components/Button';
 import Input from '@/components/Input';
 import { Eye, EyeOff, Check, X } from 'lucide-react';
-import { updateUserInfo } from '@/apiCalls';
+import { updateUserPassword } from '@/apiCalls';
 import { toast } from 'react-toastify';
 
 const Security = () => {
@@ -50,7 +50,7 @@ const Security = () => {
     setErrors({});
 
     setLoading(true);
-    updateUserInfo(formData)
+    updateUserPassword(formData)
       .then((res) => {
         if (res?.status === 'success') {
           toast.success('Password updated successfully!');

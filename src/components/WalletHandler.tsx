@@ -19,7 +19,6 @@ import {
   onChainChange,
 } from '@/contract';
 import WalletAlert from './WalletAlert';
-import { checkAddress, updateWalletAddress } from '@/apiCalls';
 import WalletConfirmDialog from './WalletConfirmDialog';
 import Link from 'next/link';
 
@@ -40,7 +39,7 @@ const Context = createContext<{
 const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
   const { userInfo, getUpdatedProfileNft, setUserInfo, getCurrUsersTokenIds } =
     useStateContext();
-  const targetWalletAddress = userInfo?.selectedAddress;
+  const targetWalletAddress = userInfo?.walletAddress;
 
   const [connected, setConnected] = useState(false);
   const [connectedAddress, setConnectedAddress] = useState('');
@@ -69,11 +68,11 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
         setConnectedToValidAddress(connectedAddress === targetWalletAddress);
         if (connectedAddress === targetWalletAddress) {
           getUpdatedProfileNft();
-        } else if (!userInfo?.linkedAddresses?.includes(connectedAddress)) {
-          setConfirmDialog({
-            isOpen: true,
-            newAddress: connectedAddress,
-          });
+          // } else if (!userInfo?.linkedAddresses?.includes(connectedAddress)) {
+          //   setConfirmDialog({
+          //     isOpen: true,
+          //     newAddress: connectedAddress,
+          //   });
         }
       }
     } catch (err: unknown) {
@@ -118,15 +117,15 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
         setConnectedToValidAddress(isValidAddress);
         setConnectedAddress(newAddress);
 
-        if (
-          userInfo?.email &&
-          !userInfo.linkedAddresses?.includes(newAddress)
-        ) {
-          setConfirmDialog({
-            isOpen: targetWalletAddress !== newAddress,
-            newAddress,
-          });
-        }
+        // if (
+        //   userInfo?.email &&
+        //   !userInfo.linkedAddresses?.includes(newAddress)
+        // ) {
+        //   setConfirmDialog({
+        //     isOpen: targetWalletAddress !== newAddress,
+        //     newAddress,
+        //   });
+        // }
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -152,17 +151,17 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
     setNewAddressError(undefined);
 
     try {
-      const data = await checkAddress({
-        selectedAddress: confirmDialog.newAddress,
-      });
+      // const data = await checkAddress({
+      //   selectedAddress: confirmDialog.newAddress,
+      // });
 
-      if (data.status === 'success' && data.data?.isTaken) {
-        setNewAddressError(
-          'This wallet address is already linked to another account.'
-        );
-        setIsCheckingAddress(false);
-        return;
-      }
+      // if (data.status === 'success' && data.data?.isTaken) {
+      //   setNewAddressError(
+      //     'This wallet address is already linked to another account.'
+      //   );
+      //   setIsCheckingAddress(false);
+      //   return;
+      // }
       sessionStorage.setItem(
         'savedWalletAddress',
         JSON.stringify(confirmDialog.newAddress ?? null)
@@ -170,10 +169,10 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
       const wallet = await connectWallet();
       setUserInfo((u) => ({ ...u!, selectedAddress: wallet.address }));
 
-      const updatedUserInfo = await updateWalletAddress(+userInfo!.id, {
-        selectedAddress: confirmDialog.newAddress,
-      });
-      setUserInfo(updatedUserInfo!.data!);
+      // const updatedUserInfo = await updateWalletAddress(+userInfo!.id, {
+      //   selectedAddress: confirmDialog.newAddress,
+      // });
+      // setUserInfo(updatedUserInfo!.data!);
 
       toast.info(
         `Connected to new wallet: ${confirmDialog.newAddress.substring(
@@ -217,34 +216,34 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
       return 'Please connect your wallet to access the app.';
     }
     if (!connectedToValidAddress) {
-      return !userInfo?.email ? (
-        `Please connect with wallet address ${targetWalletAddress}, or`
-      ) : userInfo.linkedAddresses?.includes(connectedAddress) ? (
-        <>
-          <span className='block'>
-            Your wallet is active on {connectedAddress.substring(0, 6)}...
-            {connectedAddress.substring(38)}, but your profile has{' '}
-            {targetWalletAddress?.substring(0, 6)}...
-            {targetWalletAddress?.substring(38)} as active address.
-          </span>
-          <span className='block'>
-            Either switch the wallet address to{' '}
-            {targetWalletAddress?.substring(0, 6)}...
-            {targetWalletAddress?.substring(38)} or update your active address{' '}
-            {connectedAddress.substring(0, 6)}...
-            {connectedAddress.substring(38)} in{' '}
-            <Link
-              href='/profile/wallet'
-              className='font-medium underline hover:text-yellow-900'
-            >
-              profile
-            </Link>
-            .
-          </span>
-        </>
-      ) : (
-        'Please connect with one of your linked wallet addresses or add this address to your profile, or if already added switch to this new address in your profile'
-      );
+      return !userInfo?.email
+        ? `Please connect with wallet address ${targetWalletAddress}, or`
+        : //  userInfo.linkedAddresses?.includes(connectedAddress) ? (
+          //   <>
+          //     <span className='block'>
+          //       Your wallet is active on {connectedAddress.substring(0, 6)}...
+          //       {connectedAddress.substring(38)}, but your profile has{' '}
+          //       {targetWalletAddress?.substring(0, 6)}...
+          //       {targetWalletAddress?.substring(38)} as active address.
+          //     </span>
+          //     <span className='block'>
+          //       Either switch the wallet address to{' '}
+          //       {targetWalletAddress?.substring(0, 6)}...
+          //       {targetWalletAddress?.substring(38)} or update your active address{' '}
+          //       {connectedAddress.substring(0, 6)}...
+          //       {connectedAddress.substring(38)} in{' '}
+          //       <Link
+          //         href='/profile/wallet'
+          //         className='font-medium underline hover:text-yellow-900'
+          //       >
+          //         profile
+          //       </Link>
+          //       .
+          //     </span>
+          //   </>
+          // ) : (
+          'Please connect with one of your linked wallet addresses or add this address to your profile, or if already added switch to this new address in your profile';
+      // );
     }
     return '';
   };
