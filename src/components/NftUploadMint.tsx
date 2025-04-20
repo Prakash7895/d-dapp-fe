@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { mintNewNft, getMintFee } from '@/contract';
-import { uploadFileWeb3Storage } from '@/web3Storage';
 import FileUploader from './FileUploader';
+import { mintNFT } from '@/apiCalls';
 
 export default function NftUploadMint({
   onSuccess,
@@ -36,22 +36,30 @@ export default function NftUploadMint({
       return;
     }
 
+    const formData = new FormData();
+    formData.append('file', file);
+
     setIsLoading(true);
-    uploadFileWeb3Storage(file)
+    mintNFT(formData)
       .then((res) => {
         console.log('res', res);
-        if (res) {
-          mintNewNft(res)
-            .then((r) => {
-              console.log('R', r);
-              toast.success('Profile NFT minted successfully');
-              setIsLoading(false);
-              onSuccess();
-            })
-            .catch((err) => {
-              setIsLoading(false);
-              toast.error(err?.message || 'Error minting profile nft');
-            });
+        if (res.status === 'success') {
+          if (res.data?.metadataUrl) {
+            mintNewNft(res.data?.metadataUrl)
+              .then((r) => {
+                console.log('R', r);
+                toast.success('Profile NFT minted successfully');
+                setIsLoading(false);
+                onSuccess();
+              })
+              .catch((err) => {
+                setIsLoading(false);
+                toast.error(err?.message || 'Error minting profile nft');
+              });
+          }
+        } else {
+          toast.error(res.message);
+          setIsLoading(false);
         }
       })
       .catch((err) => {

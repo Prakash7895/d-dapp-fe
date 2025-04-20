@@ -260,3 +260,24 @@ export const getLikedUsers = (pageNo: number, pageSize = 10) =>
       toast.error(err?.message || 'Failed to update user info');
       return { status: 'error' } as ApiResponse;
     });
+
+export const mintNFT = (formData: FormData) =>
+  axiosInstance
+    .post('/nft/mint', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    .then(
+      (res) =>
+        res.data as ApiResponse<{
+          imageUrl: string;
+          metadataUrl: string;
+          imageCID: string;
+          metadataCID: string;
+        }>
+    )
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to update user info');
+      return { status: 'error' } as ApiResponse;
+    });
