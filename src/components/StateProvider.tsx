@@ -16,7 +16,6 @@ import MainLayout from './MainLayout';
 import { UserResponse } from '@/types/user';
 import { getUserInfo } from '@/apiCalls';
 import WalletHandler from './WalletHandler';
-// import { signOut } from 'next-auth/react';
 
 const Context = createContext<{
   selectedAddress: string;
@@ -59,8 +58,6 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
           JSON.stringify(res.data!.walletAddress ?? null)
         );
         setLoading(false);
-        // } else {
-        // signOut({ callbackUrl: '/auth/signin' });
       }
     });
   }, []);
@@ -71,7 +68,6 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
         'savedWalletAddress',
         JSON.stringify(userInfo.walletAddress ?? null)
       );
-      sessionStorage.setItem('id', `${userInfo.id}`);
     }
   }, [userInfo]);
 

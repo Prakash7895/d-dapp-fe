@@ -122,7 +122,7 @@ export default function SignUp() {
     try {
       // Connect wallet
       const walletResult = await connectWallet();
-      const address = walletResult.address;
+      const address = await walletResult.getAddress();
 
       if (!address) {
         throw new Error('Failed to connect wallet');
@@ -174,30 +174,28 @@ export default function SignUp() {
       const { password, email, ...restFormData } = formData;
 
       // Create user with wallet address
-      const response = await fetch('/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      axiosInstance
+        .post('/users', {
           ...restFormData,
           age: +restFormData.age,
-          selectedAddress: walletAddress,
+          walletAddress: walletAddress,
           signature,
           ...location,
-        }),
-      });
-
-      const data = await response.json();
-
-      toast.success(data?.message);
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to register');
-      }
-
-      // Redirect to sign in page
-      router.push('/auth/signin?registered=true');
+        })
+        .then((res) => {
+          const data = res.data;
+          toast.success(data?.message);
+          router.push('/auth/signin?registered=true');
+        })
+        .catch((error) => {
+          setError(
+            error ? error.message : 'An error occurred during registration'
+          );
+          console.log(error);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     } catch (error) {
       setError(
         error instanceof Error

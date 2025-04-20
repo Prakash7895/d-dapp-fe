@@ -3,19 +3,22 @@ import React, { useState } from 'react';
 import { passwordSchema } from '@/apiSchemas';
 import Button from '@/components/Button';
 import Input from '@/components/Input';
-import { Eye, EyeOff, Check, X } from 'lucide-react';
-import { updateUserPassword } from '@/apiCalls';
+import { Eye, EyeOff, Check, X, Mail } from 'lucide-react';
+import { addEmail, updateUserPassword } from '@/apiCalls';
 import { toast } from 'react-toastify';
+import { useStateContext } from '@/components/StateProvider';
 
 const Security = () => {
   const [formData, setFormData] = useState({
     password: '',
     confirmPassword: '',
+    email: '',
   });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { userInfo, setUserInfo } = useStateContext();
 
   const validatePassword = (pass: string) =>
     passwordSchema.safeParse(pass).success;
@@ -50,11 +53,14 @@ const Security = () => {
     setErrors({});
 
     setLoading(true);
-    updateUserPassword(formData)
+    updateUserPassword({
+      pasword: formData.password,
+      confirmPassword: formData.confirmPassword,
+    })
       .then((res) => {
         if (res?.status === 'success') {
           toast.success('Password updated successfully!');
-          setFormData({ confirmPassword: '', password: '' });
+          setFormData({ confirmPassword: '', password: '', email: '' });
         } else {
           toast.error(res?.message ?? 'Failed to update user.');
         }
@@ -70,10 +76,85 @@ const Security = () => {
 
   const passwordValidation = getPasswordValidation(formData.password);
 
+  const validateEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateEmail(formData.email)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await addEmail(formData);
+      if (res?.status === 'success') {
+        toast.success('Email added successfully!');
+        setUserInfo((prev) => ({ ...prev!, email: formData.email }));
+        setFormData({ confirmPassword: '', password: '', email: '' });
+      }
+    } catch (error) {
+      console.error('Error adding email:', error);
+      toast.error('Failed to add email. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className='bg-gray-900 p-8 rounded-lg shadow-xl w-full mx-auto max-w-md'>
-      <h2 className='text-2xl font-bold mb-6 text-white'>Update Password</h2>
-      <form onSubmit={handleSubmit} className='space-y-4'>
+      {userInfo?.email ? (
+        <h2 className='text-2xl font-bold mb-6 text-white'>Update Password</h2>
+      ) : (
+        <div className='flex items-center gap-3 mb-6'>
+          <Mail className='text-primary-500 w-6 h-6' />
+          <h2 className='text-2xl font-bold text-white'>Add Email Address</h2>
+        </div>
+      )}
+      <form
+        onSubmit={!userInfo?.email ? handleEmailSubmit : handleSubmit}
+        className='space-y-4'
+      >
+        {!userInfo?.email && (
+          <>
+            <div className='mb-4 p-3 bg-gray-800 rounded-lg'>
+              <p className='text-sm text-gray-300'>
+                Adding an email address allows you to:
+              </p>
+              <ul className='mt-2 space-y-1 text-sm text-gray-400'>
+                <li className='flex items-center gap-2'>
+                  <Check size={14} />
+                  Sign in without a wallet
+                </li>
+                <li className='flex items-center gap-2'>
+                  <Check size={14} />
+                  Recover your account if needed
+                </li>
+                <li className='flex items-center gap-2'>
+                  <Check size={14} />
+                  Receive important notifications
+                </li>
+              </ul>
+            </div>
+
+            <div className='space-y-4'>
+              <Input
+                label='Email Address'
+                type='email'
+                name='email'
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, email: e.target.value }))
+                }
+                placeholder='Enter your email address'
+              />
+            </div>
+          </>
+        )}
+
         <div>
           <Input
             label='New Password'
@@ -82,6 +163,7 @@ const Security = () => {
             onChange={(e) => {
               setFormData((p) => ({ ...p, password: e.target.value }));
             }}
+            placeholder='Enter password here'
             type={showPassword ? 'text' : 'password'}
             rightContent={
               <button
@@ -196,6 +278,7 @@ const Security = () => {
                 {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             }
+            placeholder='Confirm password'
           />
 
           {errors.confirmPassword && (
@@ -205,16 +288,21 @@ const Security = () => {
 
         <Button
           isLoading={loading}
-          label='Update Password'
-          loadingLabel='Updating...'
+          label={userInfo?.email ? 'Update Password' : 'Add Email'}
+          loadingLabel={userInfo?.email ? 'Updating...' : 'Adding...'}
           disabled={
+            (userInfo?.email
+              ? false
+              : !formData.email || !validateEmail(formData.email)) ||
             !(
               passwordValidation.hasLowerCase &&
               passwordValidation.hasMinLength &&
               passwordValidation.hasNumber &&
               passwordValidation.hasSpecialChar &&
               passwordValidation.hasUpperCase
-            ) || loading
+            ) ||
+            formData.password !== formData.confirmPassword ||
+            loading
           }
           type='submit'
         />

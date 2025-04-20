@@ -12,15 +12,12 @@ import React, {
 } from 'react';
 import { useStateContext } from './StateProvider';
 import { toast } from 'react-toastify';
-import {
-  connectWallet,
-  detectConnection,
-  onAccountChange,
-  onChainChange,
-} from '@/contract';
+import { detectConnection, onAccountChange, onChainChange } from '@/contract';
 import WalletAlert from './WalletAlert';
-import WalletConfirmDialog from './WalletConfirmDialog';
-import Link from 'next/link';
+import {
+  checkConnectedWalletAddress,
+  saveConnectedWalletAddress,
+} from '@/apiCalls';
 
 const Context = createContext<{
   connected: boolean;
@@ -39,40 +36,33 @@ const Context = createContext<{
 const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
   const { userInfo, getUpdatedProfileNft, setUserInfo, getCurrUsersTokenIds } =
     useStateContext();
-  const targetWalletAddress = userInfo?.walletAddress;
+  const targetWalletAddress = userInfo?.walletAddress?.toLowerCase();
 
   const [connected, setConnected] = useState(false);
   const [connectedAddress, setConnectedAddress] = useState('');
   const [connectedToValidAddress, setConnectedToValidAddress] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const [confirmDialog, setConfirmDialog] = useState<{
-    isOpen: boolean;
-    newAddress: string;
-  }>({
-    isOpen: false,
-    newAddress: '',
-  });
   const [isCheckingAddress, setIsCheckingAddress] = useState(false);
   const [newAddressError, setNewAddressError] = useState<string | undefined>();
+  const [canConnectToCurrAddress, setCanConnectToCurrAddress] = useState(false);
 
   const checkWalletStatus = useCallback(async () => {
     try {
       const accounts: string[] = await detectConnection();
+      console.log('accounts', accounts);
 
       if (accounts.length) {
         setConnected(true);
-        const connectedAddress = accounts[0];
-        setConnectedAddress(connectedAddress);
+        const activeAddress = accounts[0].toLowerCase();
+        setConnectedAddress(activeAddress);
 
-        setConnectedToValidAddress(connectedAddress === targetWalletAddress);
-        if (connectedAddress === targetWalletAddress) {
-          getUpdatedProfileNft();
-          // } else if (!userInfo?.linkedAddresses?.includes(connectedAddress)) {
-          //   setConfirmDialog({
-          //     isOpen: true,
-          //     newAddress: connectedAddress,
-          //   });
+        if (targetWalletAddress) {
+          setConnectedToValidAddress(activeAddress === targetWalletAddress);
+          if (activeAddress === targetWalletAddress) {
+            getUpdatedProfileNft();
+          }
         }
       }
     } catch (err: unknown) {
@@ -80,18 +70,26 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
       toast.error((err as Error)?.message || 'Failed to detect connection');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    userInfo,
-    setConnected,
-    setConnectedAddress,
-    setConnectedToValidAddress,
-    setConfirmDialog,
-  ]);
+  }, [userInfo, setConnected, setConnectedAddress, setConnectedToValidAddress]);
 
   useEffect(() => {
     checkWalletStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetWalletAddress]);
+
+  useEffect(() => {
+    if (connectedAddress && !targetWalletAddress) {
+      setIsCheckingAddress(true);
+      checkConnectedWalletAddress(connectedAddress).then((res) => {
+        setIsCheckingAddress(false);
+        if (res.status === 'success') {
+          setCanConnectToCurrAddress(true);
+        } else {
+          setCanConnectToCurrAddress(false);
+        }
+      });
+    }
+  }, [connectedAddress, userInfo]);
 
   useEffect(() => {
     if (!connected || (connected && !connectedToValidAddress)) {
@@ -113,19 +111,11 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
         const newAddress = accounts[0].toLowerCase();
 
         setConnected(true);
-        const isValidAddress = targetWalletAddress === newAddress;
-        setConnectedToValidAddress(isValidAddress);
         setConnectedAddress(newAddress);
-
-        // if (
-        //   userInfo?.email &&
-        //   !userInfo.linkedAddresses?.includes(newAddress)
-        // ) {
-        //   setConfirmDialog({
-        //     isOpen: targetWalletAddress !== newAddress,
-        //     newAddress,
-        //   });
-        // }
+        if (targetWalletAddress) {
+          const isValidAddress = targetWalletAddress === newAddress;
+          setConnectedToValidAddress(isValidAddress);
+        }
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -147,108 +137,134 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
   }, [handleAccountChange, handleChainChange]);
 
   const handleConfirmNewAddress = async () => {
-    setIsCheckingAddress(true);
+    setSaving(true);
     setNewAddressError(undefined);
 
     try {
-      // const data = await checkAddress({
-      //   selectedAddress: confirmDialog.newAddress,
-      // });
+      const res = await saveConnectedWalletAddress(connectedAddress);
+      if (res.status === 'success') {
+        sessionStorage.setItem(
+          'savedWalletAddress',
+          JSON.stringify(connectedAddress ?? null)
+        );
+        toast.info(
+          `Connected to wallet: ${connectedAddress.substring(
+            0,
+            6
+          )}...${connectedAddress.substring(38)}`
+        );
+        setUserInfo((u) => ({
+          ...u!,
+          walletAddress: connectedAddress,
+        }));
 
-      // if (data.status === 'success' && data.data?.isTaken) {
-      //   setNewAddressError(
-      //     'This wallet address is already linked to another account.'
-      //   );
-      //   setIsCheckingAddress(false);
-      //   return;
-      // }
-      sessionStorage.setItem(
-        'savedWalletAddress',
-        JSON.stringify(confirmDialog.newAddress ?? null)
-      );
-      const wallet = await connectWallet();
-      setUserInfo((u) => ({ ...u!, selectedAddress: wallet.address }));
+        await getUpdatedProfileNft();
+        await getCurrUsersTokenIds();
 
-      // const updatedUserInfo = await updateWalletAddress(+userInfo!.id, {
-      //   selectedAddress: confirmDialog.newAddress,
-      // });
-      // setUserInfo(updatedUserInfo!.data!);
-
-      toast.info(
-        `Connected to new wallet: ${confirmDialog.newAddress.substring(
-          0,
-          6
-        )}...${confirmDialog.newAddress.substring(38)}`
-      );
-
-      await getUpdatedProfileNft();
-      await getCurrUsersTokenIds();
-
-      setConfirmDialog({ isOpen: false, newAddress: '' });
-      setShowAlert(false);
+        setShowAlert(false);
+      } else {
+        toast.error(res.message);
+      }
     } catch (error) {
       console.error('Error checking address:', error);
       setNewAddressError('Failed to verify wallet address. Please try again.');
     } finally {
-      setIsCheckingAddress(false);
+      setSaving(false);
     }
-  };
-
-  const handleCancelNewAddress = () => {
-    setConfirmDialog({ isOpen: false, newAddress: '' });
-    setNewAddressError(undefined);
   };
 
   const getTitle = () => {
+    // Not connected state
     if (!connected) {
       return 'Wallet Connection Required';
     }
-    if (!connectedToValidAddress) {
-      return !userInfo?.email
-        ? 'Original Wallet Required'
-        : 'Invalid Wallet Address';
+
+    // Checking state
+    if (isCheckingAddress) {
+      return 'Checking Wallet...';
     }
+
+    // Not connected to valid address
+    if (!connectedToValidAddress) {
+      if (!userInfo?.email) {
+        return 'Original Wallet Required';
+      }
+      if (targetWalletAddress) {
+        return 'Wrong Wallet Connected';
+      }
+      return 'Wallet Not Linked';
+    }
+
+    // Connected but invalid state
+    if (
+      !canConnectToCurrAddress &&
+      targetWalletAddress &&
+      connectedAddress !== targetWalletAddress
+    ) {
+      return 'Invalid Wallet Address';
+    }
+
+    // Saving state
+    if (saving) {
+      return 'Saving Wallet...';
+    }
+
     return '';
   };
 
   const getMessage = () => {
+    // Not connected state
     if (!connected) {
-      return 'Please connect your wallet to access the app.';
+      return 'Please connect your wallet to continue using the app.';
     }
+
+    // Checking state
+    if (isCheckingAddress) {
+      return 'Please wait while we verify your wallet address...';
+    }
+
+    // Not connected to valid address
     if (!connectedToValidAddress) {
-      return !userInfo?.email
-        ? `Please connect with wallet address ${targetWalletAddress}, or`
-        : //  userInfo.linkedAddresses?.includes(connectedAddress) ? (
-          //   <>
-          //     <span className='block'>
-          //       Your wallet is active on {connectedAddress.substring(0, 6)}...
-          //       {connectedAddress.substring(38)}, but your profile has{' '}
-          //       {targetWalletAddress?.substring(0, 6)}...
-          //       {targetWalletAddress?.substring(38)} as active address.
-          //     </span>
-          //     <span className='block'>
-          //       Either switch the wallet address to{' '}
-          //       {targetWalletAddress?.substring(0, 6)}...
-          //       {targetWalletAddress?.substring(38)} or update your active address{' '}
-          //       {connectedAddress.substring(0, 6)}...
-          //       {connectedAddress.substring(38)} in{' '}
-          //       <Link
-          //         href='/profile/wallet'
-          //         className='font-medium underline hover:text-yellow-900'
-          //       >
-          //         profile
-          //       </Link>
-          //       .
-          //     </span>
-          //   </>
-          // ) : (
-          'Please connect with one of your linked wallet addresses or add this address to your profile, or if already added switch to this new address in your profile';
-      // );
+      if (!userInfo?.email) {
+        return `Please connect with your original wallet address: ${targetWalletAddress?.substring(
+          0,
+          6
+        )}...${targetWalletAddress?.substring(38)}`;
+      }
+      if (targetWalletAddress) {
+        return `Please connect with the wallet address linked to your profile: ${targetWalletAddress.substring(
+          0,
+          6
+        )}...${targetWalletAddress.substring(38)}`;
+      }
+      if (canConnectToCurrAddress && !targetWalletAddress) {
+        return `Would you like to link ${connectedAddress.substring(
+          0,
+          6
+        )}...${connectedAddress.substring(38)} wallet address to your profile?`;
+      }
+      return 'Please connect with a valid wallet address.';
     }
+
+    // Connected but invalid state
+    if (
+      !canConnectToCurrAddress &&
+      targetWalletAddress &&
+      connectedAddress !== targetWalletAddress
+    ) {
+      return `The wallet address ${connectedAddress.substring(
+        0,
+        6
+      )}...${connectedAddress.substring(38)} cannot be used with this account.`;
+    }
+
+    // Saving state
+    if (saving) {
+      return 'Please wait while we save your wallet address...';
+    }
+
     return '';
   };
-
-  const showProfileLink = !userInfo?.email;
 
   const value = useMemo(
     () => ({
@@ -260,23 +276,27 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
     [connected, connectedToValidAddress, setShowAlert, checkWalletStatus]
   );
 
+  const showEmailRecommendation = useMemo(() => {
+    return !userInfo?.email && connected && connectedToValidAddress;
+  }, [userInfo?.email, connected, connectedToValidAddress]);
+
   return (
     <Context.Provider value={value}>
-      {showAlert && (
+      {(showAlert || showEmailRecommendation) && (
         <WalletAlert
           title={getTitle()}
           message={getMessage()}
-          showProfileLink={showProfileLink}
           showConnectBtn={!connected}
-        />
-      )}
-      {confirmDialog.isOpen && (
-        <WalletConfirmDialog
-          newAddress={confirmDialog.newAddress}
-          onConfirm={handleConfirmNewAddress}
-          onCancel={handleCancelNewAddress}
-          isChecking={isCheckingAddress}
-          error={newAddressError}
+          showSaveBtn={
+            !targetWalletAddress &&
+            connected &&
+            !connectedToValidAddress &&
+            canConnectToCurrAddress
+          }
+          onSave={handleConfirmNewAddress}
+          isLoading={isCheckingAddress}
+          isSaving={saving}
+          showEmailRecommendation={showEmailRecommendation}
         />
       )}
       {children}

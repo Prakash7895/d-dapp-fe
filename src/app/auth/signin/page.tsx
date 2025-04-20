@@ -36,8 +36,8 @@ export default function SignIn() {
       login({ type: 'email', email, password }).then((res) => {
         console.log('res', res);
         if (res.status === 'success') {
-          localStorage.setItem('accessToken', res.data?.access_token!);
-          localStorage.setItem('refreshToken', res.data?.refresh_token!);
+          sessionStorage.setItem('accessToken', res.data?.access_token!);
+          sessionStorage.setItem('refreshToken', res.data?.refresh_token!);
           router.push('/');
         } else {
           setError(res?.message || 'An error occurred');
@@ -81,6 +81,8 @@ export default function SignIn() {
         signedMessage: signature,
       }).then((res) => {
         if (res.status === 'success') {
+          sessionStorage.setItem('accessToken', res.data?.access_token!);
+          sessionStorage.setItem('refreshToken', res.data?.refresh_token!);
           router.push('/');
         } else {
           if (res.message?.includes('sign up')) {

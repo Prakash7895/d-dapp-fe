@@ -2,13 +2,12 @@
 import GridPattern from '@/components/GridPattern';
 import ProfileInfo from '@/components/ProfileInfo';
 import { Tabs } from '@/components/Tabs';
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 const ProfileLayout = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
   const pathName = usePathname();
-  console.log('pathName', pathName);
 
   const tabs = [
     {
@@ -38,7 +37,10 @@ const ProfileLayout = ({ children }: { children: ReactNode }) => {
     },
   ];
 
-  const activeTabValue = tabs.find((el) => el.path === pathName)?.value;
+  const activeTabValue = useMemo(
+    () => tabs.find((el) => el.path === pathName)?.value,
+    [pathName]
+  );
 
   return (
     <div>
@@ -57,6 +59,7 @@ const ProfileLayout = ({ children }: { children: ReactNode }) => {
           }))}
           containerClassName='mb-7'
           activeTabValue={activeTabValue}
+          key={activeTabValue}
         />
         {children}
       </div>

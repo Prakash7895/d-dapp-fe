@@ -46,7 +46,7 @@ const useSession = (): {
       }
 
       try {
-        const accessToken = localStorage.getItem('accessToken');
+        const accessToken = sessionStorage.getItem('accessToken');
 
         if (!accessToken) {
           setStatus('unauthenticated');

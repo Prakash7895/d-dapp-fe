@@ -29,9 +29,16 @@ const getActiveAddress = async () => {
 };
 
 const checkIfValidAddressIsConnected = async () => {
-  const savedWalletAddress = JSON.parse(
-    sessionStorage.getItem('savedWalletAddress') ?? ''
-  );
+  console.log('checkIfValidAddressIsConnected');
+  const savedWalletAddress = sessionStorage.getItem('savedWalletAddress');
+  console.log('savedWalletAddress', savedWalletAddress);
+  if (!savedWalletAddress) {
+    return true;
+  }
+
+  const parsedWalletAddress = JSON.parse(savedWalletAddress || '');
+  console.log('parsedWalletAddress', parsedWalletAddress);
+
   const accounts = await detectConnection();
   console.log('accounts', accounts);
   if (!accounts.length) {

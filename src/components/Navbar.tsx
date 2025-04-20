@@ -1,55 +1,65 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   BadgeInfo,
   Home,
   Heart,
   User,
   LogOut,
-  Settings,
   HeartHandshake,
 } from 'lucide-react';
 import useSession from '../hooks/useSession';
 import useClickOutside from '../hooks/useClickOutside';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { getSignedUrl, logout } from '@/apiCalls';
+import { useStateContext } from './StateProvider';
 
 export default function Navbar() {
   const { data: session } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
-  // const { activeProfilePhoto, userInfo } = useStateContext();
+  const { activeProfilePhoto, userInfo } = useStateContext();
   const divRef = useRef<HTMLDivElement>(null);
   const [profilePicture, setProfilePicture] = useState('');
 
-  const isNftMinted = false; //!!activeProfilePhoto;
+  const isNftMinted = !!activeProfilePhoto;
+
+  const router = useRouter();
 
   const handleLogout = async () => {
     setIsMenuOpen(false);
-    // await signOut({ callbackUrl: '/auth/signin' });
+    await logout().then((res) => {
+      if (res.status === 'success') {
+        sessionStorage.removeItem('accessToken');
+        sessionStorage.removeItem('refreshToken');
+        sessionStorage.removeItem('savedWalletAddress');
+        router.replace('/auth/signin');
+      }
+    });
   };
 
   useClickOutside(divRef, () => {
     setIsMenuOpen(false);
   });
 
-  // useEffect(() => {
-  //   if (userInfo?.profilePicture) {
-  //     // getSignedUrl(encodeURIComponent(userInfo.profilePicture)).then((res) => {
-  //     //   if (res.status === 'success') {
-  //     //     setProfilePicture(res.data!);
-  //     //   }
-  //     // });
-  //   }
-  // }, [userInfo]);
+  useEffect(() => {
+    if (userInfo?.profile?.profilePicture) {
+      getSignedUrl(encodeURIComponent(userInfo.profile.profilePicture)).then(
+        (res) => {
+          if (res.status === 'success') {
+            setProfilePicture(res.data!);
+          }
+        }
+      );
+    }
+  }, [userInfo]);
 
   // Hide navbar on auth pages
   if (pathname?.startsWith('/auth/')) {
     return null;
   }
-
-  const activeProfilePhoto = '';
 
   const name = session?.user
     ? `${session.user.firstName} ${session.user.lastName}`
@@ -171,14 +181,14 @@ export default function Navbar() {
                         </div>
                         {!isNftMinted && <BadgeInfo size={18} color='#f55' />}
                       </Link>
-                      <Link
+                      {/* <Link
                         href='/settings'
                         onClick={() => setIsMenuOpen(false)}
                         className='flex items-center space-x-3 px-4 py-3 text-sm text-gray-300 hover:bg-gray-700/50 transition-colors'
                       >
                         <Settings className='h-5 w-5' />
                         <span>Settings</span>
-                      </Link>
+                      </Link> */}
                       <button
                         onClick={handleLogout}
                         className='flex items-center space-x-3 w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-gray-700/50 transition-colors'

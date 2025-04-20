@@ -62,14 +62,14 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshToken = localStorage.getItem('refreshToken');
+        const refreshToken = sessionStorage.getItem('refreshToken');
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_BE_END_POINT}/auth/refresh`,
           { refreshToken }
         );
 
         const { access_token } = response.data.data;
-        localStorage.setItem('accessToken', access_token);
+        sessionStorage.setItem('accessToken', access_token);
 
         axiosInstance.defaults.headers.common[
           'Authorization'
@@ -80,8 +80,8 @@ axiosInstance.interceptors.response.use(
         return axiosInstance(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        sessionStorage.removeItem('accessToken');
+        sessionStorage.removeItem('refreshToken');
         window.location.href = '/auth/signin';
         return Promise.reject(refreshError);
       } finally {
@@ -95,7 +95,7 @@ axiosInstance.interceptors.response.use(
 );
 
 axiosInstance.interceptors.request.use((config) => {
-  const accessToken = localStorage.getItem('accessToken');
+  const accessToken = sessionStorage.getItem('accessToken');
 
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
@@ -278,6 +278,37 @@ export const mintNFT = (formData: FormData) =>
         }>
     )
     .catch((err) => {
-      toast.error(err?.message || 'Failed to update user info');
+      toast.error(err?.message || 'Failed to mint NFT');
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const checkConnectedWalletAddress = (walletAddress: string) =>
+  axiosInstance
+    .put('/profile/check-wallet-address', { walletAddress })
+    .then((res) => res.data as ApiResponse)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to cehck wallet address');
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const saveConnectedWalletAddress = (walletAddress: string) =>
+  axiosInstance
+    .put('/profile/wallet-address', { walletAddress })
+    .then((res) => res.data as ApiResponse)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to save wallet address');
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const addEmail = (data: {
+  email: string;
+  password: string;
+  confirmPassword: string;
+}) =>
+  axiosInstance
+    .put('/profile/email', data)
+    .then((res) => res.data as ApiResponse)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to save wallet address');
       return { status: 'error' } as ApiResponse;
     });
