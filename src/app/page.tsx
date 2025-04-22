@@ -5,18 +5,17 @@ import CardStack from '@/components/CardStack';
 import { AllUsers } from '@/types/user';
 import Loader from '@/components/Loader';
 import { getUsers } from '@/apiCalls';
-import MatchAnimation from '@/components/MatchAnimation';
 import { motion } from 'framer-motion';
-import { checkIfMatched, likeProfile } from '@/contract';
+import { likeProfile } from '@/contract';
 import { useStateContext } from '@/components/StateProvider';
 import { toast } from 'react-toastify';
+import { useMatchMakingContract } from '@/components/EthereumProvider';
 
 const HomePage = () => {
   const [profiles, setProfiles] = useState<AllUsers[]>([]);
   const [loading, setLoading] = useState(false);
-  const [showMatch, setShowMatch] = useState(false);
-  const [matchedProfile, setMatchedProfile] = useState<AllUsers | null>(null);
   const { userInfo } = useStateContext();
+  const matchMakingContract = useMatchMakingContract();
 
   useEffect(() => {
     setLoading(true);
@@ -46,21 +45,10 @@ const HomePage = () => {
       }
       try {
         // Like the profile
-        await likeProfile(profile?.walletAddress!);
+        await likeProfile(matchMakingContract, profile?.walletAddress!);
 
-        // Check if it's a match
-        const isMatch = await checkIfMatched(
-          profile?.walletAddress!,
-          userInfo?.walletAddress!
-        );
+        toast.success('Profile liked successfully! 💝');
 
-        if (isMatch) {
-          setMatchedProfile(profile);
-          setShowMatch(true);
-          toast.success("It's a match! 🎉");
-        } else {
-          toast.success('Profile liked successfully! 💝');
-        }
         return true;
       } catch (error: any) {
         toast.error(error?.message || 'Failed to like profile');
@@ -125,22 +113,9 @@ const HomePage = () => {
     );
   }
 
-  console.log('showMatch', showMatch);
-  console.log('matchedProfile', matchedProfile);
-
   return (
     <div className='h-full bg-gray-900 flex items-center justify-center p-4'>
       <CardStack profiles={profiles} onSwipe={handleSwipe} />
-
-      <MatchAnimation
-        matchedProfile={matchedProfile}
-        showMatch={showMatch}
-        multiSigBalance={0.06}
-        onClose={() => {
-          setShowMatch(false);
-          setMatchedProfile(null);
-        }}
-      />
     </div>
   );
 };

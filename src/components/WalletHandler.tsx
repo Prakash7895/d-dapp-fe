@@ -51,7 +51,6 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
   const checkWalletStatus = useCallback(async () => {
     try {
       const accounts: string[] = await detectConnection();
-      console.log('accounts', accounts);
 
       if (accounts.length) {
         setConnected(true);

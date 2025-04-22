@@ -10,12 +10,12 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { ToastContainer } from 'react-toastify';
 import ScreenLoader from './ScreenLoader';
 import MainLayout from './MainLayout';
 import { UserResponse } from '@/types/user';
 import { getUserInfo } from '@/apiCalls';
 import WalletHandler from './WalletHandler';
+import MatchListener from './MatchListener';
 
 const Context = createContext<{
   selectedAddress: string;
@@ -127,13 +127,14 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   return (
     <Context.Provider value={value}>
-      <ToastContainer />
       {loading ? (
         <ScreenLoader />
       ) : (
-        <WalletHandler>
-          <MainLayout>{children}</MainLayout>
-        </WalletHandler>
+        <MatchListener>
+          <WalletHandler>
+            <MainLayout>{children}</MainLayout>
+          </WalletHandler>
+        </MatchListener>
       )}
     </Context.Provider>
   );

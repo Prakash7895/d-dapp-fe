@@ -1,12 +1,12 @@
 'use client';
 
 import React from 'react';
-import { AllUsers } from '@/types/user';
+import { UserByAddress } from '@/types/user';
 import { Modal, ModalBody, ModalContent, ModalTrigger } from './AnimatedModal';
 import { motion } from 'framer-motion'; // Importing Framer Motion
 
 interface MatchAnimationProps {
-  matchedProfile: AllUsers | null;
+  matchedProfile: UserByAddress | null;
   showMatch: boolean;
   multiSigBalance: number;
   onClose: () => void;

@@ -29,23 +29,21 @@ const getActiveAddress = async () => {
 };
 
 const checkIfValidAddressIsConnected = async () => {
-  console.log('checkIfValidAddressIsConnected');
   const savedWalletAddress = sessionStorage.getItem('savedWalletAddress');
-  console.log('savedWalletAddress', savedWalletAddress);
+
   if (!savedWalletAddress) {
     return true;
   }
 
   const parsedWalletAddress = JSON.parse(savedWalletAddress || '');
-  console.log('parsedWalletAddress', parsedWalletAddress);
 
   const accounts = await detectConnection();
-  console.log('accounts', accounts);
+
   if (!accounts.length) {
     return true;
   }
   const activeWalletAddress = await getActiveAddress();
-  if (!savedWalletAddress || savedWalletAddress === activeWalletAddress) {
+  if (!savedWalletAddress || parsedWalletAddress === activeWalletAddress) {
     return true;
   }
   throw new Error('Saved wallet address is not active');
@@ -277,88 +275,36 @@ export const changeProfileNft = async (tokenId: number) => {
   }
 };
 
-const getMatchMakingContract = async () => {
-  try {
-    const signer = await connectWallet();
-    return new ethers.Contract(
-      process.env.NEXT_PUBLIC_MATCH_MAKING_ADDRESS!,
-      matchMakingAbi,
-      signer
-    );
-  } catch (error: unknown) {
-    console.log('getting MatchMaking instance error', error);
-    return false;
+export const likeProfile = async (
+  contract: Contract | null,
+  targetAddress: string
+) => {
+  if (!contract || !targetAddress) {
+    return null;
   }
-};
-
-export const getLikeAmount = async () => {
   try {
-    const matchMaking = (await getMatchMakingContract()) as Contract;
-    const likeAmountInCents = await matchMaking.s_likeAmountInCents();
-
-    return Number(likeAmountInCents);
-  } catch (error: unknown) {
-    console.log('getting like amount error', error);
-    return false;
-  }
-};
-
-export const likeProfile = async (targetAddress: string) => {
-  try {
-    const matchMaking = (await getMatchMakingContract()) as Contract;
-    const likeAmountInCents = await getLikeAmount();
-    console.log('likeAmountInCents:', likeAmountInCents);
-
-    // Convert cents to ETH using the contract's price converter
-    let likeAmountInWei = await matchMaking.getWeiFromCents(likeAmountInCents);
-    console.log('likeAmountInWei:', likeAmountInWei);
-    let usdFromWei = await matchMaking.getPriceInCents(likeAmountInWei);
-    usdFromWei = Number(usdFromWei);
-    console.log('usdFromWei:', usdFromWei);
-
-    let attempts = 0;
-    const maxAttempts = 10;
-    const INCREMENT = BigInt(1e12); // 0.000001 ETH increment
-
-    while (usdFromWei < likeAmountInCents && attempts < maxAttempts) {
-      likeAmountInWei = likeAmountInWei + INCREMENT;
-      usdFromWei = await matchMaking.getPriceInCents(likeAmountInWei);
-      attempts++;
-      usdFromWei = Number(usdFromWei);
-
-      console.log(`Attempt ${attempts}:`, {
-        wei: likeAmountInWei.toString(),
-        cents: usdFromWei.toString(),
-      });
-    }
-
-    if (usdFromWei !== likeAmountInCents) {
-      throw new Error(`Failed to find exact amount after ${attempts} attempts`);
-    }
-
-    console.log('targetAddress', targetAddress);
-
-    const transaction = await matchMaking.like(targetAddress, {
-      value: likeAmountInWei,
-    });
-    console.log('transaction1:', transaction);
-    await transaction.wait();
-    console.log('transaction2:', transaction);
-    return true;
+    const amount = await contract.s_amount();
+    console.log('amount', amount);
+    await contract.like(targetAddress, { value: amount });
   } catch (error: unknown) {
     console.log('like profile error', error);
     throw error;
   }
 };
 
-export const checkIfMatched = async (address1: string, address2: string) => {
+export const checkIfMatched = async (
+  contract: Contract | null,
+  address1: string,
+  address2: string
+) => {
+  if (!contract || !address1 || !address2) {
+    return null;
+  }
   try {
-    const matchMaking = (await getMatchMakingContract()) as Contract;
-
-    const like1 = await matchMaking.s_likes(address1, address2);
+    const like1 = await contract.s_likes(address1, address2);
     console.log('like1:', like1.like, like1);
 
-    const like2 = await matchMaking.s_likes(address2, address1);
+    const like2 = await contract.s_likes(address2, address1);
     console.log('like2:', like2.like, like2);
 
     return like1.like && like2.like;

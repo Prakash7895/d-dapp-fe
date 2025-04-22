@@ -7,9 +7,16 @@ import { toast } from 'react-toastify';
 //   UpdatePasswordSchemaType,
 //   UserUpdateSchemaType,
 // } from './apiSchemas';
-import { AllUsers, LikdedUser, UserResponse } from './types/user';
+import {
+  AllUsers,
+  LikdedUser,
+  MatchedUser,
+  UserByAddress,
+  UserResponse,
+} from './types/user';
 import { S3File } from './hooks/useUserFiles';
 import axios from 'axios';
+import { MultiSigWallet } from './types/wallet';
 
 interface ApiResponse<T = null> {
   status: 'success' | 'error';
@@ -310,5 +317,34 @@ export const addEmail = (data: {
     .then((res) => res.data as ApiResponse)
     .catch((err) => {
       toast.error(err?.message || 'Failed to save wallet address');
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const getMatchedUsers = (pageNo: number, pageSize = 10) =>
+  axiosInstance
+    .get(`/users/matched?pageNo=${pageNo}&pageSize=${pageSize}`)
+    .then(
+      (res) => res.data as ApiResponse<{ users: MatchedUser[]; total: number }>
+    )
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to update user info');
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const getMultiSigWalletAddress = (addressA: string, addressB: string) =>
+  axiosInstance
+    .get(`/users/multi-sig-wallet/${addressA}/${addressB}`)
+    .then((res) => res.data as ApiResponse<MultiSigWallet>)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to get multi sig wallet');
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const getUserByAddress = (address: string) =>
+  axiosInstance
+    .get(`/users/by-address/${address}`)
+    .then((res) => res.data as ApiResponse<UserByAddress>)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to get user by address');
       return { status: 'error' } as ApiResponse;
     });

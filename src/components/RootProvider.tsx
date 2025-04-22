@@ -4,6 +4,8 @@ import { FC, ReactNode, useEffect } from 'react';
 import ScreenLoader from './ScreenLoader';
 import StateProvider from './StateProvider';
 import useSession from '@/hooks/useSession';
+import EthereumProvider from './EthereumProvider';
+import { ToastContainer } from 'react-toastify';
 
 const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const { status } = useSession();
@@ -13,13 +15,14 @@ const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   console.log('pathname', pathname);
 
   const isAuthRoute = pathname.startsWith('/auth/sign');
+  const isAdminRoute = pathname.startsWith('/admin');
 
   useEffect(() => {
-    if (status === 'unauthenticated' && !isAuthRoute) {
+    if (status === 'unauthenticated' && !isAuthRoute && !isAdminRoute) {
       router.replace('/auth/signin');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, router, isAuthRoute]);
+  }, [status, router, isAuthRoute, isAdminRoute]);
 
   return status === 'loading' ? (
     <ScreenLoader />
@@ -31,7 +34,10 @@ const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
 };
 
 const RootProvider: FC<{ children: ReactNode }> = ({ children }) => (
-  <AuthProvider>{children}</AuthProvider>
+  <EthereumProvider>
+    <ToastContainer />
+    <AuthProvider>{children}</AuthProvider>
+  </EthereumProvider>
 );
 
 export default RootProvider;

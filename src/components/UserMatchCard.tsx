@@ -1,0 +1,116 @@
+'use client';
+import { motion } from 'framer-motion';
+import {
+  Heart,
+  MessageCircle,
+  User,
+  MapPin,
+  Calendar,
+  Wallet,
+} from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { FC } from 'react';
+import { MatchedUser } from '@/types/user';
+import Link from 'next/link';
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  show: { y: 0, opacity: 1 },
+};
+
+const UserMatchCard: FC<MatchedUser> = ({
+  id,
+  lastActiveOn,
+  matchedAt,
+  profile,
+  addressA,
+  addressB,
+}) => {
+  const name = `${profile.firstName} ${profile.lastName}`;
+  return (
+    <motion.div
+      key={id}
+      variants={itemVariants}
+      whileHover={{ scale: 1.02 }}
+      className='bg-gray-800 rounded-xl overflow-hidden'
+    >
+      <div className='relative h-64'>
+        {profile.profilePicture ? (
+          <img
+            src={profile.profilePicture}
+            alt={name}
+            className='w-full h-full object-cover'
+          />
+        ) : (
+          <div className='w-full h-full bg-gray-700 flex items-center justify-center'>
+            <User className='w-16 h-16 text-gray-500' />
+          </div>
+        )}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className='absolute top-4 right-4 bg-primary-500 rounded-full p-2'
+        >
+          <Heart className='w-5 h-5 text-white' />
+        </motion.div>
+      </div>
+
+      <div className='p-6 space-y-4'>
+        <div className='flex items-center justify-between'>
+          <h3 className='text-xl font-semibold text-white'>
+            {name}, {profile.age}
+          </h3>
+          <span className='text-sm text-gray-400'>{lastActiveOn}</span>
+        </div>
+
+        {profile.city && (
+          <div className='flex items-center text-gray-400 text-sm'>
+            <MapPin className='w-4 h-4 mr-2' />
+            <span>
+              {profile.city}, {profile.country}
+            </span>
+          </div>
+        )}
+
+        <p className='text-gray-300'>{profile.bio}</p>
+
+        <div className='flex flex-wrap gap-2'>
+          {profile.interests?.map((interest, idx) => (
+            <span
+              key={idx}
+              className='px-3 py-1 bg-primary-500/20 text-primary-400 rounded-full text-sm'
+            >
+              {interest}
+            </span>
+          ))}
+        </div>
+
+        <div className='flex items-center justify-between pt-4 border-t border-gray-700'>
+          <div className='flex items-center text-gray-400 text-sm'>
+            <Calendar className='w-4 h-4 mr-2' />
+            Matched {formatDistanceToNow(matchedAt)} ago
+          </div>
+          <div className='flex items-center gap-2'>
+            <Link
+              href={`/wallet/${addressA}/${addressB}`}
+              className='flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-full text-sm hover:bg-gray-600 transition-colors'
+            >
+              <Wallet className='w-4 h-4' />
+              Wallet
+            </Link>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className='flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-full text-sm hover:bg-primary-600 transition-colors'
+            >
+              <MessageCircle className='w-4 h-4' />
+              Message
+            </motion.button>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+export default UserMatchCard;

@@ -23,6 +23,7 @@ const useSession = (): {
   const pathName = usePathname();
 
   const isAuthRoute = pathName.startsWith('/auth/sign');
+  const isAdminRoute = pathName.startsWith('/admin');
 
   useEffect(() => {
     const validateSession = async () => {
@@ -37,7 +38,7 @@ const useSession = (): {
         setStatus(cachedSessionData.user ? 'authenticated' : 'unauthenticated');
         setData(cachedSessionData);
 
-        if (!cachedSessionData.user && !isAuthRoute) {
+        if (!cachedSessionData.user && !isAuthRoute && !isAdminRoute) {
           router.replace('/auth/signin');
         } else if (cachedSessionData.user && isAuthRoute) {
           router.replace('/');
@@ -50,7 +51,7 @@ const useSession = (): {
 
         if (!accessToken) {
           setStatus('unauthenticated');
-          if (!isAuthRoute) {
+          if (!isAuthRoute && !isAdminRoute) {
             router.replace('/auth/signin');
           }
           return;
@@ -69,7 +70,7 @@ const useSession = (): {
           }
         } else {
           setStatus('unauthenticated');
-          if (!isAuthRoute) {
+          if (!isAuthRoute && !isAdminRoute) {
             router.replace('/auth/signin');
           }
         }
@@ -77,7 +78,7 @@ const useSession = (): {
         lastValidationTime = currentTime;
         cachedSessionData = { expires: new Date(), user: null };
         setStatus('unauthenticated');
-        if (!isAuthRoute) {
+        if (!isAuthRoute && !isAdminRoute) {
           router.replace('/auth/signin');
         }
       }

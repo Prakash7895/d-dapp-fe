@@ -103,3 +103,13 @@ export type AllUsers = UserResponse & {
 export type LikdedUser = AllUsers & {
   likedAt: string;
 };
+
+export type MatchedUser = AllUsers & {
+  matchedAt: string;
+  addressA: string;
+  addressB: string;
+};
+
+export type UserByAddress = UserResponse & {
+  lastActiveOn: string | null;
+};
