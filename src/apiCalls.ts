@@ -348,3 +348,11 @@ export const getUserByAddress = (address: string) =>
       toast.error(err?.message || 'Failed to get user by address');
       return { status: 'error' } as ApiResponse;
     });
+
+export const getUserMultiSigWallets = (address: string) =>
+  axiosInstance
+    .get(`/users/my-multi-sig-wallets/${address}`)
+    .then((res) => res.data as ApiResponse<{ multiSigWallets: string[] }>)
+    .catch(() => {
+      return { status: 'error' } as ApiResponse;
+    });

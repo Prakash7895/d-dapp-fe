@@ -1,15 +1,18 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Heart } from 'lucide-react';
+import { Heart, Wallet } from 'lucide-react';
 import UserMatchCard from '@/components/UserMatchCard';
 import { getMatchedUsers } from '@/apiCalls';
 import { MatchedUser } from '@/types/user';
+import { useStateContext } from '@/components/StateProvider';
 
 const MatchesPage = () => {
   const [matches, setMatches] = useState<MatchedUser[]>([]);
+  const { totalBalance, getMulitSigBalances } = useStateContext();
 
   useEffect(() => {
+    getMulitSigBalances();
     getMatchedUsers(1).then((res) => {
       if (res.status === 'success') {
         setMatches(res.data?.users ?? []);
@@ -36,9 +39,19 @@ const MatchesPage = () => {
       >
         <div className='flex items-center justify-between mb-8'>
           <h1 className='text-3xl font-bold text-white'>Your Matches</h1>
-          <div className='flex items-center gap-2'>
-            <Heart className='text-primary-500 w-6 h-6' />
-            <span className='text-gray-400'>{matches.length} matches</span>
+          <div className='flex items-center gap-6'>
+            {!!totalBalance && (
+              <div className='flex items-center gap-2 bg-gray-800/50 px-4 py-2 rounded-lg'>
+                <Wallet className='text-primary-500 w-5 h-5' />
+                <span className='text-white font-medium'>
+                  {totalBalance || 0} ETH
+                </span>
+              </div>
+            )}
+            <div className='flex items-center gap-2'>
+              <Heart className='text-primary-500 w-6 h-6' />
+              <span className='text-gray-400'>{matches.length} matches</span>
+            </div>
           </div>
         </div>
 

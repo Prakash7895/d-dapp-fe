@@ -13,6 +13,8 @@ import {
 } from '@/components/EthereumProvider';
 import { getMultiSigWalletAddress } from '@/apiCalls';
 import { UserResponse } from '@/types/user';
+import { useStateContext } from '@/components/StateProvider';
+import AnimatedTooltip from '@/components/AnimatedTooltip';
 
 export default function WalletPage({
   params,
@@ -27,6 +29,7 @@ export default function WalletPage({
   const [walletAddress, setWalletAddress] = useState('');
   const { provider } = useEthereum();
   const [ownerUsers, setOwnerUsers] = useState<UserResponse[]>([]);
+  const { userInfo } = useStateContext();
 
   const walletContract = useMultiSigWalletContract(walletAddress);
 
@@ -156,6 +159,20 @@ export default function WalletPage({
     }
   };
 
+  const inactivateProposal = async (index: number) => {
+    if (!walletContract) return;
+
+    try {
+      const tx = await walletContract.inactivateProposal(index);
+      await tx.wait();
+      toast.success('Proposal inactivated successfully');
+      await fetchWalletInfo();
+    } catch (error) {
+      console.error('Error inactivating proposal:', error);
+      toast.error('Failed to inactivate proposal');
+    }
+  };
+
   if (isLoading) {
     return (
       <div className='min-h-screen bg-gray-900 flex items-center justify-center'>
@@ -176,11 +193,14 @@ export default function WalletPage({
         className='max-w-4xl mx-auto space-y-8'
       >
         <div className='bg-gray-800 rounded-lg p-6'>
-          <div className='flex items-center gap-3 mb-6'>
-            <Wallet className='w-6 h-6 text-primary-500' />
-            <h1 className='text-2xl font-bold text-white'>
-              Multi-Signature Wallet
-            </h1>
+          <div className='flex items-start gap-3 mb-6'>
+            <Wallet className='w-6 h-6 text-primary-500 mt-1.5' />
+            <div className='flex flex-col'>
+              <h1 className='text-2xl font-bold text-white'>
+                Multi-Signature Wallet
+              </h1>
+              <small>{walletInfo?.address}</small>
+            </div>
           </div>
 
           <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-8'>
@@ -280,10 +300,10 @@ export default function WalletPage({
                   <div key={index} className='bg-gray-800 p-4 rounded-lg'>
                     <div className='flex items-center justify-between mb-2'>
                       <div className='flex items-center gap-2'>
-                        {proposal.status === ProposalStatus.ACTIVE ? (
-                          <Clock className='w-4 h-4 text-yellow-500' />
-                        ) : proposal.executed ? (
+                        {proposal.executed ? (
                           <CheckCircle2 className='w-4 h-4 text-green-500' />
+                        ) : proposal.status === ProposalStatus.ACTIVE ? (
+                          <Clock className='w-4 h-4 text-yellow-500' />
                         ) : (
                           <XCircle className='w-4 h-4 text-red-500' />
                         )}
@@ -304,15 +324,59 @@ export default function WalletPage({
                           Approvals: {proposal.approvals}/
                           {walletInfo.requiredApprovals}
                         </span>
+                        <div className='flex gap-2 ml-2'>
+                          {walletInfo.owners.map((owner) => (
+                            <AnimatedTooltip
+                              key={owner}
+                              tooltipContent={`${owner.slice(
+                                0,
+                                6
+                              )}...${owner.slice(-4)} ${
+                                proposal.approved[owner.toLowerCase()]
+                                  ? 'Approved'
+                                  : 'Not Approved'
+                              }`}
+                            >
+                              <div
+                                className={`w-2 h-2 rounded-full ${
+                                  proposal.approved[owner.toLowerCase()]
+                                    ? 'bg-green-500'
+                                    : 'bg-gray-600'
+                                }`}
+                                title={`${owner.slice(0, 6)}...${owner.slice(
+                                  -4
+                                )} ${
+                                  proposal.approved[owner.toLowerCase()]
+                                    ? 'Approved'
+                                    : 'Not Approved'
+                                }`}
+                              />
+                            </AnimatedTooltip>
+                          ))}
+                        </div>
                       </div>
-                      {proposal.status === ProposalStatus.ACTIVE &&
-                        !proposal.executed && (
-                          <Button
-                            onClick={() => approveProposal(index)}
-                            label='Approve'
-                            className='px-4 py-2'
-                          />
-                        )}
+                      <div className='flex gap-2 items-center'>
+                        {proposal.status === ProposalStatus.ACTIVE &&
+                          !proposal.executed && (
+                            <>
+                              {userInfo?.walletAddress &&
+                                !proposal.approved[
+                                  userInfo.walletAddress?.toLowerCase()
+                                ] && (
+                                  <Button
+                                    onClick={() => approveProposal(index)}
+                                    label='Approve'
+                                    className='px-4 py-2'
+                                  />
+                                )}
+                              <Button
+                                onClick={() => inactivateProposal(index)}
+                                label='Cancel'
+                                className='px-4 py-2 !bg-red-500 hover:!bg-red-600'
+                              />
+                            </>
+                          )}
+                      </div>
                     </div>
                   </div>
                 ))}

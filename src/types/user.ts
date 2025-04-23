@@ -5,6 +5,7 @@ import {
   GenderType,
   SexualOrientationType,
 } from '@/apiSchemas';
+import { MultiSigWallet } from './wallet';
 
 export type IForm = {
   firstName: string;
@@ -112,4 +113,5 @@ export type MatchedUser = AllUsers & {
 
 export type UserByAddress = UserResponse & {
   lastActiveOn: string | null;
+  multiSigWallet: Omit<MultiSigWallet, 'userA' | 'userB'>;
 };

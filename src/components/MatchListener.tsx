@@ -155,12 +155,11 @@ const MatchListener: FC<{ children: ReactNode }> = ({ children }) => {
       <MatchAnimation
         matchedProfile={matchedUser}
         showMatch={!!matchedUser}
-        multiSigBalance={0.06}
         onClose={() => {
           setMatchedUser(null);
         }}
       />
-      {children};
+      {children}
     </>
   );
 };

@@ -1,8 +1,8 @@
 import { UserResponse } from './user';
 
 export enum ProposalStatus {
-  ACTIVE = 0,
-  INACTIVE = 1,
+  INACTIVE = 0,
+  ACTIVE = 1,
 }
 
 export interface Proposal {

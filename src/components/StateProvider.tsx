@@ -13,9 +13,11 @@ import React, {
 import ScreenLoader from './ScreenLoader';
 import MainLayout from './MainLayout';
 import { UserResponse } from '@/types/user';
-import { getUserInfo } from '@/apiCalls';
+import { getUserInfo, getUserMultiSigWallets } from '@/apiCalls';
 import WalletHandler from './WalletHandler';
 import MatchListener from './MatchListener';
+import { useEthereum } from './EthereumProvider';
+import { formatEther } from 'ethers';
 
 const Context = createContext<{
   selectedAddress: string;
@@ -28,6 +30,8 @@ const Context = createContext<{
   getUpdatedProfileNft: () => Promise<void>;
   userInfo: UserResponse | null;
   setUserInfo: React.Dispatch<React.SetStateAction<UserResponse | null>>;
+  totalBalance: number | null;
+  getMulitSigBalances: () => Promise<void>;
 }>({
   selectedAddress: '',
   setSelectedAddress: () => {},
@@ -39,6 +43,8 @@ const Context = createContext<{
   getUpdatedProfileNft: () => new Promise((r) => r),
   userInfo: null,
   setUserInfo: () => {},
+  totalBalance: null,
+  getMulitSigBalances: () => new Promise((r) => r),
 });
 
 const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
@@ -47,6 +53,9 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [tokedIds, setTokedIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
   const [userInfo, setUserInfo] = useState<UserResponse | null>(null);
+  const [multiSigWallets, setMultiSigWallets] = useState<string[]>([]);
+  const [totalBalance, setTotalBalance] = useState<number | null>(null);
+  const { provider } = useEthereum();
 
   useEffect(() => {
     setLoading(true);
@@ -70,6 +79,33 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
       );
     }
   }, [userInfo]);
+
+  useEffect(() => {
+    if (userInfo?.walletAddress) {
+      getUserMultiSigWallets(userInfo.walletAddress).then((res) => {
+        if (res.status === 'success') {
+          setMultiSigWallets(res.data?.multiSigWallets!);
+        }
+      });
+    }
+  }, [userInfo]);
+
+  const getMulitSigBalances = useCallback(async () => {
+    if (multiSigWallets.length) {
+      let total = 0;
+      for (let i = 0; i < multiSigWallets.length; i++) {
+        const bal = await provider?.getBalance(multiSigWallets[i]);
+        if (bal) {
+          total += +formatEther(bal);
+        }
+      }
+      setTotalBalance(total);
+    }
+  }, [provider, multiSigWallets, setTotalBalance]);
+
+  useEffect(() => {
+    getMulitSigBalances();
+  }, [multiSigWallets]);
 
   const getCurrUsersTokenIds = useCallback(
     () =>
@@ -110,6 +146,8 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
       getUpdatedProfileNft,
       userInfo,
       setUserInfo,
+      totalBalance,
+      getMulitSigBalances,
     }),
     [
       selectedAddress,
@@ -122,6 +160,8 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
       getUpdatedProfileNft,
       userInfo,
       setUserInfo,
+      totalBalance,
+      getMulitSigBalances,
     ]
   );
 
