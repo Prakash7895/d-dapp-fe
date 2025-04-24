@@ -8,6 +8,7 @@ import {
   User,
   LogOut,
   HeartHandshake,
+  MessageSquare,
 } from 'lucide-react';
 import useSession from '../hooks/useSession';
 import useClickOutside from '../hooks/useClickOutside';
@@ -17,7 +18,7 @@ import { getSignedUrl, logout } from '@/apiCalls';
 import { useStateContext } from './StateProvider';
 
 export default function Navbar() {
-  const { data: session } = useSession();
+  const { data: session, clearSession } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const { activeProfilePhoto, userInfo } = useStateContext();
@@ -35,6 +36,7 @@ export default function Navbar() {
         sessionStorage.removeItem('accessToken');
         sessionStorage.removeItem('refreshToken');
         sessionStorage.removeItem('savedWalletAddress');
+        clearSession();
         router.replace('/auth/signin');
       }
     });
@@ -112,17 +114,18 @@ export default function Navbar() {
                   <HeartHandshake className='h-5 w-5' />
                   <span>Matches</span>
                 </Link>
-                {/* <Link
-                  href='/messages'
+
+                <Link
+                  href='/chat'
                   className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
-                    pathname === '/messages'
+                    pathname.includes('/chat')
                       ? 'bg-gray-800 text-white'
                       : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
                   }`}
                 >
                   <MessageSquare className='h-5 w-5' />
                   <span>Messages</span>
-                </Link> */}
+                </Link>
               </div>
             )}
           </div>
@@ -160,7 +163,7 @@ export default function Navbar() {
                 </button>
 
                 {isMenuOpen && (
-                  <div className='absolute right-0 mt-2 w-64 rounded-xl shadow-lg bg-gray-800/95 backdrop-blur-sm border border-gray-700/50 overflow-hidden'>
+                  <div className='absolute z-[999] right-0 mt-2 w-64 rounded-xl shadow-lg bg-gray-800/95 backdrop-blur-sm border border-gray-700/50 overflow-hidden'>
                     <div className='p-4 border-b border-gray-700/50'>
                       <div className='font-medium text-white'>
                         {name || 'User'}

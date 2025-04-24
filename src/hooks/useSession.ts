@@ -1,7 +1,7 @@
 import axiosInstance from '@/apiCalls';
 import { SessionResponse } from '@/types/user';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 // Cache storage outside the component to persist between renders
 let lastValidationTime: number | null = null;
@@ -11,6 +11,8 @@ const VALIDATION_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
 const useSession = (): {
   status: 'loading' | 'authenticated' | 'unauthenticated';
   data: SessionResponse;
+  clearSession: () => void;
+  fetchSession: () => Promise<void>;
 } => {
   const [status, setStatus] = useState<
     'loading' | 'authenticated' | 'unauthenticated'
@@ -24,6 +26,33 @@ const useSession = (): {
 
   const isAuthRoute = pathName.startsWith('/auth/sign');
   const isAdminRoute = pathName.startsWith('/admin');
+
+  const clearSession = useCallback(() => {
+    lastValidationTime = Date.now();
+    cachedSessionData = { expires: new Date(), user: null };
+    setStatus('unauthenticated');
+  }, []);
+
+  const fetchSession = useCallback(async () => {
+    const currentTime = Date.now();
+    const res = await axiosInstance.get('/auth/validate');
+
+    lastValidationTime = currentTime;
+    cachedSessionData = res.data?.data;
+
+    if (res.data?.data?.user?.userId) {
+      setStatus('authenticated');
+      setData(res.data?.data);
+      if (isAuthRoute) {
+        router.replace('/');
+      }
+    } else {
+      setStatus('unauthenticated');
+      if (!isAuthRoute && !isAdminRoute) {
+        router.replace('/auth/signin');
+      }
+    }
+  }, [router]);
 
   useEffect(() => {
     const validateSession = async () => {
@@ -56,24 +85,7 @@ const useSession = (): {
           }
           return;
         }
-
-        const res = await axiosInstance.get('/auth/validate');
-
-        lastValidationTime = currentTime;
-        cachedSessionData = res.data?.data;
-
-        if (res.data?.data?.user?.userId) {
-          setStatus('authenticated');
-          setData(res.data?.data);
-          if (isAuthRoute) {
-            router.replace('/');
-          }
-        } else {
-          setStatus('unauthenticated');
-          if (!isAuthRoute && !isAdminRoute) {
-            router.replace('/auth/signin');
-          }
-        }
+        fetchSession();
       } catch (err: any) {
         lastValidationTime = currentTime;
         cachedSessionData = { expires: new Date(), user: null };
@@ -85,11 +97,13 @@ const useSession = (): {
     };
 
     validateSession();
-  }, [router, pathName]);
+  }, [router, pathName, fetchSession]);
 
   return {
     status,
     data,
+    clearSession,
+    fetchSession,
   };
 };
 

@@ -6,6 +6,7 @@ import {
   SexualOrientationType,
 } from '@/apiSchemas';
 import { MultiSigWallet } from './wallet';
+import { ChatMessage } from './message';
 
 export type IForm = {
   firstName: string;
@@ -114,4 +115,9 @@ export type MatchedUser = AllUsers & {
 export type UserByAddress = UserResponse & {
   lastActiveOn: string | null;
   multiSigWallet: Omit<MultiSigWallet, 'userA' | 'userB'>;
+};
+
+export type ChatUser = UserProfile & {
+  roomId: string;
+  lastMessage: ChatMessage | null;
 };

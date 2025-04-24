@@ -38,6 +38,15 @@ interface ContractState {
   isLoading: boolean;
   balanceMatchMaking: string;
   balanceSoulboundNft: string;
+  matchMakingMaxAmountCanWithdraw: string;
+}
+
+const enum ActiveFields {
+  TRANSFER = 'transfer',
+  AMOUNT = 'amount',
+  EXPIRATION_DAYS = 'expirationDays',
+  MINT_FEE = 'mintFee',
+  COMMISSION = 'commission',
 }
 
 const containerVariants = {
@@ -86,17 +95,17 @@ const AdminPage = () => {
     commission: 0,
     balanceMatchMaking: '',
     balanceSoulboundNft: '',
+    matchMakingMaxAmountCanWithdraw: '',
   });
   const [newValues, setNewValues] = useState({
-    amount: '',
-    expirationDays: '',
-    mintFee: '',
-    commission: '',
+    [ActiveFields.AMOUNT]: '',
+    [ActiveFields.EXPIRATION_DAYS]: '',
+    [ActiveFields.MINT_FEE]: '',
+    [ActiveFields.COMMISSION]: '',
+    [ActiveFields.TRANSFER]: '',
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeField, setActiveField] = useState<
-    'amount' | 'expirationDays' | 'mintFee' | 'commission' | null
-  >(null);
+  const [activeField, setActiveField] = useState<ActiveFields | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const isOwner = address?.toLowerCase() === state.owner?.toLowerCase();
@@ -113,6 +122,7 @@ const AdminPage = () => {
         owner,
         expirationDays,
         s_commission,
+        s_maxAmountCanWithdraw,
         balanceMatchMaking,
         nftOwner,
         mintFee,
@@ -123,6 +133,7 @@ const AdminPage = () => {
         matchMakingContract.s_owner(),
         matchMakingContract.s_likeExpirationDays(),
         matchMakingContract.s_commission(),
+        matchMakingContract.s_maxAmountCanWithdraw(),
         provider?.getBalance(process.env.NEXT_PUBLIC_MATCH_MAKING_ADDRESS!),
         // SoulboundNFT Contract
         soulboundNftContract.s_owner(),
@@ -140,6 +151,7 @@ const AdminPage = () => {
         isLoading: false,
         balanceMatchMaking: formatEther(balanceMatchMaking!),
         balanceSoulboundNft: formatEther(balanceSoulboundNft!),
+        matchMakingMaxAmountCanWithdraw: formatEther(s_maxAmountCanWithdraw),
       });
     } catch (error) {
       console.log('Error fetching contract state:', error);
@@ -156,23 +168,21 @@ const AdminPage = () => {
     }
   }, [matchMakingContract, soulboundNftContract]);
 
-  const handleUpdate = async (
-    field: 'amount' | 'expirationDays' | 'mintFee' | 'commission'
-  ) => {
+  const handleUpdate = async (field: ActiveFields) => {
     if (!matchMakingContract || !soulboundNftContract || !isOwner) return;
 
     try {
       let tx;
       setIsUpdating(true);
-      if (field === 'amount') {
+      if (field === ActiveFields.AMOUNT) {
         tx = await matchMakingContract.setAmount(parseEther(newValues.amount));
-      } else if (field == 'expirationDays') {
+      } else if (field == ActiveFields.EXPIRATION_DAYS) {
         tx = await matchMakingContract.setLikeExpirationDays(
           Number(newValues.expirationDays)
         );
-      } else if (field === 'mintFee') {
+      } else if (field === ActiveFields.MINT_FEE) {
         tx = await soulboundNftContract.setAmount(Number(newValues.mintFee));
-      } else if (field === 'commission') {
+      } else if (field === ActiveFields.COMMISSION) {
         tx = await matchMakingContract.setCommission(
           Number(newValues.commission)
         );
@@ -190,10 +200,10 @@ const AdminPage = () => {
     }
   };
 
-  const handleOpenModal = (
-    field: 'amount' | 'expirationDays' | 'mintFee' | 'commission'
-  ) => {
-    setNewValues((p) => ({ ...p, [field]: state[field] }));
+  const handleOpenModal = (field: ActiveFields) => {
+    if (field !== ActiveFields.TRANSFER) {
+      setNewValues((p) => ({ ...p, [field]: state[field] }));
+    }
     setActiveField(field);
     setIsModalOpen(true);
   };
@@ -203,6 +213,24 @@ const AdminPage = () => {
     await handleUpdate(activeField);
     setIsModalOpen(false);
     setActiveField(null);
+  };
+
+  const handleTransferToOwner = async (amount: string) => {
+    if (!matchMakingContract || !isOwner) return;
+
+    try {
+      setIsUpdating(true);
+      const tx = await matchMakingContract.transferToOwner(parseEther(amount));
+      await tx.wait();
+      await fetchContractState(); // Refresh contract state
+      toast.success('Successfully transferred funds to owner');
+      setIsModalOpen(false);
+    } catch (error: any) {
+      console.log('Error transferring funds:', error);
+      toast.error('Failed to transfer funds');
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   if (state.isLoading) {
@@ -297,14 +325,23 @@ const AdminPage = () => {
         <ModalBody className='w-full max-w-md'>
           <ModalContent>
             <h2 className='text-xl font-bold mb-4'>
-              Update{' '}
-              {activeField === 'amount' ? 'Like Amount' : 'Expiration Days'}
+              {activeField === ActiveFields.TRANSFER
+                ? 'Transfer Funds to Owner'
+                : `Update ${
+                    activeField === 'amount' ? 'Like Amount' : 'Expiration Days'
+                  }`}
             </h2>
             <div className='space-y-4'>
               <input
                 type='number'
-                step={activeField === 'amount' ? '0.001' : '1'}
-                value={newValues[activeField || 'amount']}
+                step={
+                  activeField === ActiveFields.TRANSFER
+                    ? '0.001'
+                    : activeField === 'amount'
+                    ? '0.001'
+                    : '1'
+                }
+                value={newValues[activeField || ActiveFields.AMOUNT]}
                 onChange={(e) =>
                   setNewValues((prev) => ({
                     ...prev,
@@ -313,7 +350,9 @@ const AdminPage = () => {
                 }
                 className='w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white'
                 placeholder={
-                  activeField === 'amount'
+                  activeField === ActiveFields.TRANSFER
+                    ? 'Enter amount to transfer in ETH'
+                    : activeField === 'amount'
                     ? 'Enter amount in ETH'
                     : 'Enter number of days'
                 }
@@ -322,10 +361,16 @@ const AdminPage = () => {
           </ModalContent>
           <ModalFooter>
             <Button
-              onClick={handleSave}
+              onClick={
+                activeField === ActiveFields.TRANSFER
+                  ? () => handleTransferToOwner(newValues.transfer)
+                  : handleSave
+              }
               isLoading={isUpdating}
-              label='Save Changes'
-              loadingLabel='Saving...'
+              label={activeField === 'transfer' ? 'Transfer' : 'Save Changes'}
+              loadingLabel={
+                activeField === 'transfer' ? 'Transferring...' : 'Saving...'
+              }
               disabled={!isOwner || isUpdating}
               className='w-full'
             />
@@ -387,7 +432,6 @@ const AdminPage = () => {
                       </div>
                     </div>
                   </motion.div>
-
                   <motion.div
                     variants={itemVariants}
                     className='bg-gray-700/50 p-4 rounded-lg'
@@ -395,10 +439,31 @@ const AdminPage = () => {
                     <div className='flex items-center justify-between'>
                       <h3 className='text-gray-400'>Contract Balance</h3>
                       <div className='flex items-center gap-2'>
-                        <Lock className='w-4 h-4 text-gray-500' />
                         <span className='font-mono text-sm text-gray-300'>
-                          {state.balanceMatchMaking}
+                          {state.balanceMatchMaking} ETH
                         </span>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    variants={itemVariants}
+                    className='bg-gray-700/50 p-4 rounded-lg'
+                  >
+                    <div className='flex items-center justify-between'>
+                      <h3 className='text-gray-400'>Max Amount Withdrawable</h3>
+                      <div className='flex items-center gap-4'>
+                        <Button
+                          onClick={() => handleOpenModal(ActiveFields.TRANSFER)}
+                          label='Transfer to Owner'
+                          className='px-4 py-2 bg-primary-500 hover:enabled:bg-primary-600 !w-fit'
+                          disabled={
+                            !isOwner || !+state.matchMakingMaxAmountCanWithdraw
+                          }
+                        />
+                        <p className='font-mono text-sm text-right text-gray-300'>
+                          {`${state.matchMakingMaxAmountCanWithdraw} ETH`}
+                        </p>
                       </div>
                     </div>
                   </motion.div>
@@ -414,7 +479,7 @@ const AdminPage = () => {
                         <span className='text-white'>{state.amount} ETH</span>
                         {isOwner && (
                           <button
-                            onClick={() => handleOpenModal('amount')}
+                            onClick={() => handleOpenModal(ActiveFields.AMOUNT)}
                             className='p-2 hover:bg-gray-600 rounded-full'
                           >
                             <Edit2 className='w-4 h-4 text-gray-400' />
@@ -437,7 +502,9 @@ const AdminPage = () => {
                         </span>
                         {isOwner && (
                           <button
-                            onClick={() => handleOpenModal('expirationDays')}
+                            onClick={() =>
+                              handleOpenModal(ActiveFields.EXPIRATION_DAYS)
+                            }
                             className='p-2 hover:bg-gray-600 rounded-full'
                           >
                             <Edit2 className='w-4 h-4 text-gray-400' />
@@ -458,7 +525,9 @@ const AdminPage = () => {
                         <span className='text-white'>{state.commission}%</span>
                         {isOwner && (
                           <button
-                            onClick={() => handleOpenModal('commission')}
+                            onClick={() =>
+                              handleOpenModal(ActiveFields.COMMISSION)
+                            }
                             className='p-2 hover:bg-gray-600 rounded-full'
                           >
                             <Edit2 className='w-4 h-4 text-gray-400' />
@@ -520,7 +589,9 @@ const AdminPage = () => {
                         <span className='text-white'>{state.mintFee} ETH</span>
                         {isOwner && (
                           <button
-                            onClick={() => handleOpenModal('mintFee')}
+                            onClick={() =>
+                              handleOpenModal(ActiveFields.MINT_FEE)
+                            }
                             className='p-2 hover:bg-gray-600 rounded-full'
                           >
                             <Edit2 className='w-4 h-4 text-gray-400' />

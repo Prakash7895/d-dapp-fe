@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 // } from './apiSchemas';
 import {
   AllUsers,
+  ChatUser,
   LikdedUser,
   MatchedUser,
   UserByAddress,
@@ -17,6 +18,7 @@ import {
 import { S3File } from './hooks/useUserFiles';
 import axios from 'axios';
 import { MultiSigWallet } from './types/wallet';
+import { ChatMessage } from './types/message';
 
 interface ApiResponse<T = null> {
   status: 'success' | 'error';
@@ -354,5 +356,23 @@ export const getUserMultiSigWallets = (address: string) =>
     .get(`/users/my-multi-sig-wallets/${address}`)
     .then((res) => res.data as ApiResponse<{ multiSigWallets: string[] }>)
     .catch(() => {
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const getChats = (pageNo: number, pageSize = 10) =>
+  axiosInstance
+    .get(`/chat?pageNo=${pageNo}&pageSize=${pageSize}`)
+    .then((res) => res.data as ApiResponse<ChatUser[]>)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to update user info');
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const getMessages = (roomId: string, pageNo: number, pageSize = 10) =>
+  axiosInstance
+    .get(`/chat/${roomId}?pageNo=${pageNo}&pageSize=${pageSize}`)
+    .then((res) => res.data as ApiResponse<ChatMessage[]>)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to update user info');
       return { status: 'error' } as ApiResponse;
     });

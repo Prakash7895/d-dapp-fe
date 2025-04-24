@@ -19,7 +19,7 @@ import MatchListener from './MatchListener';
 import { useEthereum } from './EthereumProvider';
 import { formatEther } from 'ethers';
 
-const Context = createContext<{
+interface ContextState {
   selectedAddress: string;
   setSelectedAddress: React.Dispatch<React.SetStateAction<string>>;
   activeProfilePhoto: string;
@@ -32,20 +32,11 @@ const Context = createContext<{
   setUserInfo: React.Dispatch<React.SetStateAction<UserResponse | null>>;
   totalBalance: number | null;
   getMulitSigBalances: () => Promise<void>;
-}>({
-  selectedAddress: '',
-  setSelectedAddress: () => {},
-  activeProfilePhoto: '',
-  setActiveProfilePhoto: () => {},
-  tokedIds: [],
-  setTokedIds: () => {},
-  getCurrUsersTokenIds: () => new Promise((r) => r),
-  getUpdatedProfileNft: () => new Promise((r) => r),
-  userInfo: null,
-  setUserInfo: () => {},
-  totalBalance: null,
-  getMulitSigBalances: () => new Promise((r) => r),
-});
+  multiSigWallets: string[];
+  fetchMultiSigWallets: () => Promise<void> | undefined;
+}
+
+const Context = createContext<ContextState>({} as ContextState);
 
 const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [selectedAddress, setSelectedAddress] = useState('');
@@ -80,9 +71,9 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
     }
   }, [userInfo]);
 
-  useEffect(() => {
+  const fetchMultiSigWallets = useCallback(() => {
     if (userInfo?.walletAddress) {
-      getUserMultiSigWallets(userInfo.walletAddress).then((res) => {
+      return getUserMultiSigWallets(userInfo.walletAddress).then((res) => {
         if (res.status === 'success') {
           setMultiSigWallets(res.data?.multiSigWallets!);
         }
@@ -90,15 +81,26 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
     }
   }, [userInfo]);
 
+  useEffect(() => {
+    fetchMultiSigWallets();
+  }, [userInfo]);
+
   const getMulitSigBalances = useCallback(async () => {
     if (multiSigWallets.length) {
       let total = 0;
+      let totalWei = BigInt(0);
       for (let i = 0; i < multiSigWallets.length; i++) {
         const bal = await provider?.getBalance(multiSigWallets[i]);
+        console.log('BAL:', bal!.toString());
         if (bal) {
           total += +formatEther(bal);
+          totalWei += bal;
         }
       }
+      console.log('total:', total);
+      const totalEth = parseFloat(formatEther(totalWei));
+      console.log('Total in Wei:', totalWei.toString());
+      console.log('Total in ETH:', totalEth);
       setTotalBalance(total);
     }
   }, [provider, multiSigWallets, setTotalBalance]);
@@ -148,6 +150,8 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
       setUserInfo,
       totalBalance,
       getMulitSigBalances,
+      multiSigWallets,
+      fetchMultiSigWallets,
     }),
     [
       selectedAddress,
@@ -162,6 +166,8 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
       setUserInfo,
       totalBalance,
       getMulitSigBalances,
+      multiSigWallets,
+      fetchMultiSigWallets,
     ]
   );
 

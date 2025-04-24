@@ -67,7 +67,7 @@ const MatchAnimation: React.FC<MatchAnimationProps> = ({
 
   return (
     <Modal open={showMatch} setOpen={() => onClose()}>
-      <ModalTrigger>
+      <ModalTrigger className='absolute'>
         <span className='absolute'></span>
       </ModalTrigger>
       <ModalBody className='max-w-[50%]'>

@@ -6,13 +6,13 @@ import StateProvider from './StateProvider';
 import useSession from '@/hooks/useSession';
 import EthereumProvider from './EthereumProvider';
 import { ToastContainer } from 'react-toastify';
+import ChatProvider from './Chat/ChatProvider';
 
 const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const { status } = useSession();
-  console.log('status', status);
+
   const router = useRouter();
   const pathname = usePathname();
-  console.log('pathname', pathname);
 
   const isAuthRoute = pathname.startsWith('/auth/sign');
   const isAdminRoute = pathname.startsWith('/admin');
@@ -29,7 +29,9 @@ const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   ) : status === 'unauthenticated' ? (
     children
   ) : (
-    <StateProvider>{children}</StateProvider>
+    <StateProvider>
+      <ChatProvider>{children}</ChatProvider>
+    </StateProvider>
   );
 };
 

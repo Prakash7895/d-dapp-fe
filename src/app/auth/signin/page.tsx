@@ -13,7 +13,7 @@ import { login } from '@/apiCalls';
 
 export default function SignIn() {
   const router = useRouter();
-  const { status } = useSession();
+  const { status, fetchSession } = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -33,11 +33,12 @@ export default function SignIn() {
     setError('');
 
     try {
-      login({ type: 'email', email, password }).then((res) => {
+      login({ type: 'email', email, password }).then(async (res) => {
         console.log('res', res);
         if (res.status === 'success') {
           sessionStorage.setItem('accessToken', res.data?.access_token!);
           sessionStorage.setItem('refreshToken', res.data?.refresh_token!);
+          await fetchSession();
           router.push('/');
         } else {
           setError(res?.message || 'An error occurred');
@@ -79,10 +80,11 @@ export default function SignIn() {
         type: 'wallet',
         walletAddress: address,
         signedMessage: signature,
-      }).then((res) => {
+      }).then(async (res) => {
         if (res.status === 'success') {
           sessionStorage.setItem('accessToken', res.data?.access_token!);
           sessionStorage.setItem('refreshToken', res.data?.refresh_token!);
+          await fetchSession();
           router.push('/');
         } else {
           if (res.message?.includes('sign up')) {

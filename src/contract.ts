@@ -1,9 +1,9 @@
 'use client';
 import { ethers, formatEther } from 'ethers';
 import soulboundNftAbi from '@/abis/SooulboundNft.json';
-import matchMakingAbi from '@/abis/MatchMaking.json';
 
 import { Contract } from 'ethers';
+import { toast } from 'react-toastify';
 
 interface EthereumProvider {
   request: (args: { method: string }) => Promise<string[]>;
@@ -275,6 +275,23 @@ export const changeProfileNft = async (tokenId: number) => {
   }
 };
 
+const handleLikeError = (error: any) => {
+  if (error?.code === -32603) {
+    if (error.message.includes('insufficient funds')) {
+      toast.error('Insufficient funds to complete transaction');
+    } else if (error.message.includes('user rejected')) {
+      toast.error('Transaction rejected by user');
+    } else {
+      toast.error(
+        'Transaction failed. Please check your wallet balance and try again'
+      );
+    }
+  } else {
+    toast.error('Failed to like profile. Please try again');
+  }
+  console.log('Like profile error:', error);
+};
+
 export const likeProfile = async (
   contract: Contract | null,
   targetAddress: string
@@ -288,6 +305,7 @@ export const likeProfile = async (
     await contract.like(targetAddress, { value: amount });
   } catch (error: unknown) {
     console.log('like profile error', error);
+    handleLikeError(error);
     throw error;
   }
 };
