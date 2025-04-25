@@ -120,4 +120,5 @@ export type UserByAddress = UserResponse & {
 export type ChatUser = UserProfile & {
   roomId: string;
   lastMessage: ChatMessage | null;
+  unreadCount: number;
 };

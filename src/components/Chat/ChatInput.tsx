@@ -1,17 +1,52 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ImageIcon, Send } from 'lucide-react';
-import { useMessages } from './MessageProvider';
+import { sendMessage, startTyping, stopTyping } from '@/socket';
+import { ChatMessage } from '@/types/message';
+import { useStateContext } from '../StateProvider';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { addNewMessage, updateMessage } from '@/store/MessageReducer';
 
 const ChatInput = () => {
   const [message, setMessage] = useState('');
   const [notified, setNotified] = useState(false);
+  const dispatch = useAppDispatch();
+  const { userInfo } = useStateContext();
 
-  const { sendMessage, startTyping, stopTyping } = useMessages();
+  const { activeRoomId } = useAppSelector('chat');
+  const [sending, setSending] = useState(false);
 
   const handleSend = () => {
-    if (!message.trim()) return;
-    sendMessage(message);
+    console.log('Sending message:', message);
+    console.log('[handleSend] sending:', sending);
+    if (!message.trim() || sending) return;
+    setSending(true);
+    const newMessage: ChatMessage = {
+      content: message,
+      createdAt: new Date().toString(),
+      read: false,
+      received: false,
+      roomId: activeRoomId,
+      senderId: userInfo?.id!,
+      id: new Date().getTime().toString(),
+      updatedAt: new Date().toString(),
+      pending: true,
+    };
+    dispatch(addNewMessage(newMessage));
+
+    sendMessage(message, activeRoomId, (savedMsg) => {
+      console.log('[handleSend] savedMsg:', savedMsg.id);
+      dispatch(
+        updateMessage({
+          data: { ...savedMsg, pending: false },
+          messageId: newMessage.id,
+        })
+      );
+      setSending(false);
+      setMessage('');
+    });
+    stopTyping(activeRoomId);
+    setNotified(false);
     setMessage('');
   };
 
@@ -30,12 +65,11 @@ const ChatInput = () => {
           value={message}
           onChange={(e) => {
             if (e.target.value.length > 0 && !notified) {
-              startTyping();
+              startTyping(activeRoomId);
               setNotified(true);
-            } else {
-              if (notified) {
-                stopTyping();
-              }
+            }
+            if (e.target.value.length === 0 && notified) {
+              stopTyping(activeRoomId);
               setNotified(false);
             }
             setMessage(e.target.value);
@@ -44,7 +78,7 @@ const ChatInput = () => {
             if (e.key === 'Enter') handleSend();
           }}
           onBlur={() => {
-            stopTyping();
+            stopTyping(activeRoomId);
             setNotified(false);
           }}
           placeholder='Type a message...'

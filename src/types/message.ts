@@ -1,7 +1,7 @@
 export interface ChatMessage {
   id: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
   content: string;
   roomId: string;
   senderId: string;

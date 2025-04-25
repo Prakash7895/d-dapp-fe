@@ -7,6 +7,8 @@ import useSession from '@/hooks/useSession';
 import EthereumProvider from './EthereumProvider';
 import { ToastContainer } from 'react-toastify';
 import ChatProvider from './Chat/ChatProvider';
+import { Provider } from 'react-redux';
+import { store } from '@/store';
 
 const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const { status } = useSession();
@@ -30,7 +32,9 @@ const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     children
   ) : (
     <StateProvider>
-      <ChatProvider>{children}</ChatProvider>
+      <Provider store={store}>
+        <ChatProvider>{children}</ChatProvider>
+      </Provider>
     </StateProvider>
   );
 };

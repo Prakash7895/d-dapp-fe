@@ -1,10 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { User } from 'lucide-react';
-import { useChatListContext } from './ChatListProvider';
+
+import { useAppSelector } from '@/store';
 
 const MessageHeader = () => {
-  const { chats, activeRoomId } = useChatListContext();
+  const { chats, activeRoomId } = useAppSelector('chat');
 
   const activeChat = chats.find((el) => el.roomId === activeRoomId);
   const isTyping = false;

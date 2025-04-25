@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 import ChatSidebar from '@/components/Chat/ChatSidebar';
 import { useWalletContext } from '@/components/WalletHandler';
 import { useParams } from 'next/navigation';
-import ChatListProvider from '@/components/Chat/ChatListProvider';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { setActiveRoomId } from '@/store/ChatReducer';
 
 const ChatLayout = ({ children }: { children: React.ReactNode }) => {
   const divRef = useRef<HTMLDivElement>(null);
@@ -12,8 +13,15 @@ const ChatLayout = ({ children }: { children: React.ReactNode }) => {
   const { connectedToValidAddress } = useWalletContext();
 
   const params = useParams();
+  const dispatch = useAppDispatch();
+  const { activeRoomId } = useAppSelector('chat');
 
   const roomId = Array.isArray(params.id) ? params.id[0] : params.id;
+  useEffect(() => {
+    if (roomId && roomId !== activeRoomId) {
+      dispatch(setActiveRoomId(roomId));
+    }
+  }, [roomId, activeRoomId]);
 
   useEffect(() => {
     const rect = divRef.current?.getBoundingClientRect();
@@ -30,7 +38,7 @@ const ChatLayout = ({ children }: { children: React.ReactNode }) => {
       className='flex h-full bg-gray-900'
     >
       {height ? (
-        <ChatListProvider roomId={roomId}>
+        <>
           <motion.div
             initial={{ x: -300, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
@@ -45,7 +53,7 @@ const ChatLayout = ({ children }: { children: React.ReactNode }) => {
           >
             {children}
           </motion.div>
-        </ChatListProvider>
+        </>
       ) : (
         <></>
       )}

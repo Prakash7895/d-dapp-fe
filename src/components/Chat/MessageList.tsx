@@ -1,12 +1,12 @@
 import React, { useEffect, useRef } from 'react';
-import { useMessages } from './MessageProvider';
 import { AnimatePresence, motion } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns';
 import { useStateContext } from '../StateProvider';
 import { Check, CheckCheck, ClockArrowUp } from 'lucide-react';
+import { useAppSelector } from '@/store';
 
 const MessageList = () => {
-  const { messages } = useMessages();
+  const { messages } = useAppSelector('message');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   console.log('messages', messages);
   const { userInfo } = useStateContext();

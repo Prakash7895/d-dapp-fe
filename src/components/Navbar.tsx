@@ -31,14 +31,12 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     setIsMenuOpen(false);
-    await logout().then((res) => {
-      if (res.status === 'success') {
-        sessionStorage.removeItem('accessToken');
-        sessionStorage.removeItem('refreshToken');
-        sessionStorage.removeItem('savedWalletAddress');
-        clearSession();
-        router.replace('/auth/signin');
-      }
+    await logout().then(() => {
+      sessionStorage.removeItem('accessToken');
+      sessionStorage.removeItem('refreshToken');
+      sessionStorage.removeItem('savedWalletAddress');
+      clearSession();
+      router.replace('/auth/signin');
     });
   };
 
