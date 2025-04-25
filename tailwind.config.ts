@@ -22,6 +22,7 @@ export default {
           700: '#A621B2',
           800: '#911D9B',
           900: '#7C1985',
+          950: '#681470', // Added darker shade
         },
       },
     },

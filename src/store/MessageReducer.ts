@@ -26,10 +26,19 @@ const messageSlice = createSlice({
       state.loading = false;
       state.pageNo = 1;
     },
-    setMessages: (state, action: PayloadAction<ChatMessage[]>) => {
-      state.messages = action.payload;
-      state.hasMore = action.payload.length >= PAGE_SIZE;
-      state.pageNo = state.pageNo + 1;
+    setMessages: (
+      state,
+      action: PayloadAction<{ data: ChatMessage[]; page: number }>
+    ) => {
+      const existingMessages = state.messages.map((msg) => ({ ...msg }));
+
+      const newMessages = action.payload.data.filter(
+        (msg) =>
+          !existingMessages.some((existingMsg) => existingMsg.id === msg.id)
+      );
+      state.messages = [...existingMessages, ...newMessages];
+      state.hasMore = action.payload?.data?.length >= PAGE_SIZE;
+      state.pageNo = action.payload.page;
       state.loading = false;
     },
     addNewMessage: (state, action: PayloadAction<ChatMessage>) => {

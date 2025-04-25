@@ -35,21 +35,21 @@ const ChatLayout = ({ children }: { children: React.ReactNode }) => {
     <div
       ref={divRef}
       style={height ? { height: `${height}px` } : {}}
-      className='flex h-full bg-gray-900'
+      className='flex h-full bg-gray-900 w-full'
     >
       {height ? (
         <>
           <motion.div
             initial={{ x: -300, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            className='w-80 border-r border-gray-800 h-full'
+            className='max-w-80 border-r border-gray-800 h-full w-1/3'
           >
             <ChatSidebar />
           </motion.div>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className='flex-1 h-full'
+            className='flex-1 h-full w-2/3'
           >
             {children}
           </motion.div>

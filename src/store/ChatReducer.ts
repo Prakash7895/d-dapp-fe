@@ -1,7 +1,7 @@
 import { ChatUser } from '@/types/user';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-export const PAGE_SIZE = 5;
+export const PAGE_SIZE = 20;
 
 interface ChatState {
   chats: ChatUser[];
