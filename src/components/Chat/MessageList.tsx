@@ -1,45 +1,37 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { useAppDispatch, useAppSelector } from '@/store';
+import { useAppSelector } from '@/store';
 import InfiniteScroll from '../InfiniteScroll';
-import { getMessages } from '@/apiCalls';
 import { PAGE_SIZE } from '@/store/ChatReducer';
-import { setLoading, setMessages } from '@/store/MessageReducer';
 import Message from './Message';
+import { fetchMessages } from '@/store/thunk';
+import { useAppDispatch } from './ChatProvider';
 
 const MessageList = () => {
   const { activeRoomId } = useAppSelector('chat');
   const { messages, pageNo, loading, hasMore } = useAppSelector('message');
 
-  console.log('messages', messages);
-
   const dispatch = useAppDispatch();
 
-  const fetchMessages = useCallback(async () => {
-    if (loading) return;
-
-    if (activeRoomId) {
-      try {
-        dispatch(setLoading(true));
-        const response = await getMessages(activeRoomId, pageNo, PAGE_SIZE);
-        if (response.status === 'success' && response.data) {
-          dispatch(setMessages({ data: response.data, page: pageNo + 1 }));
-        }
-      } catch (err) {
-        console.error('Failed to fetch matches:', err);
-      }
+  const handleLoadMore = () => {
+    if (!loading && hasMore && activeRoomId) {
+      dispatch(
+        fetchMessages({ roomId: activeRoomId, pageNo, pageSize: PAGE_SIZE })
+      );
     }
-  }, [activeRoomId, pageNo, loading]);
+  };
 
   useEffect(() => {
-    fetchMessages();
-  }, []);
+    if (activeRoomId && messages.length === 0) {
+      handleLoadMore();
+    }
+  }, [activeRoomId, loading, messages, hasMore]);
 
   return (
     <div className='flex-1 h-full p-4'>
       <AnimatePresence>
         <InfiniteScroll
-          onLoadMore={fetchMessages}
+          onLoadMore={handleLoadMore}
           hasMore={hasMore}
           isLoading={loading}
           direction='bottom-to-top'

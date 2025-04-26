@@ -1,12 +1,39 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ChatMessage } from '@/types/message';
 import { useStateContext } from '../StateProvider';
 import { formatDistanceToNow } from 'date-fns';
 import { Check, CheckCheck, ClockArrowUp } from 'lucide-react';
+import { useAppSelector } from '@/store';
+import { markReadMessage } from '@/socket';
+import { useAppDispatch } from './ChatProvider';
+import { updateMessageStatus } from '@/store/MessageReducer';
+import { decrementUnreadCount } from '@/store/ChatReducer';
 
 const Message: FC<ChatMessage> = (msg) => {
   const { userInfo } = useStateContext();
+  const dispatch = useAppDispatch();
+
+  const { activeRoomId } = useAppSelector('chat');
+  const marking = useRef(false);
+
+  useEffect(() => {
+    if (
+      msg.roomId === activeRoomId &&
+      !msg.read &&
+      msg.senderId !== userInfo?.id
+    ) {
+      if (marking.current) return;
+      marking.current = true;
+      markReadMessage(msg.id, (response) => {
+        if (response?.status === 'success') {
+          dispatch(updateMessageStatus({ messageId: msg.id, status: 'read' }));
+          dispatch(decrementUnreadCount({ roomId: msg.roomId }));
+        }
+        marking.current = false;
+      });
+    }
+  }, [activeRoomId, msg]);
 
   return (
     <motion.div
@@ -35,7 +62,7 @@ const Message: FC<ChatMessage> = (msg) => {
           {msg.senderId === userInfo?.id && (
             <span className='text-xs'>
               {msg.read ? (
-                <CheckCheck className='text-primary-500' />
+                <CheckCheck className='text-orange-500' />
               ) : msg.received ? (
                 <CheckCheck />
               ) : msg.pending ? (

@@ -2,7 +2,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import chatReducer from './ChatReducer';
 import messageReducer from './MessageReducer';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 export const store = configureStore({
   reducer: {
@@ -20,5 +20,3 @@ export const useAppSelector = <T extends keyof RootState>(
   reducer: T
 ): RootState[T] =>
   useSelector((state: RootState) => state[reducer] as RootState[T]);
-
-export const useAppDispatch = () => useDispatch<AppDispatch>();

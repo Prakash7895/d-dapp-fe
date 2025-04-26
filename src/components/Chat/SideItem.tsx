@@ -2,12 +2,14 @@ import { ChatUser } from '@/types/user';
 import React, { FC } from 'react';
 import { BeatLoader } from 'react-spinners';
 import { motion } from 'framer-motion';
-import { useAppDispatch, useAppSelector } from '@/store';
+import { useAppSelector } from '@/store';
 import { useStateContext } from '../StateProvider';
 import Link from 'next/link';
-import { setActiveRoomId } from '@/store/ChatReducer';
+import { PAGE_SIZE, setActiveRoomId } from '@/store/ChatReducer';
 import { User } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { resetMessages } from '@/store/MessageReducer';
+import { fetchMessages } from '@/store/thunk';
+import { useAppDispatch } from './ChatProvider';
 
 const SideItem: FC<ChatUser> = (chat) => {
   const { typingUsers, onlineUsers } = useAppSelector('chat');
@@ -24,6 +26,14 @@ const SideItem: FC<ChatUser> = (chat) => {
       href={`/chat/${chat.roomId}`}
       className='block'
       onClick={() => {
+        dispatch(resetMessages());
+        dispatch(
+          fetchMessages({
+            roomId: chat.roomId,
+            pageNo: 1,
+            pageSize: PAGE_SIZE,
+          })
+        );
         dispatch(setActiveRoomId(chat.roomId));
       }}
     >
@@ -54,7 +64,13 @@ const SideItem: FC<ChatUser> = (chat) => {
               <BeatLoader color='#cf29de' size={8} />
             ) : (
               chat?.lastMessage && (
-                <p className={'text-sm h-6 text-gray-400 truncate'}>
+                <p
+                  className={`text-sm h-6 text-gray-400 truncate ${
+                    chat.unreadCount > 0
+                      ? 'font-semibold !text-primary-400'
+                      : ''
+                  }`}
+                >
                   {chat?.lastMessage?.content}
                 </p>
               )

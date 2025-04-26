@@ -376,3 +376,12 @@ export const getMessages = (roomId: string, pageNo: number, pageSize = 10) =>
       toast.error(err?.message || 'Failed to update user info');
       return { status: 'error' } as ApiResponse;
     });
+
+export const markMessagesReceived = () =>
+  axiosInstance
+    .put('/chat/mark-received')
+    .then((res) => res.data as ApiResponse)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to save wallet address');
+      return { status: 'error' } as ApiResponse;
+    });

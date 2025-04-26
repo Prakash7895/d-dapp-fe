@@ -4,8 +4,10 @@ import { motion } from 'framer-motion';
 import ChatSidebar from '@/components/Chat/ChatSidebar';
 import { useWalletContext } from '@/components/WalletHandler';
 import { useParams } from 'next/navigation';
-import { useAppDispatch, useAppSelector } from '@/store';
-import { setActiveRoomId } from '@/store/ChatReducer';
+import { useAppSelector } from '@/store';
+import { PAGE_SIZE, resetChats, setActiveRoomId } from '@/store/ChatReducer';
+import { fetchChats } from '@/store/thunk';
+import { useAppDispatch } from '@/components/Chat/ChatProvider';
 
 const ChatLayout = ({ children }: { children: React.ReactNode }) => {
   const divRef = useRef<HTMLDivElement>(null);
@@ -14,7 +16,12 @@ const ChatLayout = ({ children }: { children: React.ReactNode }) => {
 
   const params = useParams();
   const dispatch = useAppDispatch();
-  const { activeRoomId } = useAppSelector('chat');
+  const { activeRoomId, chats } = useAppSelector('chat');
+
+  useEffect(() => {
+    dispatch(resetChats());
+    dispatch(fetchChats({ pageNo: 1, pageSize: PAGE_SIZE }));
+  }, []);
 
   const roomId = Array.isArray(params.id) ? params.id[0] : params.id;
   useEffect(() => {

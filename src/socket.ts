@@ -10,6 +10,10 @@ import {
   setTypingStatus,
 } from './store/ChatReducer';
 import axiosInstance from './apiCalls';
+import {
+  updateMessageStatus,
+  updateMessageStatusByRoomId,
+} from './store/MessageReducer';
 
 enum CHAT_EVENTS {
   NEW_MESSAGE = 'newMessage',
@@ -19,6 +23,7 @@ enum CHAT_EVENTS {
   USER_STATUS = 'userStatus',
   TOKEN_MISSING = 'tokenMissing',
   INVALID_TOKEN = 'invalidToken',
+  MARK_ALL_RECEIVED = 'markAllReceived',
 }
 
 enum EMIT_EVENTS {
@@ -102,17 +107,21 @@ export const initializeSocket = () => {
 
       await axiosInstance.get('/auth/validate');
 
-      socketObj = null;
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      if (attempts < reconnectAttempts) {
-        timeoutId = setTimeout(() => {
-          initializeSocket();
-          attempts++;
-        }, reconnectDelay);
-      }
+      reconnectSocket();
     });
+  }
+};
+
+const reconnectSocket = () => {
+  socketObj = null;
+  if (timeoutId) {
+    clearTimeout(timeoutId);
+  }
+  if (attempts < reconnectAttempts) {
+    timeoutId = setTimeout(() => {
+      initializeSocket();
+      attempts++;
+    }, reconnectDelay);
   }
 };
 
@@ -178,51 +187,49 @@ const attachListeners = (socket: Socket) => {
     CHAT_EVENTS.MESSAGE_STATUS,
     (message: { messageId: string; status: 'received' | 'read' }) => {
       console.log('MESSAGE_STATUS:', message);
-      //   setMessages((prev) => {
-      //     const idx = prev.findIndex((msg) => msg.id === message.messageId);
-      //     if (idx >= 0) {
-      //       return prev.map((msg) => {
-      //         if (msg.id === message.messageId) {
-      //           return {
-      //             ...msg,
-      //             [message.status]: true,
-      //             pending: false,
-      //           };
-      //         }
-      //         return msg;
-      //       });
-      //     }
-      //     return prev;
-      //   });
+      if (message.status === 'read') {
+        store.dispatch(updateMessageStatus(message));
+      }
     }
   );
+
+  socket.removeListener(CHAT_EVENTS.MARK_ALL_RECEIVED);
+  socket.on(CHAT_EVENTS.MARK_ALL_RECEIVED, (message: { roomId: string }) => {
+    console.log('MARK_ALL_RECEIVED:', message);
+
+    store.dispatch(updateMessageStatusByRoomId(message));
+  });
 };
 
 const checkStatus = () => {
   if (!socketObj) {
     console.log('Socket is not initialized');
+
+    reconnectSocket();
     return false;
   }
   if (!socketObj.connected) {
     console.log('Socket is not connected');
     return false;
   }
-
+  console.log('SOCKET STATUS', socketObj.connected);
   return socketObj.connected;
 };
 
 export const sendMessage = (
   content: string,
   roomId: string,
-  callback: (msg: ChatMessage) => void
+  callback: (msg: ChatMessage | null) => void
 ) => {
-  console.log('CALLING SEND MESSAGE');
+  console.log('CALLING SEND MESSAGE', checkStatus());
   if (checkStatus()) {
     socketObj!.emit(
       EMIT_EVENTS.SEND_MESSAGE,
       { roomId, content },
       (message: ChatMessage) => callback(message)
     );
+  } else {
+    callback(null);
   }
 };
 
@@ -235,5 +242,20 @@ export const startTyping = (roomId: string) => {
 export const stopTyping = (roomId: string) => {
   if (checkStatus() && roomId) {
     socketObj?.emit(EMIT_EVENTS.STOP_TYPING, { roomId });
+  }
+};
+
+export const markReadMessage = (
+  messageId: string,
+  callback: (res: any) => void
+) => {
+  if (checkStatus()) {
+    socketObj?.emit(
+      EMIT_EVENTS.MESSAGE_READ,
+      { messageId },
+      (response: any) => {
+        callback(response);
+      }
+    );
   }
 };

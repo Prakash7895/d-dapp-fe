@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ImageIcon, Send } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { sendMessage, startTyping, stopTyping } from '@/socket';
 import { ChatMessage } from '@/types/message';
 import { useStateContext } from '../StateProvider';
-import { useAppDispatch, useAppSelector } from '@/store';
+import { useAppSelector } from '@/store';
 import { addNewMessage, updateMessage } from '@/store/MessageReducer';
+import { updateLatestMessage } from '@/store/ChatReducer';
+import { useAppDispatch } from './ChatProvider';
 
 const ChatInput = () => {
   const [message, setMessage] = useState('');
@@ -35,19 +37,21 @@ const ChatInput = () => {
     dispatch(addNewMessage(newMessage));
 
     sendMessage(message, activeRoomId, (savedMsg) => {
-      console.log('[handleSend] savedMsg:', savedMsg.id);
-      dispatch(
-        updateMessage({
-          data: { ...savedMsg, pending: false },
-          messageId: newMessage.id,
-        })
-      );
+      if (savedMsg) {
+        console.log('[handleSend] savedMsg:', savedMsg.id);
+        dispatch(
+          updateMessage({
+            data: { ...savedMsg, pending: false },
+            messageId: newMessage.id,
+          })
+        );
+        dispatch(updateLatestMessage(savedMsg));
+        stopTyping(activeRoomId);
+        setNotified(false);
+        setMessage('');
+      }
       setSending(false);
-      setMessage('');
     });
-    stopTyping(activeRoomId);
-    setNotified(false);
-    setMessage('');
   };
 
   return (
@@ -57,9 +61,9 @@ const ChatInput = () => {
       className='p-4 border-t border-gray-800'
     >
       <div className='flex items-center gap-2'>
-        <button className='p-2 text-gray-400 hover:text-white transition-colors'>
+        {/* <button className='p-2 text-gray-400 hover:text-white transition-colors'>
           <ImageIcon size={20} />
-        </button>
+        </button> */}
         <input
           type='text'
           value={message}

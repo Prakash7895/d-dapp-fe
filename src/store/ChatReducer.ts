@@ -1,5 +1,8 @@
+import { ChatMessage } from '@/types/message';
 import { ChatUser } from '@/types/user';
+import { deepClone } from '@/utils';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { fetchChats } from './thunk';
 
 export const PAGE_SIZE = 20;
 
@@ -27,26 +30,7 @@ const chatSlice = createSlice({
   name: 'chat',
   initialState,
   reducers: {
-    setChats: (
-      state,
-      action: PayloadAction<{ data: ChatUser[]; page: number }>
-    ) => {
-      const existingChats = state.chats.map((chat) => ({ ...chat }));
-
-      const newChats = action.payload.data.filter(
-        (chat) =>
-          !existingChats.some(
-            (existingChat) => existingChat.roomId === chat.roomId
-          )
-      );
-      state.chats = [...existingChats, ...newChats];
-      state.hasMore = action.payload.data.length >= PAGE_SIZE;
-      state.pageNo = action.payload.page;
-      state.loading = false;
-    },
-    setLoading: (state, action: PayloadAction<boolean>) => {
-      state.loading = action.payload;
-    },
+    resetChats: () => initialState,
     setActiveRoomId: (state, action: PayloadAction<string>) => {
       state.activeRoomId = action.payload;
     },
@@ -78,6 +62,27 @@ const chatSlice = createSlice({
       updatedChats.unshift(newChat);
       state.chats = updatedChats;
     },
+    updateLatestMessage: (state, action: PayloadAction<ChatMessage>) => {
+      const newMessage = action.payload;
+      const chat = deepClone(
+        state.chats.find((el) => el.roomId === newMessage.roomId)
+      );
+
+      if (chat) {
+        chat.lastMessage = newMessage;
+      }
+
+      const updatedChats = deepClone(state.chats).filter(
+        (el) => el.roomId !== chat?.roomId
+      );
+
+      updatedChats.unshift(chat!);
+
+      return {
+        ...state,
+        chats: updatedChats,
+      };
+    },
     setTypingStatus: (
       state,
       action: PayloadAction<{
@@ -97,17 +102,61 @@ const chatSlice = createSlice({
       state.typingUsers = updatedData;
       state.onlineUsers = updateOnlineUsers;
     },
+    decrementUnreadCount: (
+      state,
+      action: PayloadAction<{ roomId: string }>
+    ) => {
+      const roomId = action.payload.roomId;
+
+      // Find the chat and decrement its unreadCount
+      const updatedChats = state.chats.map((chat) => {
+        if (chat.roomId === roomId && chat.unreadCount > 0) {
+          return {
+            ...chat,
+            unreadCount: chat.unreadCount - 1,
+          };
+        }
+        return chat;
+      });
+
+      state.chats = updatedChats;
+    },
+  },
+  extraReducers(builder) {
+    builder
+      .addCase(fetchChats.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchChats.fulfilled, (state, action) => {
+        state.loading = false;
+        const existingChats = state.chats.map((chat) => ({ ...chat }));
+
+        const newChats = action.payload.data?.filter(
+          (chat) =>
+            !existingChats.some(
+              (existingChat) => existingChat.roomId === chat.roomId
+            )
+        );
+        state.chats = [...existingChats, ...(newChats || [])];
+        state.hasMore = action.payload.data?.length! >= PAGE_SIZE;
+        state.pageNo = action.payload.page;
+      })
+      .addCase(fetchChats.rejected, (state) => {
+        state.loading = false;
+        console.log('Failed to fetch chats');
+      });
   },
 });
 
 export const {
+  resetChats,
   setActiveRoomId,
-  setChats,
-  setLoading,
   setOnlineUsers,
   appendOnTop,
   setTypingStatus,
   addOnlineUser,
   removeOnlineUser,
+  updateLatestMessage,
+  decrementUnreadCount,
 } = chatSlice.actions;
 export default chatSlice.reducer;

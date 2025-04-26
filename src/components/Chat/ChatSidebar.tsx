@@ -1,34 +1,20 @@
 'use client';
-import { useAppDispatch, useAppSelector } from '@/store';
-import { PAGE_SIZE, setChats, setLoading } from '@/store/ChatReducer';
-import { useEffect } from 'react';
-import { getChats } from '@/apiCalls';
+import { useAppSelector } from '@/store';
+import { PAGE_SIZE } from '@/store/ChatReducer';
 import InfiniteScroll from '../InfiniteScroll';
 import SideItem from './SideItem';
+import { fetchChats } from '@/store/thunk';
+import { useAppDispatch } from './ChatProvider';
 
 const ChatSidebar = () => {
   const { chats, loading, hasMore, pageNo } = useAppSelector('chat');
   const dispatch = useAppDispatch();
 
-  console.log('pageNo', pageNo);
-
-  const fetchChats = async () => {
-    if (loading) return;
-    try {
-      dispatch(setLoading(true));
-      const response = await getChats(pageNo, PAGE_SIZE);
-      if (response.status === 'success' && response.data) {
-        const newPageNo = pageNo + 1;
-        dispatch(setChats({ data: response.data, page: newPageNo }));
-      }
-    } catch (err) {
-      console.log('Failed to fetch matches:', err);
+  const handleLoadMore = () => {
+    if (!loading && hasMore) {
+      dispatch(fetchChats({ pageNo, pageSize: PAGE_SIZE }));
     }
   };
-
-  useEffect(() => {
-    fetchChats();
-  }, []);
 
   return (
     <div className='h-full flex flex-col'>
@@ -36,7 +22,7 @@ const ChatSidebar = () => {
         <h2 className='text-xl font-bold text-white'>Messages</h2>
       </div>
       <InfiniteScroll
-        onLoadMore={fetchChats}
+        onLoadMore={handleLoadMore}
         hasMore={hasMore}
         isLoading={loading}
         direction='top-to-bottom'

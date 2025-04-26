@@ -45,3 +45,21 @@ export const sexualOrientationOptions = SEXUAL_ORIENTATION.map((e) => ({
   label: capitalizeFirstLetter(e),
   value: e,
 }));
+
+export const deepClone = <T>(obj: T): T => {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => deepClone(item)) as unknown as T;
+  }
+
+  const clonedObj: Record<string, unknown> = {};
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      clonedObj[key] = deepClone((obj as Record<string, unknown>)[key]);
+    }
+  }
+  return clonedObj as T;
+};
