@@ -123,3 +123,9 @@ export type ChatUser = UserProfile & {
   unreadCount: number;
   unreceivedCount: number;
 };
+
+export type MatchedUserResponse = UserResponse & {
+  multiSigWallet: Omit<MultiSigWallet, 'userA' | 'userB'>;
+  userAId: string;
+  userBId: string;
+};

@@ -2,12 +2,14 @@
 import { configureStore } from '@reduxjs/toolkit';
 import chatReducer from './ChatReducer';
 import messageReducer from './MessageReducer';
+import matchReducer from './MatchReducer';
 import { useSelector } from 'react-redux';
 
 export const store = configureStore({
   reducer: {
     chat: chatReducer,
     message: messageReducer,
+    match: matchReducer,
   },
 });
 

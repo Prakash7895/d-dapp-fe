@@ -14,6 +14,8 @@ import {
   updateMessageStatus,
   updateMessageStatusByRoomId,
 } from './store/MessageReducer';
+import { MatchedUserResponse } from './types/user';
+import { setMatchedWith } from './store/MatchReducer';
 
 enum CHAT_EVENTS {
   NEW_MESSAGE = 'newMessage',
@@ -24,6 +26,7 @@ enum CHAT_EVENTS {
   TOKEN_MISSING = 'tokenMissing',
   INVALID_TOKEN = 'invalidToken',
   MARK_ALL_RECEIVED = 'markAllReceived',
+  NEW_MATCH_EVENT = 'newMatchEvent',
 }
 
 enum EMIT_EVENTS {
@@ -199,6 +202,15 @@ const attachListeners = (socket: Socket) => {
 
     store.dispatch(updateMessageStatusByRoomId(message));
   });
+
+  socket.removeListener(CHAT_EVENTS.NEW_MATCH_EVENT);
+  socket.on(
+    CHAT_EVENTS.NEW_MATCH_EVENT,
+    (data: { matchedWith: MatchedUserResponse }) => {
+      console.log('NEW_MATCH_EVENT:', data);
+      store.dispatch(setMatchedWith(data.matchedWith));
+    }
+  );
 };
 
 const checkStatus = () => {

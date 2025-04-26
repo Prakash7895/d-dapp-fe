@@ -1,14 +1,14 @@
 'use client';
 
 import React from 'react';
-import { UserByAddress } from '@/types/user';
+import { MatchedUserResponse } from '@/types/user';
 import { Modal, ModalBody, ModalContent, ModalTrigger } from './AnimatedModal';
 import { motion } from 'framer-motion'; // Importing Framer Motion
 import { MapPin } from 'lucide-react';
 import Link from 'next/link';
 
 interface MatchAnimationProps {
-  matchedProfile: UserByAddress | null;
+  matchedProfile: MatchedUserResponse | null;
   showMatch: boolean;
   onClose: () => void;
 }
