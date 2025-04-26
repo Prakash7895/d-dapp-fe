@@ -4,10 +4,9 @@ import { motion } from 'framer-motion';
 import ChatSidebar from '@/components/Chat/ChatSidebar';
 import { useWalletContext } from '@/components/WalletHandler';
 import { useParams } from 'next/navigation';
-import { useAppSelector } from '@/store';
 import { PAGE_SIZE, resetChats, setActiveRoomId } from '@/store/ChatReducer';
 import { fetchChats } from '@/store/thunk';
-import { useAppDispatch } from '@/components/Chat/ChatProvider';
+import { useAppDispatch, useAppSelector } from '@/store';
 
 const ChatLayout = ({ children }: { children: React.ReactNode }) => {
   const divRef = useRef<HTMLDivElement>(null);
@@ -16,7 +15,7 @@ const ChatLayout = ({ children }: { children: React.ReactNode }) => {
 
   const params = useParams();
   const dispatch = useAppDispatch();
-  const { activeRoomId, chats } = useAppSelector('chat');
+  const { activeRoomId } = useAppSelector('chat');
 
   useEffect(() => {
     dispatch(resetChats());

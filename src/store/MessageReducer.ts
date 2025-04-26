@@ -24,16 +24,20 @@ const messageSlice = createSlice({
     resetMessages: () => initialState,
     addNewMessage: (state, action: PayloadAction<ChatMessage>) => {
       const newMessage = action.payload;
-      const existingMessageIndex = state.messages.findIndex(
-        (msg) => msg.id === newMessage.id
-      );
-      if (existingMessageIndex >= 0) {
-        state.messages[existingMessageIndex] = {
-          ...state.messages[existingMessageIndex],
-          ...newMessage,
-        };
-      } else {
-        state.messages.unshift(newMessage);
+      const roomIdMatch = state.messages[0]?.roomId === newMessage.roomId;
+
+      if (roomIdMatch) {
+        const existingMessageIndex = state.messages.findIndex(
+          (msg) => msg.id === newMessage.id
+        );
+        if (existingMessageIndex >= 0) {
+          state.messages[existingMessageIndex] = {
+            ...state.messages[existingMessageIndex],
+            ...newMessage,
+          };
+        } else {
+          state.messages.unshift(newMessage);
+        }
       }
     },
     updateMessage: (

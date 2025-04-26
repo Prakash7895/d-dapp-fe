@@ -3,7 +3,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import chatReducer from './ChatReducer';
 import messageReducer from './MessageReducer';
 import matchReducer from './MatchReducer';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 export const store = configureStore({
   reducer: {
@@ -17,6 +17,8 @@ console.log('STORE CONFIGURED');
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+
+export const useAppDispatch = () => useDispatch<AppDispatch>();
 
 export const useAppSelector = <T extends keyof RootState>(
   reducer: T

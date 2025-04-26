@@ -31,11 +31,11 @@ const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   ) : status === 'unauthenticated' ? (
     children
   ) : (
-    <StateProvider>
-      <Provider store={store}>
+    <Provider store={store}>
+      <StateProvider>
         <ChatProvider>{children}</ChatProvider>
-      </Provider>
-    </StateProvider>
+      </StateProvider>
+    </Provider>
   );
 };
 

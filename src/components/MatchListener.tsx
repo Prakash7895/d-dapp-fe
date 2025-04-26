@@ -2,9 +2,8 @@
 import { FC, ReactNode, useEffect, useState } from 'react';
 import { useStateContext } from './StateProvider';
 import MatchAnimation from './MatchAnimation';
-import { useAppSelector } from '@/store';
-import { useAppDispatch } from './Chat/ChatProvider';
 import { resetMatch } from '@/store/MatchReducer';
+import { useAppDispatch, useAppSelector } from '@/store';
 
 const MatchListener: FC<{ children: ReactNode }> = ({ children }) => {
   const { userInfo, fetchMultiSigWallets } = useStateContext();

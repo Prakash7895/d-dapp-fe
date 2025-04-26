@@ -2,14 +2,13 @@ import { ChatUser } from '@/types/user';
 import React, { FC } from 'react';
 import { BeatLoader } from 'react-spinners';
 import { motion } from 'framer-motion';
-import { useAppSelector } from '@/store';
 import { useStateContext } from '../StateProvider';
 import Link from 'next/link';
 import { PAGE_SIZE, setActiveRoomId } from '@/store/ChatReducer';
 import { User } from 'lucide-react';
 import { resetMessages } from '@/store/MessageReducer';
 import { fetchMessages } from '@/store/thunk';
-import { useAppDispatch } from './ChatProvider';
+import { useAppDispatch, useAppSelector } from '@/store';
 
 const SideItem: FC<ChatUser> = (chat) => {
   const { typingUsers, onlineUsers } = useAppSelector('chat');

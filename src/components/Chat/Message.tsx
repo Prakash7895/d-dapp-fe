@@ -4,11 +4,10 @@ import { ChatMessage } from '@/types/message';
 import { useStateContext } from '../StateProvider';
 import { formatDistanceToNow } from 'date-fns';
 import { Check, CheckCheck, ClockArrowUp } from 'lucide-react';
-import { useAppSelector } from '@/store';
 import { markReadMessage } from '@/socket';
-import { useAppDispatch } from './ChatProvider';
 import { updateMessageStatus } from '@/store/MessageReducer';
 import { decrementUnreadCount } from '@/store/ChatReducer';
+import { useAppDispatch, useAppSelector } from '@/store';
 
 const Message: FC<ChatMessage> = (msg) => {
   const { userInfo } = useStateContext();
@@ -62,13 +61,13 @@ const Message: FC<ChatMessage> = (msg) => {
           {msg.senderId === userInfo?.id && (
             <span className='text-xs'>
               {msg.read ? (
-                <CheckCheck className='text-orange-500' />
+                <CheckCheck size={16} className='text-orange-500' />
               ) : msg.received ? (
-                <CheckCheck />
+                <CheckCheck size={16} />
               ) : msg.pending ? (
-                <ClockArrowUp />
+                <ClockArrowUp size={16} />
               ) : (
-                <Check />
+                <Check size={16} />
               )}
             </span>
           )}

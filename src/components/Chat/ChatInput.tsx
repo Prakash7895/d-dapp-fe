@@ -4,10 +4,9 @@ import { Send } from 'lucide-react';
 import { sendMessage, startTyping, stopTyping } from '@/socket';
 import { ChatMessage } from '@/types/message';
 import { useStateContext } from '../StateProvider';
-import { useAppSelector } from '@/store';
 import { addNewMessage, updateMessage } from '@/store/MessageReducer';
 import { updateLatestMessage } from '@/store/ChatReducer';
-import { useAppDispatch } from './ChatProvider';
+import { useAppDispatch, useAppSelector } from '@/store';
 
 const ChatInput = () => {
   const [message, setMessage] = useState('');
@@ -48,8 +47,8 @@ const ChatInput = () => {
         dispatch(updateLatestMessage(savedMsg));
         stopTyping(activeRoomId);
         setNotified(false);
-        setMessage('');
       }
+      setMessage('');
       setSending(false);
     });
   };

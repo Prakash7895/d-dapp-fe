@@ -16,6 +16,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getSignedUrl, logout } from '@/apiCalls';
 import { useStateContext } from './StateProvider';
+import { disconnectSocket } from '@/socket';
+import { useAppSelector } from '@/store';
 
 export default function Navbar() {
   const { data: session, clearSession } = useSession();
@@ -24,6 +26,12 @@ export default function Navbar() {
   const { activeProfilePhoto, userInfo } = useStateContext();
   const divRef = useRef<HTMLDivElement>(null);
   const [profilePicture, setProfilePicture] = useState('');
+  const { chats } = useAppSelector('chat');
+
+  const unreadMessages = chats.reduce(
+    (acc, chat) => acc + (chat.unreadCount || 0),
+    0
+  );
 
   const isNftMinted = !!activeProfilePhoto;
 
@@ -31,6 +39,8 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     setIsMenuOpen(false);
+
+    disconnectSocket();
     await logout().then(() => {
       sessionStorage.removeItem('accessToken');
       sessionStorage.removeItem('refreshToken');
@@ -115,7 +125,7 @@ export default function Navbar() {
 
                 <Link
                   href='/chat'
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
+                  className={`relative flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
                     pathname.includes('/chat')
                       ? 'bg-gray-800 text-white'
                       : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
@@ -123,6 +133,12 @@ export default function Navbar() {
                 >
                   <MessageSquare className='h-5 w-5' />
                   <span>Messages</span>
+
+                  {unreadMessages > 0 && (
+                    <span className='absolute -top-1 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center'>
+                      {unreadMessages > 99 ? '99+' : unreadMessages}
+                    </span>
+                  )}
                 </Link>
               </div>
             )}

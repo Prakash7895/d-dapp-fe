@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { User } from 'lucide-react';
-
 import { useAppSelector } from '@/store';
 
 const MessageHeader = () => {

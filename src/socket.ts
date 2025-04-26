@@ -11,6 +11,7 @@ import {
 } from './store/ChatReducer';
 import axiosInstance from './apiCalls';
 import {
+  addNewMessage,
   updateMessageStatus,
   updateMessageStatusByRoomId,
 } from './store/MessageReducer';
@@ -37,6 +38,7 @@ enum EMIT_EVENTS {
   STOP_TYPING = 'stopTyping',
   MESSAGE_RECEIVED = 'messageReceived',
   MESSAGE_READ = 'messageRead',
+  LOG_OUT = 'logOut',
 }
 
 let socketObj: Socket | null = null;
@@ -142,6 +144,8 @@ const attachListeners = (socket: Socket) => {
       })
     );
 
+    store.dispatch(addNewMessage(message));
+
     socket.emit(EMIT_EVENTS.MESSAGE_RECEIVED, { messageId: message.id });
   });
 
@@ -153,11 +157,10 @@ const attachListeners = (socket: Socket) => {
     CHAT_EVENTS.INITIAL_ONLINE_STATUSES,
     (users: { userId: string; online: boolean }[]) => {
       console.log('INITIAL_ONLINE_STATUSES:', users);
-      store.dispatch(
-        setOnlineUsers(
-          users.filter((user) => user.online).map((user) => user.userId)
-        )
-      );
+      const userIds = users
+        .filter((user) => user.online)
+        .map((user) => user.userId);
+      store.dispatch(setOnlineUsers(userIds));
     }
   );
 
@@ -190,9 +193,7 @@ const attachListeners = (socket: Socket) => {
     CHAT_EVENTS.MESSAGE_STATUS,
     (message: { messageId: string; status: 'received' | 'read' }) => {
       console.log('MESSAGE_STATUS:', message);
-      if (message.status === 'read') {
-        store.dispatch(updateMessageStatus(message));
-      }
+      store.dispatch(updateMessageStatus(message));
     }
   );
 
@@ -261,6 +262,7 @@ export const markReadMessage = (
   messageId: string,
   callback: (res: any) => void
 ) => {
+  console.log('CALLING MARK READ MESSAGE', checkStatus());
   if (checkStatus()) {
     socketObj?.emit(
       EMIT_EVENTS.MESSAGE_READ,
@@ -270,4 +272,18 @@ export const markReadMessage = (
       }
     );
   }
+};
+
+export const disconnectSocket = () => {
+  console.log('Disconnecting socket...', checkStatus());
+
+  if (socketObj) {
+    socketObj.emit(EMIT_EVENTS.LOG_OUT);
+    socketObj.disconnect();
+    socketObj = null;
+  }
+  if (timeoutId) {
+    clearTimeout(timeoutId);
+  }
+  console.log('WebSocket disconnected on logout');
 };

@@ -30,12 +30,21 @@ const chatSlice = createSlice({
   name: 'chat',
   initialState,
   reducers: {
-    resetChats: () => initialState,
+    resetChats: (state) => {
+      return {
+        ...initialState,
+        onlineUsers: state.onlineUsers,
+        typingUsers: state.typingUsers,
+      };
+    },
     setActiveRoomId: (state, action: PayloadAction<string>) => {
       state.activeRoomId = action.payload;
     },
     setOnlineUsers: (state, action: PayloadAction<string[]>) => {
-      state.onlineUsers = action.payload;
+      return {
+        ...state,
+        onlineUsers: [...action.payload],
+      };
     },
     addOnlineUser: (state, action: PayloadAction<string>) => {
       const userId = action.payload;
@@ -93,14 +102,14 @@ const chatSlice = createSlice({
     ) => {
       const userId = action.payload.userId;
       const updatedData = state.typingUsers.filter((u) => u.userId !== userId);
-      const updateOnlineUsers = state.onlineUsers.filter((u) => u !== userId);
       if (action.payload.typing) {
         updatedData.push({ userId, roomId: action.payload.roomId });
+        const updateOnlineUsers = state.onlineUsers.filter((u) => u !== userId);
         updateOnlineUsers.push(userId);
+        state.onlineUsers = updateOnlineUsers;
       }
 
       state.typingUsers = updatedData;
-      state.onlineUsers = updateOnlineUsers;
     },
     decrementUnreadCount: (
       state,

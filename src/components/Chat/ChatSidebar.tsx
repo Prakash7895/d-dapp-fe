@@ -1,10 +1,9 @@
 'use client';
-import { useAppSelector } from '@/store';
 import { PAGE_SIZE } from '@/store/ChatReducer';
 import InfiniteScroll from '../InfiniteScroll';
 import SideItem from './SideItem';
 import { fetchChats } from '@/store/thunk';
-import { useAppDispatch } from './ChatProvider';
+import { useAppDispatch, useAppSelector } from '@/store';
 
 const ChatSidebar = () => {
   const { chats, loading, hasMore, pageNo } = useAppSelector('chat');

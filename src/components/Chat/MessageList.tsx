@@ -1,11 +1,10 @@
 import React, { useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { useAppSelector } from '@/store';
 import InfiniteScroll from '../InfiniteScroll';
 import { PAGE_SIZE } from '@/store/ChatReducer';
 import Message from './Message';
 import { fetchMessages } from '@/store/thunk';
-import { useAppDispatch } from './ChatProvider';
+import { useAppDispatch, useAppSelector } from '@/store';
 
 const MessageList = () => {
   const { activeRoomId } = useAppSelector('chat');
