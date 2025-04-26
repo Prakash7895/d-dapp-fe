@@ -8,6 +8,7 @@ import {
   Heart,
   MapPin,
   Mars,
+  Pointer,
   Transgender,
   User,
   Venus,
@@ -18,6 +19,8 @@ import { AllUsers } from '@/types/user';
 import { CardBody, CardContainer, CardItem } from './Card3d';
 import { capitalizeFirstLetter } from '@/utils';
 import Carousel from './Carousel';
+import { useStateContext } from './StateProvider';
+import AnimatedTooltip from './AnimatedTooltip';
 
 interface ProfileCardProps {
   profile: AllUsers;
@@ -39,6 +42,38 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     if (stackIndex === 2) return 'shadow-lg';
     return 'shadow-md';
   };
+
+  const { userInfo } = useStateContext();
+
+  const loggedInHasWallet = !!userInfo?.walletAddress;
+  const currentUserHasWallet = !!profile?.walletAddress;
+  const isWalletConnected = loggedInHasWallet && currentUserHasWallet;
+
+  const handleNudge = () => {
+    console.log('NUDGE');
+  };
+
+  const likeBtn = (
+    <motion.button
+      {...(loggedInHasWallet
+        ? {
+            whileHover: { scale: 1.1 },
+            whileTap: { scale: 0.9 },
+          }
+        : {})}
+      onClick={() => (isWalletConnected ? onSwipe('right') : handleNudge())}
+      disabled={!loggedInHasWallet}
+      className='w-16 h-16 rounded-full bg-white/10 hover:enabled:bg-white/20 disabled:opacity-70 flex items-center justify-center'
+    >
+      {!currentUserHasWallet && loggedInHasWallet ? (
+        <Pointer className='h-8 w-8 text-yellow-500' />
+      ) : (
+        <Heart className='h-8 w-8 text-green-500' />
+      )}
+    </motion.button>
+  );
+
+  const nudgeMessage = `Nudge ${profile?.profile?.firstName} to add a wallet!`;
 
   return (
     <CardContainer
@@ -140,14 +175,19 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
               </motion.button>
             </CardItem>
             <CardItem translateZ={75} as='div'>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => onSwipe('right')}
-                className='w-16 h-16 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center'
-              >
-                <Heart className='h-8 w-8 text-green-500' />
-              </motion.button>
+              {isWalletConnected ? (
+                likeBtn
+              ) : (
+                <AnimatedTooltip
+                  tooltipContent={
+                    loggedInHasWallet && !currentUserHasWallet
+                      ? nudgeMessage
+                      : 'Please add a wallet address to like this profile.'
+                  }
+                >
+                  {likeBtn}
+                </AnimatedTooltip>
+              )}
             </CardItem>
           </div>
         )}

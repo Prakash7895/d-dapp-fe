@@ -95,6 +95,7 @@ export interface UserResponse {
   email: string | null;
   profile: UserProfile;
   walletAddress: string | null;
+  unreadNotifications: number;
 }
 
 export type AllUsers = UserResponse & {
@@ -129,3 +130,16 @@ export type MatchedUserResponse = UserResponse & {
   userAId: string;
   userBId: string;
 };
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: string;
+  title: string;
+  content: string;
+  read: boolean;
+  nudgerId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  status: boolean;
+}

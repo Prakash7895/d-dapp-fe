@@ -1,4 +1,4 @@
-import { getChats, getMessages } from '@/apiCalls';
+import { getChats, getMessages, getNotifications } from '@/apiCalls';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 export const fetchMessages = createAsyncThunk(
@@ -32,6 +32,25 @@ export const fetchChats = createAsyncThunk(
   ) => {
     try {
       const response = await getChats(pageNo, pageSize);
+      if (response.status === 'success') {
+        return { data: response.data, page: pageNo + 1 };
+      } else {
+        return thunkAPI.rejectWithValue(response.message);
+      }
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const fetchNotifications = createAsyncThunk(
+  'notification/fetchNotifications',
+  async (
+    { pageNo, pageSize }: { pageNo: number; pageSize: number },
+    thunkAPI
+  ) => {
+    try {
+      const response = await getNotifications(pageNo, pageSize);
       if (response.status === 'success') {
         return { data: response.data, page: pageNo + 1 };
       } else {

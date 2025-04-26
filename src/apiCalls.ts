@@ -12,6 +12,7 @@ import {
   ChatUser,
   LikdedUser,
   MatchedUser,
+  Notification,
   UserByAddress,
   UserResponse,
 } from './types/user';
@@ -296,7 +297,7 @@ export const checkConnectedWalletAddress = (walletAddress: string) =>
     .put('/profile/check-wallet-address', { walletAddress })
     .then((res) => res.data as ApiResponse)
     .catch((err) => {
-      toast.error(err?.message || 'Failed to cehck wallet address');
+      // toast.error(err?.message || 'Failed to cehck wallet address');
       return { status: 'error' } as ApiResponse;
     });
 
@@ -383,5 +384,32 @@ export const markMessagesReceived = () =>
     .then((res) => res.data as ApiResponse)
     .catch((err) => {
       toast.error(err?.message || 'Failed to save wallet address');
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const getNotifications = (pageNo: number, pageSize = 10) =>
+  axiosInstance
+    .get(`/notification?pageNo=${pageNo}&pageSize=${pageSize}`)
+    .then((res) => res.data as ApiResponse<Notification[]>)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to get notifications');
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const markNotificationRead = (notificationId: string) =>
+  axiosInstance
+    .put(`/notification/read/${notificationId}`)
+    .then((res) => res.data as ApiResponse)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to mark notification as read');
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const postNudge = (userId: string) =>
+  axiosInstance
+    .post(`/notification/nudge`, { userId })
+    .then((res) => res.data as ApiResponse)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to nudge user');
       return { status: 'error' } as ApiResponse;
     });

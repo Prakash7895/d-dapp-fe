@@ -3,6 +3,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import chatReducer from './ChatReducer';
 import messageReducer from './MessageReducer';
 import matchReducer from './MatchReducer';
+import notificationReducer from './NotificationReducer';
 import { useDispatch, useSelector } from 'react-redux';
 
 export const store = configureStore({
@@ -10,6 +11,7 @@ export const store = configureStore({
     chat: chatReducer,
     message: messageReducer,
     match: matchReducer,
+    notification: notificationReducer,
   },
 });
 

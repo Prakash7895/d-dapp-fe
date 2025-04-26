@@ -9,6 +9,7 @@ import {
   LogOut,
   HeartHandshake,
   MessageSquare,
+  Bell,
 } from 'lucide-react';
 import useSession from '../hooks/useSession';
 import useClickOutside from '../hooks/useClickOutside';
@@ -74,6 +75,8 @@ export default function Navbar() {
   const name = session?.user
     ? `${session.user.firstName} ${session.user.lastName}`
     : '';
+
+  const unreadNotifications = userInfo?.unreadNotifications || 0;
 
   return (
     <nav className='z-50 bg-gray-900/80 backdrop-blur-sm border-b border-gray-800/50'>
@@ -147,58 +150,70 @@ export default function Navbar() {
           {/* User Menu */}
           <div className='flex items-center'>
             {session ? (
-              <div ref={divRef} className='relative'>
-                <button
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className='flex items-center space-x-3 focus:outline-none group'
+              <div className='flex items-center space-x-4'>
+                <Link
+                  href='/notifications'
+                  className='relative flex items-center justify-center w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors'
                 >
-                  <div className='relative'>
-                    <div className='w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-purple-500 p-[2px]'>
-                      <div className='w-full h-full rounded-full bg-gray-900 flex items-center justify-center overflow-hidden'>
-                        {activeProfilePhoto || profilePicture ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={profilePicture || activeProfilePhoto}
-                            alt='Profile'
-                            className='w-full h-full object-cover'
-                          />
-                        ) : (
-                          <span className='text-white font-medium text-lg'>
-                            {name?.[0] || session.user?.email?.[0] || '?'}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className='absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-gray-900' />
-                  </div>
-                  <span className='hidden md:block text-gray-300 group-hover:text-white transition-colors'>
-                    {name || session.user?.email || 'User'}
-                  </span>
-                </button>
+                  <Bell className='h-5 w-5 text-gray-300' />
+                  {unreadNotifications > 0 && (
+                    <span className='absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center p-0.5'>
+                      {unreadNotifications > 99 ? '99+' : unreadNotifications}
+                    </span>
+                  )}
+                </Link>
 
-                {isMenuOpen && (
-                  <div className='absolute z-[999] right-0 mt-2 w-64 rounded-xl shadow-lg bg-gray-800/95 backdrop-blur-sm border border-gray-700/50 overflow-hidden'>
-                    <div className='p-4 border-b border-gray-700/50'>
-                      <div className='font-medium text-white'>
-                        {name || 'User'}
-                      </div>
-                      <div className='text-sm text-gray-400 truncate'>
-                        {session.user?.email}
+                <div ref={divRef} className='relative'>
+                  <button
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    className='flex items-center space-x-3 focus:outline-none group'
+                  >
+                    <div className='relative'>
+                      <div className='w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-purple-500 p-[2px]'>
+                        <div className='w-full h-full rounded-full bg-gray-900 flex items-center justify-center overflow-hidden'>
+                          {activeProfilePhoto || profilePicture ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={profilePicture || activeProfilePhoto}
+                              alt='Profile'
+                              className='w-full h-full object-cover'
+                            />
+                          ) : (
+                            <span className='text-white font-medium text-lg'>
+                              {name?.[0] || session.user?.email?.[0] || '?'}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    <div className='py-1'>
-                      <Link
-                        href='/profile'
-                        onClick={() => setIsMenuOpen(false)}
-                        className='flex items-center justify-between px-4 py-3 text-sm text-gray-300 hover:bg-gray-700/50 transition-colors'
-                      >
-                        <div className='flex items-center space-x-3'>
-                          <User className='h-5 w-5' />
-                          <span>Profile</span>
+                    <span className='hidden md:block text-gray-300 group-hover:text-white transition-colors'>
+                      {name || session.user?.email || 'User'}
+                    </span>
+                  </button>
+
+                  {isMenuOpen && (
+                    <div className='absolute z-[999] right-0 mt-2 w-64 rounded-xl shadow-lg bg-gray-800/95 backdrop-blur-sm border border-gray-700/50 overflow-hidden'>
+                      <div className='p-4 border-b border-gray-700/50'>
+                        <div className='font-medium text-white'>
+                          {name || 'User'}
                         </div>
-                        {!isNftMinted && <BadgeInfo size={18} color='#f55' />}
-                      </Link>
-                      {/* <Link
+                        <div className='text-sm text-gray-400 truncate'>
+                          {session.user?.email}
+                        </div>
+                      </div>
+                      <div className='py-1'>
+                        <Link
+                          href='/profile'
+                          onClick={() => setIsMenuOpen(false)}
+                          className='flex items-center justify-between px-4 py-3 text-sm text-gray-300 hover:bg-gray-700/50 transition-colors'
+                        >
+                          <div className='flex items-center space-x-3'>
+                            <User className='h-5 w-5' />
+                            <span>Profile</span>
+                          </div>
+                          {!isNftMinted && <BadgeInfo size={18} color='#f55' />}
+                        </Link>
+                        {/* <Link
                         href='/settings'
                         onClick={() => setIsMenuOpen(false)}
                         className='flex items-center space-x-3 px-4 py-3 text-sm text-gray-300 hover:bg-gray-700/50 transition-colors'
@@ -206,16 +221,17 @@ export default function Navbar() {
                         <Settings className='h-5 w-5' />
                         <span>Settings</span>
                       </Link> */}
-                      <button
-                        onClick={handleLogout}
-                        className='flex items-center space-x-3 w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-gray-700/50 transition-colors'
-                      >
-                        <LogOut className='h-5 w-5' />
-                        <span>Sign out</span>
-                      </button>
+                        <button
+                          onClick={handleLogout}
+                          className='flex items-center space-x-3 w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-gray-700/50 transition-colors'
+                        >
+                          <LogOut className='h-5 w-5' />
+                          <span>Sign out</span>
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             ) : (
               <div className='flex items-center space-x-4'>
