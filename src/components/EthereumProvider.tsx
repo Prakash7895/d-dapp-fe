@@ -15,6 +15,7 @@ import soulboundNftAbi from '@/abis/SooulboundNft.json';
 import matchMakingAbi from '@/abis/MatchMaking.json';
 import walletAbi from '@/abis/SimpleMultiSig.json';
 import ScreenLoader from './ScreenLoader';
+import { useStateContext } from './StateProvider';
 
 interface EthereumContextType {
   provider: BrowserProvider | null;
@@ -38,6 +39,7 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [chainId, setChainId] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const { userInfo } = useStateContext();
 
   const connect = async () => {
     if (!window.ethereum) {
@@ -48,6 +50,7 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
     setIsConnecting(true);
     try {
       // Request accounts
+      console.log('Requesting accounts...');
       await window.ethereum.request({ method: 'eth_requestAccounts' });
 
       // Initialize provider
@@ -83,7 +86,7 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
   };
 
   useEffect(() => {
-    if (window.ethereum) {
+    if (window.ethereum && userInfo?.walletAddress) {
       connect();
     }
 
@@ -109,7 +112,7 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
         window.ethereum.removeListener('disconnect', disconnect);
       }
     };
-  }, []);
+  }, [userInfo]);
 
   return (
     <EthereumContext.Provider

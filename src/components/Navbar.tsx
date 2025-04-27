@@ -19,6 +19,7 @@ import { getSignedUrl, logout } from '@/apiCalls';
 import { useStateContext } from './StateProvider';
 import { disconnectSocket } from '@/socket';
 import { useAppSelector } from '@/store';
+import AnimatedTooltip from './AnimatedTooltip';
 
 export default function Navbar() {
   const { data: session, clearSession } = useSession();
@@ -78,10 +79,64 @@ export default function Navbar() {
 
   const unreadNotifications = userInfo?.unreadNotifications || 0;
 
+  const className = `flex items-center space-x-3 md:space-x-2 px-4 md:px-3 py-3 md:py-2 md:text-base md:rounded-lg transition-colors text-sm text-gray-300 hover:bg-gray-700/50`;
+  const activeClassName = (condition: boolean) =>
+    condition
+      ? 'md:bg-gray-800 bg-gray-900 text-white'
+      : 'text-gray-300 hover:text-white hover:md:bg-gray-800/50 hover:bg-gray-700/50 ';
+
+  const discover = (
+    <Link
+      href='/'
+      className={`${className} ${activeClassName(pathname === '/')}`}
+    >
+      <Home className='h-5 w-5' />
+      <span>Discover</span>
+    </Link>
+  );
+
+  const liked = (
+    <Link
+      href='/liked'
+      className={`${className} ${activeClassName(pathname === '/liked')}`}
+    >
+      <Heart className='h-5 w-5' />
+      <span>Liked</span>
+    </Link>
+  );
+
+  const matches = (
+    <Link
+      href='/matches'
+      className={`${className} ${activeClassName(pathname === '/matches')}`}
+    >
+      <HeartHandshake className='h-5 w-5' />
+      <span>Matches</span>
+    </Link>
+  );
+
+  const messages = (
+    <Link
+      href='/chat'
+      className={`relative ${className} ${activeClassName(
+        pathname.includes('/chat')
+      )}`}
+    >
+      <MessageSquare className='h-5 w-5' />
+      <span>Messages</span>
+
+      {unreadMessages > 0 && (
+        <span className='absolute -top-1 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center'>
+          {unreadMessages > 99 ? '99+' : unreadMessages}
+        </span>
+      )}
+    </Link>
+  );
+
   return (
-    <nav className='z-50 bg-gray-900/80 backdrop-blur-sm border-b border-gray-800/50'>
+    <nav className='z-50 w-full bg-gray-900/80 backdrop-blur-sm border-b border-gray-800/50'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-        <div className='flex items-center justify-between h-16'>
+        <div className='flex items-center justify-between h-16 w-full'>
           {/* Logo and Main Navigation */}
           <div className='flex items-center space-x-8'>
             <Link href='/' className='flex items-center space-x-2'>
@@ -92,57 +147,10 @@ export default function Navbar() {
 
             {session && (
               <div className='hidden md:flex items-center space-x-6'>
-                <Link
-                  href='/'
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
-                    pathname === '/'
-                      ? 'bg-gray-800 text-white'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
-                  }`}
-                >
-                  <Home className='h-5 w-5' />
-                  <span>Discover</span>
-                </Link>
-                <Link
-                  href='/liked'
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
-                    pathname === '/liked'
-                      ? 'bg-gray-800 text-white'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
-                  }`}
-                >
-                  <Heart className='h-5 w-5' />
-                  <span>Liked</span>
-                </Link>
-                <Link
-                  href='/matches'
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
-                    pathname === '/matches'
-                      ? 'bg-gray-800 text-white'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
-                  }`}
-                >
-                  <HeartHandshake className='h-5 w-5' />
-                  <span>Matches</span>
-                </Link>
-
-                <Link
-                  href='/chat'
-                  className={`relative flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
-                    pathname.includes('/chat')
-                      ? 'bg-gray-800 text-white'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
-                  }`}
-                >
-                  <MessageSquare className='h-5 w-5' />
-                  <span>Messages</span>
-
-                  {unreadMessages > 0 && (
-                    <span className='absolute -top-1 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center'>
-                      {unreadMessages > 99 ? '99+' : unreadMessages}
-                    </span>
-                  )}
-                </Link>
+                {discover}
+                {liked}
+                {matches}
+                {messages}
               </div>
             )}
           </div>
@@ -150,25 +158,25 @@ export default function Navbar() {
           {/* User Menu */}
           <div className='flex items-center'>
             {session ? (
-              <div className='flex items-center space-x-4'>
+              <div className='flex w-full items-center space-x-4'>
                 <Link
                   href='/notifications'
-                  className='relative flex items-center justify-center w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors'
+                  className='relative flex shrink-0 items-center justify-center w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors'
                 >
                   <Bell className='h-5 w-5 text-gray-300' />
                   {unreadNotifications > 0 && (
-                    <span className='absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center p-0.5'>
+                    <span className='absolute min-h-5 min-w-5 -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center p-0.5'>
                       {unreadNotifications > 99 ? '99+' : unreadNotifications}
                     </span>
                   )}
                 </Link>
 
-                <div ref={divRef} className='relative'>
+                <div ref={divRef} className='relative flex-1'>
                   <button
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
-                    className='flex items-center space-x-3 focus:outline-none group'
+                    className='flex w-full items-center space-x-3 focus:outline-none group'
                   >
-                    <div className='relative'>
+                    <div className='relative shrink-0'>
                       <div className='w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-purple-500 p-[2px]'>
                         <div className='w-full h-full rounded-full bg-gray-900 flex items-center justify-center overflow-hidden'>
                           {activeProfilePhoto || profilePicture ? (
@@ -186,15 +194,15 @@ export default function Navbar() {
                         </div>
                       </div>
                     </div>
-                    <span className='hidden md:block text-gray-300 group-hover:text-white transition-colors'>
+                    <p className='hidden md:block flex-1 max-w-40 truncate text-gray-300 group-hover:text-white transition-colors'>
                       {name || session.user?.email || 'User'}
-                    </span>
+                    </p>
                   </button>
 
                   {isMenuOpen && (
-                    <div className='absolute z-[999] right-0 mt-2 w-64 rounded-xl shadow-lg bg-gray-800/95 backdrop-blur-sm border border-gray-700/50 overflow-hidden'>
+                    <div className='absolute z-[999] right-0 mt-2 w-64 rounded-xl shadow-lg bg-gray-800/95 backdrop-blur-sm border border-gray-700/50'>
                       <div className='p-4 border-b border-gray-700/50'>
-                        <div className='font-medium text-white'>
+                        <div className='font-medium text-white truncate'>
                           {name || 'User'}
                         </div>
                         <div className='text-sm text-gray-400 truncate'>
@@ -205,22 +213,54 @@ export default function Navbar() {
                         <Link
                           href='/profile'
                           onClick={() => setIsMenuOpen(false)}
-                          className='flex items-center justify-between px-4 py-3 text-sm text-gray-300 hover:bg-gray-700/50 transition-colors'
+                          className={`flex items-center justify-between px-4 py-3 text-sm text-gray-300 hover:bg-gray-700/50 transition-colors ${
+                            pathname === '/profile' ? 'bg-gray-900' : ''
+                          }`}
                         >
                           <div className='flex items-center space-x-3'>
                             <User className='h-5 w-5' />
                             <span>Profile</span>
                           </div>
-                          {!isNftMinted && <BadgeInfo size={18} color='#f55' />}
+                          {!isNftMinted && (
+                            <AnimatedTooltip
+                              position='left'
+                              tooltipContent={
+                                <div className='max-w-xs text-gray-300'>
+                                  <p>
+                                    Your account is currently{' '}
+                                    <span className='font-semibold text-white'>
+                                      unverified
+                                    </span>
+                                    . Verified accounts enhance your credibility
+                                    and trust within the community.
+                                  </p>
+                                  <p className='mt-2'>
+                                    To verify your account, mint your{' '}
+                                    <span className='font-semibold text-white'>
+                                      Profile NFT
+                                    </span>
+                                    . This secures your identity and unlocks
+                                    exclusive features.
+                                  </p>
+                                  <Link
+                                    href='/profile/nfts'
+                                    className='mt-3 inline-block text-primary-500 hover:underline font-medium'
+                                  >
+                                    Verify your account now →
+                                  </Link>
+                                </div>
+                              }
+                            >
+                              <BadgeInfo size={18} color='#f55' />
+                            </AnimatedTooltip>
+                          )}
                         </Link>
-                        {/* <Link
-                        href='/settings'
-                        onClick={() => setIsMenuOpen(false)}
-                        className='flex items-center space-x-3 px-4 py-3 text-sm text-gray-300 hover:bg-gray-700/50 transition-colors'
-                      >
-                        <Settings className='h-5 w-5' />
-                        <span>Settings</span>
-                      </Link> */}
+                        <div className='md:hidden flex flex-col'>
+                          {discover}
+                          {liked}
+                          {matches}
+                          {messages}
+                        </div>
                         <button
                           onClick={handleLogout}
                           className='flex items-center space-x-3 w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-gray-700/50 transition-colors'

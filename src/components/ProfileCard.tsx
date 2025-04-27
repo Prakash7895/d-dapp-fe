@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowUp,
@@ -21,6 +21,11 @@ import { capitalizeFirstLetter } from '@/utils';
 import Carousel from './Carousel';
 import { useStateContext } from './StateProvider';
 import AnimatedTooltip from './AnimatedTooltip';
+import { postNudge } from '@/apiCalls';
+import { toast } from 'react-toastify';
+import { differenceInHours } from 'date-fns';
+import { useAppDispatch } from '@/store';
+import { updateUserProperty } from '@/store/UsersReducer';
 
 interface ProfileCardProps {
   profile: AllUsers;
@@ -42,16 +47,49 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     if (stackIndex === 2) return 'shadow-lg';
     return 'shadow-md';
   };
+  const dispatch = useAppDispatch();
 
-  const { userInfo } = useStateContext();
+  const { userInfo, activeProfilePhoto } = useStateContext();
+  const isNftMinted = !!activeProfilePhoto;
+  const [nudging, setNudging] = useState(false);
 
   const loggedInHasWallet = !!userInfo?.walletAddress;
   const currentUserHasWallet = !!profile?.walletAddress;
   const isWalletConnected = loggedInHasWallet && currentUserHasWallet;
 
+  const nudgeDiff = profile.nudgedAt
+    ? differenceInHours(new Date(), new Date(profile.nudgedAt))
+    : 24;
+
   const handleNudge = () => {
-    console.log('NUDGE');
+    if (nudgeDiff < 24) {
+      toast.error(
+        `You can nudge ${profile?.profile?.firstName} again in ${
+          24 - nudgeDiff
+        } hours`
+      );
+      return;
+    }
+    setNudging(true);
+    postNudge(profile.id).then((res) => {
+      if (res.status === 'success') {
+        toast.success(res.message);
+        dispatch(
+          updateUserProperty({
+            id: profile.id,
+            data: {
+              nudgedAt: new Date().toISOString(),
+            },
+          })
+        );
+      } else {
+        toast.error(res.message);
+      }
+      setNudging(false);
+    });
   };
+
+  const maxInterestsToShow = 4;
 
   const likeBtn = (
     <motion.button
@@ -62,7 +100,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           }
         : {})}
       onClick={() => (isWalletConnected ? onSwipe('right') : handleNudge())}
-      disabled={!loggedInHasWallet}
+      disabled={!loggedInHasWallet || nudging}
       className='w-16 h-16 rounded-full bg-white/10 hover:enabled:bg-white/20 disabled:opacity-70 flex items-center justify-center'
     >
       {!currentUserHasWallet && loggedInHasWallet ? (
@@ -84,14 +122,24 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     >
       <CardBody className='h-full relative group/card w-full rounded-xl p-6'>
         <CardItem
-          translateZ='50'
-          className='text-xl font-bold text-neutral-600 dark:text-white'
+          translateZ={50}
+          className='text-xl z-50 font-bold text-neutral-600 w-full dark:text-white'
         >
-          <h2 className='text-2xl font-bold text-white flex items-center gap-5'>
-            {capitalizeFirstLetter(profile?.profile?.firstName || '')}{' '}
-            {capitalizeFirstLetter(profile?.profile?.lastName || '')}{' '}
-            {profile.walletAddress && <BadgeCheck color='#5f5' />}
-          </h2>
+          <div className='flex items-center gap-2 w-full'>
+            <h2 className='text-2xl font-bold text-white truncate'>
+              {capitalizeFirstLetter(profile?.profile?.firstName || '')}{' '}
+            </h2>
+            <h2 className='text-2xl font-bold text-white truncate'>
+              {capitalizeFirstLetter(profile?.profile?.lastName || '')}{' '}
+            </h2>
+            <div className='shrink-0'>
+              {isNftMinted && (
+                <AnimatedTooltip tooltipContent='Verified'>
+                  <BadgeCheck color='#5f5' />
+                </AnimatedTooltip>
+              )}
+            </div>
+          </div>
           <h3 className='flex items-center'>
             {profile?.profile?.age},{' '}
             {profile?.profile?.gender === 'MALE' ? (
@@ -130,28 +178,41 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           className='text-neutral-500 mt-2 dark:text-neutral-300'
         >
           <div className='flex flex-wrap gap-2'>
-            {(profile?.profile?.interests ?? []).map((interest, index) => (
-              <span
-                key={index}
-                className='px-3 py-1 bg-primary-500/20 text-primary-400 rounded-full text-sm'
-              >
-                {interest}
-              </span>
-            ))}
+            {(profile?.profile?.interests ?? [])
+              .slice(0, maxInterestsToShow)
+              .map((interest, index) => (
+                <span
+                  key={index}
+                  className='px-3 py-1 bg-primary-500/20 text-primary-400 rounded-full text-sm'
+                >
+                  {interest}
+                </span>
+              ))}
+            {profile.profile.interests &&
+              profile.profile.interests.length > maxInterestsToShow && (
+                <span className='px-3 py-1 bg-primary-500/20 text-primary-400 rounded-full text-sm'>
+                  +{profile.profile.interests?.length - maxInterestsToShow} more
+                </span>
+              )}
           </div>
         </CardItem>
-        <div className='flex justify-between items-center mt-4'>
-          <CardItem
-            translateZ={20}
-            className='rounded-xl flex items-center gap-2 font-normal dark:text-white'
-          >
-            <MapPin className='h-4 w-4 scale-125 ml-1' />
-            <span className='text-gray-300'>
-              {profile?.profile?.city}{' '}
-              <small>({profile?.profile?.maxDistance} km away)</small>
-            </span>
-          </CardItem>
-        </div>
+        {profile?.profile?.city && (
+          <div className='flex justify-between items-center mt-4'>
+            <CardItem
+              translateZ={20}
+              className='rounded-xl flex items-center font-normal dark:text-white w-full'
+            >
+              <MapPin className='h-4 w-4 scale-125 ml-1 shrink-0' />
+              <p className='text-gray-300 pl-2 truncate'>
+                {profile?.profile?.city}
+              </p>
+              ,
+              <p className='text-gray-300 pl-2 truncate'>
+                {profile.profile?.country}
+              </p>
+            </CardItem>
+          </div>
+        )}
         {isTopCard && (
           <div className='absolute bottom-6 left-0 right-0 flex justify-center space-x-8'>
             <CardItem translateZ={75} as='div'>

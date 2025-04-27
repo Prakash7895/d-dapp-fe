@@ -44,7 +44,10 @@ const ProfileLayout = ({ children }: { children: ReactNode }) => {
 
   return (
     <div>
-      <div className='border-b-2 border-gray-800'>
+      <div
+        className='border-b-2 border-gray-800 w-full relative flex flex-col justify-end'
+        style={{ height: `${5 * 42 + 5}px` }}
+      >
         <GridPattern columns={'width'} rows={5} />
         <ProfileInfo />
       </div>

@@ -29,21 +29,27 @@ const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   return status === 'loading' ? (
     <ScreenLoader />
   ) : status === 'unauthenticated' ? (
-    children
+    isAuthRoute || isAdminRoute ? (
+      children
+    ) : (
+      <ScreenLoader />
+    )
   ) : (
     <Provider store={store}>
       <StateProvider>
-        <ChatProvider>{children}</ChatProvider>
+        <EthereumProvider>
+          <ChatProvider>{children}</ChatProvider>
+        </EthereumProvider>
       </StateProvider>
     </Provider>
   );
 };
 
 const RootProvider: FC<{ children: ReactNode }> = ({ children }) => (
-  <EthereumProvider>
+  <>
     <ToastContainer />
     <AuthProvider>{children}</AuthProvider>
-  </EthereumProvider>
+  </>
 );
 
 export default RootProvider;

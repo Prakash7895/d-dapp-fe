@@ -48,15 +48,15 @@ const WalletAlert: FC<WalletAlertProps> = ({
           {showEmailRecommendation && (
             <div className='mt-2 p-2 bg-yellow-600/20 rounded-md'>
               <div className='text-sm text-yellow-900'>
-                💡 Using a wallet-only account? Add an email address to:
-                <ul className='ml-4 mt-1 list-disc'>
-                  <li>Sign in from devices without wallet extensions</li>
-                  <li>Recover your account if needed</li>
-                  <li>Receive important notifications</li>
-                </ul>
+                <p>
+                  💡 For enhanced security, we recommend adding an email to your
+                  account. This ensures that no one else can log in using your
+                  wallet on this device. You can also enable 'Email-Only Login'
+                  for additional protection.
+                </p>
                 <Link
                   href='/profile/security'
-                  className='mt-2 inline-flex items-center font-medium underline hover:text-yellow-900'
+                  className='mt-2 block items-center font-medium underline hover:text-yellow-900'
                 >
                   Add email in profile settings →
                 </Link>

@@ -101,6 +101,7 @@ export interface UserResponse {
 export type AllUsers = UserResponse & {
   lastActiveOn: string | null;
   files: string[];
+  nudgedAt: string | null;
 };
 
 export type LikdedUser = AllUsers & {
@@ -142,4 +143,9 @@ export interface Notification {
   createdAt: Date;
   updatedAt: Date;
   status: boolean;
+}
+
+export enum SignInType {
+  EMAIL = 'email',
+  WALLET = 'wallet',
 }

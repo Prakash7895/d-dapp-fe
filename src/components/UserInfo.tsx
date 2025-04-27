@@ -74,7 +74,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
           {label}
         </label>
         <div
-          className={`px-4 py-2 bg-gray-800 border border-gray-700 rounded-md text-white flex ${
+          className={`px-4 py-2 overflow-auto bg-gray-800 border border-gray-700 rounded-md text-white flex ${
             type === 'textarea' ? 'min-h-[105px]' : 'min-h-[42px] items-center'
           }`}
         >
@@ -299,10 +299,12 @@ const UserInfo: React.FC = () => {
     {
       label: 'First Name',
       value: 'firstName',
+      className: 'col-span-2 md:col-span-1',
     },
     {
       label: 'Last Name',
       value: 'lastName',
+      className: 'col-span-2 md:col-span-1',
     },
     // {
     //   label: 'Email',
@@ -317,12 +319,14 @@ const UserInfo: React.FC = () => {
       type: 'number',
       min: 18,
       max: 99,
+      className: 'col-span-2 md:col-span-1',
     },
     {
       label: 'Gender',
       value: 'gender',
       type: 'select',
       options: genderOptions,
+      className: 'col-span-2 md:col-span-1',
     },
     {
       label: 'Sexual Orientation',

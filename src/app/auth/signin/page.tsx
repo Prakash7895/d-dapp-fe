@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { connectWallet } from '@/contract';
 import { ethers } from 'ethers';
 import Link from 'next/link';
@@ -10,6 +10,8 @@ import Input from '@/components/Input';
 import ScreenLoader from '@/components/ScreenLoader';
 import useSession from '@/hooks/useSession';
 import { login } from '@/apiCalls';
+import { SignInType } from '@/types/user';
+import { createQueryString } from '@/utils';
 
 export default function SignIn() {
   const router = useRouter();
@@ -18,7 +20,21 @@ export default function SignIn() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | React.ReactNode>('');
-  const [authMethod, setAuthMethod] = useState<'email' | 'wallet'>('email');
+  const searchParams = useSearchParams();
+  const wallet = searchParams.get('wallet');
+
+  const [authMethod, setAuthMethod] = useState<SignInType>(
+    wallet ? SignInType.WALLET : SignInType.EMAIL
+  );
+  const pathName = usePathname();
+
+  useEffect(() => {
+    if (wallet) {
+      setAuthMethod(SignInType.WALLET);
+    } else {
+      setAuthMethod(SignInType.EMAIL);
+    }
+  }, [wallet]);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -33,7 +49,7 @@ export default function SignIn() {
     setError('');
 
     try {
-      login({ type: 'email', email, password }).then(async (res) => {
+      login({ type: SignInType.EMAIL, email, password }).then(async (res) => {
         console.log('res', res);
         if (res.status === 'success') {
           sessionStorage.setItem('accessToken', res.data?.access_token!);
@@ -77,7 +93,7 @@ export default function SignIn() {
 
       // Sign in with the wallet
       login({
-        type: 'wallet',
+        type: SignInType.WALLET,
         walletAddress: address,
         signedMessage: signature,
       }).then(async (res) => {
@@ -137,29 +153,34 @@ export default function SignIn() {
 
         <div className='mt-8 space-y-6'>
           <div className='flex justify-center space-x-4 mb-6'>
-            <button
-              onClick={() => setAuthMethod('email')}
+            <Link
+              href={pathName}
+              onClick={() => setAuthMethod(SignInType.EMAIL)}
               className={`px-4 py-2 rounded-md ${
-                authMethod === 'email'
+                authMethod === SignInType.EMAIL
                   ? 'bg-primary-500 text-white'
                   : 'bg-gray-700 text-gray-300'
               }`}
             >
               Email & Password
-            </button>
-            <button
-              onClick={() => setAuthMethod('wallet')}
+            </Link>
+            <Link
+              href={
+                pathName +
+                createQueryString(searchParams, SignInType.WALLET, 'true')
+              }
+              onClick={() => setAuthMethod(SignInType.WALLET)}
               className={`px-4 py-2 rounded-md ${
-                authMethod === 'wallet'
+                authMethod === SignInType.WALLET
                   ? 'bg-primary-500 text-white'
                   : 'bg-gray-700 text-gray-300'
               }`}
             >
               Wallet
-            </button>
+            </Link>
           </div>
 
-          {authMethod === 'email' ? (
+          {authMethod === SignInType.EMAIL ? (
             <form className='mt-8 space-y-6' onSubmit={handleEmailSignIn}>
               <div className='rounded-md shadow-sm -space-y-px'>
                 <Input

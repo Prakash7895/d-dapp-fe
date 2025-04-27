@@ -242,7 +242,7 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
           6
         )}...${connectedAddress.substring(38)} wallet address to your profile?`;
       }
-      return 'Please connect with a valid wallet address.';
+      return 'An account is already associated with this wallet address. Please log in using the corresponding account to continue.';
     }
 
     // Connected but invalid state

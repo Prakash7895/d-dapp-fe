@@ -1,5 +1,6 @@
 'use client';
 
+import { ReadonlyURLSearchParams } from 'next/navigation';
 import { GENDER, SEXUAL_ORIENTATION } from './apiSchemas';
 
 export const capitalizeFirstLetter = (str: string = '') =>
@@ -62,4 +63,15 @@ export const deepClone = <T>(obj: T): T => {
     }
   }
   return clonedObj as T;
+};
+
+export const createQueryString = (
+  searchParams: ReadonlyURLSearchParams,
+  name: string,
+  value: string
+) => {
+  const params = new URLSearchParams(searchParams.toString());
+  params.set(name, value);
+
+  return '?' + params.toString();
 };

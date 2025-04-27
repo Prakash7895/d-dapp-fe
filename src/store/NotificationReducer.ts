@@ -1,5 +1,5 @@
 import { Notification } from '@/types/user';
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { fetchNotifications } from './thunk';
 import { PAGE_SIZE } from './ChatReducer';
 
@@ -22,6 +22,24 @@ const notificationSlice = createSlice({
   initialState,
   reducers: {
     resetNotification: () => initialState,
+    markRead: (state, action: PayloadAction<{ notificationId: string }>) => {
+      const notificationIndex = state.notifications.findIndex(
+        (notification) => notification.id === action.payload.notificationId
+      );
+      if (notificationIndex !== -1) {
+        state.notifications[notificationIndex].read = true;
+      }
+    },
+    deleteNotification: (
+      state,
+      action: PayloadAction<{ notificationId: string }>
+    ) => {
+      const updatedNotifications = state.notifications.filter(
+        (notification) => notification.id !== action.payload.notificationId
+      );
+
+      state.notifications = updatedNotifications;
+    },
   },
   extraReducers(builder) {
     builder
@@ -47,5 +65,6 @@ const notificationSlice = createSlice({
   },
 });
 
-export const { resetNotification } = notificationSlice.actions;
+export const { resetNotification, markRead, deleteNotification } =
+  notificationSlice.actions;
 export default notificationSlice.reducer;

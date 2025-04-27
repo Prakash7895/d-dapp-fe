@@ -50,11 +50,13 @@ const checkIfValidAddressIsConnected = async () => {
 };
 
 export async function detectConnection() {
+  console.log('detectConnection');
   // TODO: need to handle this case
   if (window.ethereum == null || typeof window.ethereum == 'undefined') {
     throw new Error('Please install MetaMask to use this dApp!');
   } else {
     try {
+      console.log('detecting connection');
       const accounts = await window.ethereum.request({
         method: 'eth_accounts',
       });
@@ -68,13 +70,15 @@ export async function detectConnection() {
 }
 
 export async function connectWallet() {
+  console.log('connectWallet');
+
   if (window.ethereum == null || typeof window.ethereum == 'undefined') {
     throw new Error('Please install MetaMask to use this dApp!');
   } else {
     try {
       await checkIfValidAddressIsConnected();
       const provider = new ethers.BrowserProvider(window.ethereum);
-
+      console.log('provider', provider);
       const signer = await provider.getSigner();
 
       return signer;
@@ -129,6 +133,7 @@ export function onChainChange(callback: (chainId: string) => void): () => void {
 
 const getSoulboundNft = async () => {
   try {
+    console.log('getting SoulboundNft instance');
     const signer = await connectWallet();
 
     return new ethers.Contract(
@@ -180,6 +185,7 @@ export const mintNewNft = async (tokenUri: string) => {
 
 export const getActiveProfileNft = async () => {
   try {
+    console.log('getting active profile nft');
     const signer = await connectWallet();
     const soulboundNft = (await getSoulboundNft()) as Contract;
 
@@ -207,6 +213,7 @@ export const getActiveProfileNft = async () => {
 
 export const getUserTokenUris = async () => {
   try {
+    console.log('getting user token uris');
     const signer = await connectWallet();
     const soulboundNft = (await getSoulboundNft()) as Contract;
 
@@ -221,6 +228,7 @@ export const getUserTokenUris = async () => {
 
 export const getUserTokenIds = async () => {
   try {
+    console.log('getting user token ids');
     const signer = await connectWallet();
     const soulboundNft = (await getSoulboundNft()) as Contract;
 

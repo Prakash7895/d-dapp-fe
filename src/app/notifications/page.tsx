@@ -7,6 +7,7 @@ import { fetchNotifications } from '@/store/thunk';
 import { PAGE_SIZE } from '@/store/ChatReducer';
 import NotificationItem from '@/components/NotificationItem';
 import InfiniteScroll from '@/components/InfiniteScroll';
+import Button from '@/components/Button';
 
 const NotificationPage = () => {
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
@@ -45,17 +46,17 @@ const NotificationPage = () => {
 
       <div className='flex space-x-4 mb-6'>
         {['all', 'unread', 'read'].map((tab) => (
-          <button
+          <Button
             key={tab}
             onClick={() => setFilter(tab as 'all' | 'unread' | 'read')}
-            className={`px-4 py-2 rounded-full font-medium transition-all shadow-md ${
+            buttonType='secondary'
+            className={`px-4 py-2 rounded-full font-medium transition-all shadow-md !w-fit outline-none ${
               filter === tab
                 ? 'bg-gradient-to-r from-primary-500 to-purple-500 text-white'
                 : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
             }`}
-          >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-          </button>
+            label={tab.charAt(0).toUpperCase() + tab.slice(1)}
+          />
         ))}
       </div>
 

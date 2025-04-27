@@ -13,7 +13,7 @@ const GridPattern: FC<GridPatternProps> = ({ columns = 12, rows = 11 }) => {
   const currColumns = columns === 'width' ? Math.ceil(width / 40) : columns;
 
   return (
-    <div className='w-full overflow-hidden'>
+    <div className='w-full overflow-hidden absolute -z-10'>
       <div className='flex bg-gray-100 dark:bg-neutral-900 shrink-0 flex-col justify-center items-center gap-x-px gap-y-px  scale-105'>
         {Array.from({ length: rows }).map((_, row) => (
           <div key={row} className='border-1 border-green-400 flex'>

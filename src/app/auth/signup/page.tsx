@@ -1,14 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { connectWallet, onAccountChange } from '@/contract';
 import { ethers } from 'ethers';
 import Link from 'next/link';
 import Input from '@/components/Input';
 import Select from '@/components/Select';
-import { genderOptions, sexualOrientationOptions } from '@/utils';
-import { UserFormData } from '@/types/user';
+import {
+  createQueryString,
+  genderOptions,
+  sexualOrientationOptions,
+} from '@/utils';
+import { SignInType, UserFormData } from '@/types/user';
 import Button from '@/components/Button';
 import { toast } from 'react-toastify';
 import { getUserLocation } from '@/userLocation';
@@ -29,9 +33,16 @@ export default function SignUp() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [authMethod, setAuthMethod] = useState<'email' | 'wallet'>('email');
+
+  const searchParams = useSearchParams();
+  const wallet = searchParams.get('wallet');
+
+  const [authMethod, setAuthMethod] = useState<SignInType>(
+    wallet ? SignInType.WALLET : SignInType.EMAIL
+  );
   const [walletAddress, setWalletAddress] = useState('');
   const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
+  const pathName = usePathname();
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -96,7 +107,7 @@ export default function SignUp() {
           ...location,
         })
         .then(() => {
-          router.push('/auth/signin?registered=true');
+          router.push('/auth/signin');
         })
         .catch((err) => {
           throw new Error(err.message || 'Failed to register');
@@ -129,7 +140,7 @@ export default function SignUp() {
       }
 
       setWalletAddress(address);
-      setAuthMethod('wallet');
+      setAuthMethod(SignInType.WALLET);
     } catch (error) {
       setError('An error occurred while connecting wallet');
       console.error(error);
@@ -137,6 +148,15 @@ export default function SignUp() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (wallet) {
+      setAuthMethod(SignInType.WALLET);
+      handleWalletConnect();
+    } else {
+      setAuthMethod(SignInType.EMAIL);
+    }
+  }, [wallet]);
 
   const handleWalletSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -178,14 +198,14 @@ export default function SignUp() {
         .post('/users', {
           ...restFormData,
           age: +restFormData.age,
-          walletAddress: walletAddress,
+          walletAddress: walletAddress.toLowerCase(),
           signature,
           ...location,
         })
         .then((res) => {
           const data = res.data;
           toast.success(data?.message);
-          router.push('/auth/signin?registered=true');
+          router.push(`/auth/signin?${SignInType.WALLET}=true`);
         })
         .catch((error) => {
           setError(
@@ -225,7 +245,7 @@ export default function SignUp() {
   const formRenderer = [
     { label: 'First Name', name: 'firstName', type: 'text' },
     { label: 'Last Name', name: 'lastName', type: 'text' },
-    ...(authMethod === 'email'
+    ...(authMethod === SignInType.EMAIL
       ? [
           {
             label: 'Email address',
@@ -288,17 +308,25 @@ export default function SignUp() {
 
   const tabs = [
     {
-      onClick: () => setAuthMethod('email'),
+      onClick: () => setAuthMethod(SignInType.EMAIL),
       label: 'Email & Password',
-      isActive: authMethod === 'email',
+      isActive: authMethod === SignInType.EMAIL,
+      type: SignInType.EMAIL,
     },
     {
+      type: SignInType.WALLET,
       onClick: handleWalletConnect,
       label: 'Wallet',
-      isActive: authMethod === 'wallet',
+      isActive: authMethod === SignInType.WALLET,
     },
   ].map((el) => (
-    <button
+    <Link
+      href={
+        pathName +
+        (el.type === SignInType.WALLET
+          ? createQueryString(searchParams, SignInType.WALLET, 'true')
+          : '')
+      }
       key={el.label}
       onClick={el.onClick}
       className={`px-4 py-2 rounded-md ${
@@ -306,7 +334,7 @@ export default function SignUp() {
       }`}
     >
       {el.label}
-    </button>
+    </Link>
   ));
 
   return (
@@ -324,10 +352,12 @@ export default function SignUp() {
           <form
             className='mt-8 space-y-6'
             onSubmit={
-              authMethod === 'email' ? handleEmailSignUp : handleWalletSignUp
+              authMethod === SignInType.EMAIL
+                ? handleEmailSignUp
+                : handleWalletSignUp
             }
           >
-            {authMethod === 'wallet' && (
+            {authMethod === SignInType.WALLET && (
               <>
                 {walletAddress ? (
                   <div className='mb-4 p-3 bg-gray-800 rounded-md'>
@@ -359,7 +389,7 @@ export default function SignUp() {
                 isLoading={isLoading}
                 disabled={
                   isLoading ||
-                  (authMethod === 'wallet' ? !walletAddress : false)
+                  (authMethod === SignInType.WALLET ? !walletAddress : false)
                 }
                 loadingLabel='Creating account...'
                 type='submit'

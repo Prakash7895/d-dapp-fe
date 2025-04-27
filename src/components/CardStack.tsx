@@ -11,10 +11,16 @@ interface CardStackProps {
     direction: 'left' | 'right' | 'up',
     profile: AllUsers
   ) => Promise<boolean | undefined>;
+  currentIndex: number;
+  setCurrentIndex: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const CardStack: React.FC<CardStackProps> = ({ profiles, onSwipe }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+const CardStack: React.FC<CardStackProps> = ({
+  profiles,
+  onSwipe,
+  currentIndex,
+  setCurrentIndex,
+}) => {
   const [direction, setDirection] = useState<'left' | 'right' | 'up' | null>(
     null
   );
@@ -136,9 +142,7 @@ const CardStack: React.FC<CardStackProps> = ({ profiles, onSwipe }) => {
           return (
             <motion.div
               key={profile.id}
-              className={`absolute w-full h-full ${
-                isTopCard ? 'cursor-grab active:cursor-grabbing' : ''
-              }`}
+              className={`absolute w-full h-full`}
               style={{
                 scale,
                 y: yOffset,

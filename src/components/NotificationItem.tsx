@@ -1,22 +1,53 @@
 import { Notification } from '@/types/user';
 import { formatDistanceToNow } from 'date-fns';
 import { motion } from 'framer-motion';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, Trash2 } from 'lucide-react';
 import { FC } from 'react';
+import { useStateContext } from './StateProvider';
+import { deleteNotification, markNotificationRead } from '@/apiCalls';
+import { useAppDispatch } from '@/store';
+import {
+  markRead,
+  deleteNotification as deleteNotifInState,
+} from '@/store/NotificationReducer';
+import { toast } from 'react-toastify';
+import Button from './Button';
+import AnimatedTooltip from './AnimatedTooltip';
 
 const NotificationItem: FC<Notification> = (notification) => {
+  const { setUserInfo } = useStateContext();
+  const dispatch = useAppDispatch();
+
   const markAsRead = () => {
-    // setNotifications((prev) =>
-    //   prev.map((notification) =>
-    //     notification.id === id ? { ...notification, read: true } : notification
-    //   )
-    // );
+    markNotificationRead(notification.id).then((res) => {
+      if (res.status === 'success') {
+        toast.success(res.message);
+        setUserInfo((prev) => ({
+          ...prev!,
+          unreadNotifications: (prev!.unreadNotifications || 1) - 1,
+        }));
+        dispatch(markRead({ notificationId: notification.id }));
+      } else {
+        toast.error(res.message);
+      }
+    });
   };
 
-  const deleteNotification = () => {
-    // setNotifications((prev) =>
-    //   prev.filter((notification) => notification.id !== id)
-    // );
+  const deleteNotif = () => {
+    deleteNotification(notification.id).then((res) => {
+      if (res.status === 'success') {
+        toast.success(res.message);
+        if (!notification.read) {
+          setUserInfo((prev) => ({
+            ...prev!,
+            unreadNotifications: (prev!.unreadNotifications || 1) - 1,
+          }));
+        }
+        dispatch(deleteNotifInState({ notificationId: notification.id }));
+      } else {
+        toast.error(res.message);
+      }
+    });
   };
 
   return (
@@ -26,7 +57,7 @@ const NotificationItem: FC<Notification> = (notification) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
-      className={`p-4 rounded-lg shadow-md flex items-start justify-between ${
+      className={`p-4 my-4 group rounded-lg shadow-md flex items-start justify-between ${
         notification.read
           ? 'bg-gray-100 dark:bg-gray-800'
           : 'bg-blue-50 dark:bg-blue-900'
@@ -36,28 +67,33 @@ const NotificationItem: FC<Notification> = (notification) => {
         <h3 className='text-lg font-semibold text-gray-800 dark:text-white'>
           {notification.title}
         </h3>
-        <p className='text-sm text-gray-600 dark:text-gray-400'>
-          {notification.content}
-        </p>
+        <p
+          className='text-sm text-gray-600 dark:text-gray-400'
+          dangerouslySetInnerHTML={{ __html: notification.content }}
+        />
         <span className='text-xs text-gray-500 dark:text-gray-400'>
           {formatDistanceToNow(notification.createdAt)}
         </span>
       </div>
-      <div className='flex items-center space-x-2'>
+      <div className='items-center space-x-3 hidden group-hover:!flex'>
         {!notification.read && (
-          <button
-            onClick={() => markAsRead()}
-            className='p-2 rounded-full bg-green-500 hover:bg-green-600 text-white'
-          >
-            <CheckCircle className='h-5 w-5' />
-          </button>
+          <AnimatedTooltip tooltipContent='Mark as Read'>
+            <Button
+              onClick={() => markAsRead()}
+              className='!p-1 !w-fit rounded-full bg-gradient-to-r from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white shadow-md hover:shadow-lg transition-all duration-300 ease-in-out'
+            >
+              <CheckCircle />
+            </Button>
+          </AnimatedTooltip>
         )}
-        <button
-          onClick={() => deleteNotification()}
-          className='p-2 rounded-full bg-red-500 hover:bg-red-600 text-white'
-        >
-          <XCircle className='h-5 w-5' />
-        </button>
+        <AnimatedTooltip tooltipContent='Delete'>
+          <Button
+            onClick={() => deleteNotif()}
+            className='!p-1 !w-fit rounded-full bg-gradient-to-r from-red-400 to-red-600 hover:from-red-500 hover:to-red-700 text-white shadow-md hover:shadow-lg transition-all duration-300 ease-in-out'
+          >
+            <Trash2 />
+          </Button>
+        </AnimatedTooltip>
       </div>
     </motion.div>
   );

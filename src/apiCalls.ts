@@ -13,6 +13,7 @@ import {
   LikdedUser,
   MatchedUser,
   Notification,
+  SignInType,
   UserByAddress,
   UserResponse,
 } from './types/user';
@@ -228,7 +229,7 @@ export const login = ({
   walletAddress,
   signedMessage,
 }: {
-  type: 'email' | 'wallet';
+  type: SignInType;
   email?: string;
   password?: string;
   walletAddress?: string;
@@ -237,7 +238,9 @@ export const login = ({
   axiosInstance
     .post(
       '/auth/login',
-      type === 'email' ? { email, password } : { walletAddress, signedMessage }
+      type === SignInType.EMAIL
+        ? { email, password }
+        : { walletAddress, signedMessage }
     )
     .then(
       (res) =>
@@ -405,11 +408,29 @@ export const markNotificationRead = (notificationId: string) =>
       return { status: 'error' } as ApiResponse;
     });
 
+export const deleteNotification = (notificationId: string) =>
+  axiosInstance
+    .delete(`/notification/${notificationId}`)
+    .then((res) => res.data as ApiResponse)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to delete notification');
+      return { status: 'error' } as ApiResponse;
+    });
+
 export const postNudge = (userId: string) =>
   axiosInstance
     .post(`/notification/nudge`, { userId })
     .then((res) => res.data as ApiResponse)
     .catch((err) => {
       toast.error(err?.message || 'Failed to nudge user');
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const saveEmailOnlyLogin = (enable: boolean) =>
+  axiosInstance
+    .put('/profile/enable-email-login', { enable })
+    .then((res) => res.data as ApiResponse)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to update email only login');
       return { status: 'error' } as ApiResponse;
     });

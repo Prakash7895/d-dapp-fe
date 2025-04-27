@@ -1,30 +1,34 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import CardStack from '@/components/CardStack';
 import { AllUsers } from '@/types/user';
 import Loader from '@/components/Loader';
-import { getUsers } from '@/apiCalls';
 import { motion } from 'framer-motion';
 import { likeProfile } from '@/contract';
 import { useStateContext } from '@/components/StateProvider';
 import { toast } from 'react-toastify';
 import { useMatchMakingContract } from '@/components/EthereumProvider';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { fetchUsers } from '@/store/thunk';
 
 const HomePage = () => {
-  const [profiles, setProfiles] = useState<AllUsers[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const { users, loading, hasMore, pageNo } = useAppSelector('users');
   const { userInfo } = useStateContext();
   const matchMakingContract = useMatchMakingContract();
 
+  const dispatch = useAppDispatch();
+
   useEffect(() => {
-    setLoading(true);
-    getUsers(1).then((res) => {
-      console.log('res', res.data?.users);
-      setProfiles(res.data?.users ?? []);
-      setLoading(false);
-    });
-  }, []);
+    if (
+      !loading &&
+      hasMore &&
+      (users.length === 0 || currentIndex === users.length - 2)
+    ) {
+      dispatch(fetchUsers({ pageNo, pageSize: 7 }));
+    }
+  }, [loading, users, hasMore, pageNo, currentIndex]);
 
   const handleSwipe = async (
     direction: 'left' | 'right' | 'up',
@@ -58,7 +62,7 @@ const HomePage = () => {
     return true;
   };
 
-  if (loading) {
+  if (loading && users.length === 0) {
     return (
       <div className='flex items-center justify-center min-h-screen'>
         <Loader size={64} />
@@ -66,7 +70,7 @@ const HomePage = () => {
     );
   }
 
-  if (profiles.length === 0) {
+  if (users.length === 0) {
     return (
       <div className='h-full bg-gray-900 flex items-center justify-center p-4'>
         <motion.div
@@ -115,7 +119,12 @@ const HomePage = () => {
 
   return (
     <div className='h-full bg-gray-900 flex items-center justify-center p-4'>
-      <CardStack profiles={profiles} onSwipe={handleSwipe} />
+      <CardStack
+        profiles={users}
+        onSwipe={handleSwipe}
+        currentIndex={currentIndex}
+        setCurrentIndex={setCurrentIndex}
+      />
     </div>
   );
 };
