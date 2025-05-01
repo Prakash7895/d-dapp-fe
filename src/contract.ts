@@ -1,7 +1,4 @@
 'use client';
-import { ethers, formatEther } from 'ethers';
-import soulboundNftAbi from '@/abis/SooulboundNft.json';
-
 import { Contract } from 'ethers';
 import { toast } from 'react-toastify';
 
@@ -14,78 +11,6 @@ interface EthereumProvider {
 declare global {
   interface Window {
     ethereum?: EthereumProvider;
-  }
-}
-
-const getActiveAddress = async () => {
-  if (!window.ethereum) {
-    throw new Error('MetaMask is not installed');
-  }
-  const accounts = await window.ethereum.request({
-    method: 'eth_accounts',
-  });
-
-  return accounts[0];
-};
-
-const checkIfValidAddressIsConnected = async () => {
-  const savedWalletAddress = sessionStorage.getItem('savedWalletAddress');
-
-  if (!savedWalletAddress) {
-    return true;
-  }
-
-  const parsedWalletAddress = JSON.parse(savedWalletAddress || '');
-
-  const accounts = await detectConnection();
-
-  if (!accounts.length) {
-    return true;
-  }
-  const activeWalletAddress = await getActiveAddress();
-  if (!savedWalletAddress || parsedWalletAddress === activeWalletAddress) {
-    return true;
-  }
-  throw new Error('Saved wallet address is not active');
-};
-
-export async function detectConnection() {
-  console.log('detectConnection');
-  // TODO: need to handle this case
-  if (window.ethereum == null || typeof window.ethereum == 'undefined') {
-    throw new Error('Please install MetaMask to use this dApp!');
-  } else {
-    try {
-      console.log('detecting connection');
-      const accounts = await window.ethereum.request({
-        method: 'eth_accounts',
-      });
-
-      return accounts;
-    } catch (err) {
-      console.log('User rejected the request', err);
-      throw err;
-    }
-  }
-}
-
-export async function connectWallet() {
-  console.log('connectWallet');
-
-  if (window.ethereum == null || typeof window.ethereum == 'undefined') {
-    throw new Error('Please install MetaMask to use this dApp!');
-  } else {
-    try {
-      await checkIfValidAddressIsConnected();
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      console.log('provider', provider);
-      const signer = await provider.getSigner();
-
-      return signer;
-    } catch (err) {
-      console.log('User rejected the request', err);
-      throw err;
-    }
   }
 }
 
@@ -131,158 +56,6 @@ export function onChainChange(callback: (chainId: string) => void): () => void {
   };
 }
 
-const getSoulboundNft = async () => {
-  try {
-    console.log('getting SoulboundNft instance');
-    const signer = await connectWallet();
-
-    return new ethers.Contract(
-      process.env.NEXT_PUBLIC_SOULBOUND_NFT_ADDRESS!,
-      soulboundNftAbi,
-      signer
-    );
-  } catch (error: unknown) {
-    console.log('getting SoulboundNft instance error', error);
-    return false;
-  }
-};
-
-export const getMintFee = async () => {
-  try {
-    const soulboundNft = (await getSoulboundNft()) as Contract;
-
-    const mintFeeInWei = await soulboundNft.s_mintFee();
-    const mintFeeInEth = +formatEther(mintFeeInWei);
-
-    return {
-      mintFeeInWei,
-      mintFeeInEth,
-    };
-  } catch (error: unknown) {
-    console.log('getting mint fee error', error);
-    return false;
-  }
-};
-
-export const mintNewNft = async (tokenUri: string) => {
-  try {
-    const soulboundNft = (await getSoulboundNft()) as Contract;
-    const fees = await getMintFee();
-
-    if (!fees) {
-      throw new Error('Failed to get mint fee');
-    }
-
-    const transaction = await soulboundNft.createUserProfile(tokenUri, {
-      value: fees.mintFeeInWei,
-    });
-    await transaction.wait();
-  } catch (error: unknown) {
-    console.log('minting new Nft error', error);
-    return false;
-  }
-};
-
-export const getActiveProfileNft = async () => {
-  try {
-    console.log('getting active profile nft');
-    const signer = await connectWallet();
-    const soulboundNft = (await getSoulboundNft()) as Contract;
-
-    const metaDataUri = await soulboundNft.getActiveProfileNft(signer.address);
-
-    const response = await fetch(metaDataUri);
-    if (!response.ok) {
-      throw new Error('Failed to fetch metadata');
-    }
-
-    const metaData = await response.json();
-
-    const imageUrl = metaData?.image_gateway;
-
-    if (!imageUrl) {
-      throw new Error('Image URL not found in metadata');
-    }
-
-    return imageUrl;
-  } catch (error: unknown) {
-    console.log('getting active profile nft error', error);
-    return false;
-  }
-};
-
-export const getUserTokenUris = async () => {
-  try {
-    console.log('getting user token uris');
-    const signer = await connectWallet();
-    const soulboundNft = (await getSoulboundNft()) as Contract;
-
-    const tokenUris = await soulboundNft.getUserTokenUris(signer.address);
-
-    return Array.from(tokenUris);
-  } catch (error: unknown) {
-    console.log('get user token uris error', error);
-    return false;
-  }
-};
-
-export const getUserTokenIds = async () => {
-  try {
-    console.log('getting user token ids');
-    const signer = await connectWallet();
-    const soulboundNft = (await getSoulboundNft()) as Contract;
-
-    const tokenIds = await soulboundNft.getUserNfts(signer.address);
-
-    const ids = Array.from(tokenIds).map((el) => Number(el));
-
-    return ids;
-  } catch (error: unknown) {
-    console.log('get user token ids error', error);
-    return false;
-  }
-};
-
-export const getUserTokenUriById = async (id: number) => {
-  try {
-    const soulboundNft = (await getSoulboundNft()) as Contract;
-
-    const metaDataUri = await soulboundNft.tokenURI(id);
-
-    const response = await fetch(metaDataUri);
-    if (!response.ok) {
-      throw new Error('Failed to fetch metadata');
-    }
-
-    const metaData = await response.json();
-
-    const imageUrl = metaData?.image_gateway;
-
-    if (!imageUrl) {
-      throw new Error('Image URL not found in metadata');
-    }
-
-    return imageUrl;
-  } catch (error: unknown) {
-    console.log('Get token uri by id error', error);
-    return false;
-  }
-};
-
-export const changeProfileNft = async (tokenId: number) => {
-  try {
-    const soulboundNft = (await getSoulboundNft()) as Contract;
-
-    const transaction = await soulboundNft.changeProfileNft(tokenId);
-    await transaction.wait();
-
-    return true;
-  } catch (error: unknown) {
-    console.log('Change profile nft error', error);
-    return false;
-  }
-};
-
 const handleLikeError = (error: any) => {
   if (error?.code === -32603) {
     if (error.message.includes('insufficient funds')) {
@@ -294,10 +67,19 @@ const handleLikeError = (error: any) => {
         'Transaction failed. Please check your wallet balance and try again'
       );
     }
-  } else {
-    toast.error('Failed to like profile. Please try again');
   }
-  console.log('Like profile error:', error);
+  if (error.reason) {
+    console.log('Revert reason:', error.reason);
+    toast.error(`Transaction failed: ${error.reason}`);
+  } else if (error.data?.message) {
+    console.log('Error message:', error.data.message);
+    toast.error(`Transaction failed: ${error.data.message}`);
+  } else if (error.message) {
+    console.log('Error message:', error.message);
+    toast.error(`Transaction failed: ${error.message}`);
+  } else {
+    toast.error('Transaction failed. Please try again.');
+  }
 };
 
 export const likeProfile = async (
@@ -305,6 +87,7 @@ export const likeProfile = async (
   targetAddress: string
 ) => {
   if (!contract || !targetAddress) {
+    console.log('Contract or target address is null');
     return null;
   }
   try {
@@ -313,6 +96,24 @@ export const likeProfile = async (
     await contract.like(targetAddress, { value: amount });
   } catch (error: unknown) {
     console.log('like profile error', error);
+    handleLikeError(error);
+    throw error;
+  }
+};
+
+export const unlikeProfile = async (
+  contract: Contract | null,
+  user1: string,
+  user2: string
+) => {
+  if (!contract || !user1 || !user2) {
+    console.log('Contract or user addresses are null');
+    return null;
+  }
+  try {
+    await contract.unSetLikeOnExpiration(user1, user2);
+  } catch (error: any) {
+    console.log('unlike profile error', error);
     handleLikeError(error);
     throw error;
   }
@@ -336,6 +137,138 @@ export const checkIfMatched = async (
     return like1.like && like2.like;
   } catch (error: unknown) {
     console.log('check if matched error', error);
+    return false;
+  }
+};
+
+export const mintNewNft = async (
+  contract: Contract | null,
+  tokenUri: string
+) => {
+  if (!contract || !tokenUri) {
+    console.log('Contract or tokenUri is null');
+    return null;
+  }
+  try {
+    const mintFeeInWei = await contract.s_mintFee();
+
+    if (!mintFeeInWei) {
+      throw new Error('Failed to get mint fee');
+    }
+
+    const transaction = await contract.createUserProfile(tokenUri, {
+      value: mintFeeInWei,
+    });
+    await transaction.wait();
+
+    return true;
+  } catch (error: unknown) {
+    console.log('minting new Nft error', error);
+    return false;
+  }
+};
+
+export const getActiveProfileNft = async (
+  contract: Contract | null,
+  address: string | null
+) => {
+  if (!contract || !address) {
+    console.log('Contract or address is null');
+    return null;
+  }
+  try {
+    console.log('getting active profile nft');
+
+    const metaDataUri = await contract.getActiveProfileNft(address);
+
+    const response = await fetch(metaDataUri);
+    if (!response.ok) {
+      throw new Error('Failed to fetch metadata');
+    }
+
+    const metaData = await response.json();
+
+    const imageUrl = metaData?.image_gateway;
+
+    if (!imageUrl) {
+      throw new Error('Image URL not found in metadata');
+    }
+
+    return imageUrl;
+  } catch (error: unknown) {
+    console.log('getting active profile nft error', error);
+    return false;
+  }
+};
+
+export const getUserTokenIds = async (
+  contract: Contract | null,
+  address: string | null
+) => {
+  if (!contract || !address) {
+    console.log('Contract or address is null');
+    return null;
+  }
+  try {
+    console.log('getting user token ids');
+
+    const tokenIds = await contract.getUserNfts(address);
+
+    const ids = Array.from(tokenIds).map((el) => Number(el));
+
+    return ids;
+  } catch (error: unknown) {
+    console.log('get user token ids error', error);
+    return false;
+  }
+};
+
+export const changeProfileNft = async (
+  contract: Contract | null,
+  tokenId: number
+) => {
+  if (!contract) {
+    console.log('Contract is null');
+    return null;
+  }
+  try {
+    const transaction = await contract.changeProfileNft(tokenId);
+    await transaction.wait();
+
+    return true;
+  } catch (error: unknown) {
+    console.log('Change profile nft error', error);
+    return false;
+  }
+};
+
+export const getUserTokenUriById = async (
+  contract: Contract | null,
+  id: number
+) => {
+  if (!contract) {
+    console.log('Contract is null');
+    return null;
+  }
+  try {
+    const metaDataUri = await contract.tokenURI(id);
+
+    const response = await fetch(metaDataUri);
+    if (!response.ok) {
+      throw new Error('Failed to fetch metadata');
+    }
+
+    const metaData = await response.json();
+
+    const imageUrl = metaData?.image_gateway;
+
+    if (!imageUrl) {
+      throw new Error('Image URL not found in metadata');
+    }
+
+    return imageUrl;
+  } catch (error: unknown) {
+    console.log('Get token uri by id error', error);
     return false;
   }
 };

@@ -1,3 +1,5 @@
+'use client';
+
 import { JsonRpcSigner } from 'ethers';
 import { Contract } from 'ethers';
 import { BrowserProvider } from 'ethers';
@@ -5,6 +7,7 @@ import React, {
   createContext,
   FC,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -14,18 +17,19 @@ import { toast } from 'react-toastify';
 import soulboundNftAbi from '@/abis/SooulboundNft.json';
 import matchMakingAbi from '@/abis/MatchMaking.json';
 import walletAbi from '@/abis/SimpleMultiSig.json';
-import ScreenLoader from './ScreenLoader';
-import { useStateContext } from './StateProvider';
 
 interface EthereumContextType {
   provider: BrowserProvider | null;
   signer: JsonRpcSigner | null;
   address: string | null;
+  connectedAddress: string | null;
   chainId: string | null;
   isConnecting: boolean;
   isConnected: boolean;
-  connect: () => Promise<void>;
+  connect: () => Promise<JsonRpcSigner | null>;
   disconnect: () => void;
+  detectConnection: () => Promise<string[]>;
+  isWalletPresent: boolean;
 }
 
 const EthereumContext = createContext<EthereumContextType>(
@@ -39,12 +43,45 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [chainId, setChainId] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
-  const { userInfo } = useStateContext();
+  const [connectedAddress, setConnectedAddress] = useState('');
+  const [isWalletPresent] = useState(() =>
+    typeof window?.ethereum !== 'undefined' ? true : false
+  );
+
+  const detectConnection = useCallback(async () => {
+    if (isWalletPresent) {
+      try {
+        console.log('detecting connection');
+        const accounts = await window.ethereum?.request({
+          method: 'eth_accounts',
+        });
+        console.log('accounts:', accounts);
+        return accounts ?? [];
+      } catch (err: any) {
+        console.log('User rejected the request', err);
+        toast.error(err.message || 'Failed to detect connection');
+        return [];
+      }
+    }
+    return [];
+  }, [isWalletPresent]);
+
+  useEffect(() => {
+    detectConnection().then((accounts) => {
+      if (accounts && accounts.length > 0) {
+        setConnectedAddress(accounts[0]?.toLowerCase());
+        connect();
+      } else {
+        setIsConnected(false);
+      }
+    });
+  }, []);
 
   const connect = async () => {
+    console.log('Connecting to MetaMask...');
     if (!window.ethereum) {
       toast.error('Please install MetaMask');
-      return;
+      return null;
     }
 
     setIsConnecting(true);
@@ -54,24 +91,32 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
       await window.ethereum.request({ method: 'eth_requestAccounts' });
 
       // Initialize provider
-      const provider = new BrowserProvider(window.ethereum);
-      setProvider(provider);
+      const _provider = new BrowserProvider(window.ethereum);
+      setProvider(_provider);
 
       // Get chain ID
-      const network = await provider.getNetwork();
-      const chainId = network.chainId.toString(16);
-      setChainId(chainId);
+      const network = await _provider.getNetwork();
+      const _chainId = network.chainId.toString(16);
+      setChainId(_chainId);
 
       // Get signer and address
-      const signer = await provider.getSigner();
-      const address = await signer.getAddress();
-
-      setSigner(signer);
-      setAddress(address);
+      const _signer = await _provider.getSigner();
+      const _address = await _signer.getAddress();
+      console.log('Connected _address:', _address);
+      setSigner(_signer);
+      setAddress(_address);
       setIsConnected(true);
-    } catch (error) {
+
+      return _signer;
+    } catch (error: any) {
       console.error('Connection error:', error);
-      toast.error('Failed to connect wallet');
+      if (error.code === 4001) {
+        // User rejected the request
+        toast.error('Permission denied. Please allow wallet access.');
+      } else {
+        toast.error(error.message || 'Failed to connect to MetaMask');
+      }
+      return null;
     } finally {
       setIsConnecting(false);
     }
@@ -83,24 +128,30 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
     setAddress(null);
     setChainId(null);
     setIsConnected(false);
+    setConnectedAddress('');
   };
 
   useEffect(() => {
-    if (window.ethereum && userInfo?.walletAddress) {
-      connect();
-    }
-
     // Setup event listeners
     if (window.ethereum) {
-      window.ethereum.on('accountsChanged', () => {
-        connect();
+      window.ethereum.on('accountsChanged', (acc: string[]) => {
+        console.log('ACC', acc);
+        if (acc.length === 0) {
+          console.log('No accounts found');
+          disconnect();
+        } else {
+          setConnectedAddress(acc[0]?.toLowerCase());
+          connect();
+        }
       });
 
-      window.ethereum.on('chainChanged', () => {
-        connect();
+      window.ethereum.on('chainChanged', (c) => {
+        console.log('CHAIN', c);
       });
 
-      window.ethereum.on('disconnect', () => {
+      window.ethereum.on('disconnect', (d) => {
+        console.log('disconnect', d);
+        toast.error('Disconnected from wallet');
         disconnect();
       });
     }
@@ -112,7 +163,7 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
         window.ethereum.removeListener('disconnect', disconnect);
       }
     };
-  }, [userInfo]);
+  }, []);
 
   return (
     <EthereumContext.Provider
@@ -125,9 +176,12 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
         isConnected,
         connect,
         disconnect,
+        detectConnection,
+        isWalletPresent,
+        connectedAddress,
       }}
     >
-      {isConnecting ? <ScreenLoader /> : children}
+      {children}
     </EthereumContext.Provider>
   );
 };

@@ -13,12 +13,16 @@ interface AnimatedTooltipProps {
   children: ReactNode;
   tooltipContent: ReactNode;
   position?: 'top' | 'left' | 'right';
+  className?: string;
+  disabled?: boolean;
 }
 
 const AnimatedTooltip: FC<AnimatedTooltipProps> = ({
   children,
   tooltipContent,
   position = 'top',
+  className = '',
+  disabled,
 }) => {
   const [isHovering, setIsHovering] = useState(false);
 
@@ -90,7 +94,11 @@ const AnimatedTooltip: FC<AnimatedTooltipProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
-      <div className='relative cursor-pointer transition duration-500 group-hover:z-30 group-hover:scale-110'>
+      <div
+        className={`relative transition duration-500 group-hover:z-30 ${
+          disabled ? '' : 'group-hover:scale-110 cursor-pointer'
+        } ${className}`}
+      >
         {children}
       </div>
     </div>

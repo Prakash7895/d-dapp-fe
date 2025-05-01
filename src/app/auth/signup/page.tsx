@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { connectWallet, onAccountChange } from '@/contract';
 import { ethers } from 'ethers';
 import Link from 'next/link';
 import Input from '@/components/Input';
@@ -18,6 +17,8 @@ import { toast } from 'react-toastify';
 import { getUserLocation } from '@/userLocation';
 import useSession from '@/hooks/useSession';
 import axiosInstance from '@/apiCalls';
+import TransactionBtn from '@/components/TransactionBtn';
+import { useEthereum } from '@/components/EthereumProvider';
 
 export default function SignUp() {
   const router = useRouter();
@@ -43,6 +44,7 @@ export default function SignUp() {
   const [walletAddress, setWalletAddress] = useState('');
   const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
   const pathName = usePathname();
+  const { isConnecting } = useEthereum();
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -50,18 +52,6 @@ export default function SignUp() {
       router.replace('/');
     }
   }, [status, router]);
-
-  useEffect(() => {
-    const removeAccountListener = onAccountChange((accounts) => {
-      if (accounts?.[0]) {
-        setWalletAddress(accounts[0]);
-      }
-    });
-
-    return () => {
-      removeAccountListener();
-    };
-  }, []);
 
   useEffect(() => {
     getUserLocation()
@@ -126,40 +116,29 @@ export default function SignUp() {
     }
   };
 
-  const handleWalletConnect = async () => {
-    setIsLoading(true);
+  const handleWalletConnect = async (signer: ethers.JsonRpcSigner) => {
     setError('');
 
     try {
       // Connect wallet
-      const walletResult = await connectWallet();
-      const address = await walletResult.getAddress();
-
-      if (!address) {
-        throw new Error('Failed to connect wallet');
-      }
-
+      const address = await signer.getAddress();
       setWalletAddress(address);
       setAuthMethod(SignInType.WALLET);
     } catch (error) {
       setError('An error occurred while connecting wallet');
       console.error(error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     if (wallet) {
       setAuthMethod(SignInType.WALLET);
-      handleWalletConnect();
     } else {
       setAuthMethod(SignInType.EMAIL);
     }
   }, [wallet]);
 
-  const handleWalletSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleWalletSignUp = async (signer: ethers.JsonRpcSigner) => {
     setIsLoading(true);
     setError('');
 
@@ -180,12 +159,6 @@ export default function SignUp() {
 
       // Create a message to sign
       const message = `${process.env.NEXT_PUBLIC_MESSAGE_TO_VERIFY}${walletAddress}`;
-
-      // Get the signer
-      const provider = new ethers.BrowserProvider(window.ethereum!);
-      console.log('provider', provider);
-      const signer = await provider.getSigner();
-      console.log('signer', signer);
 
       // Sign the message
       const signature = await signer.signMessage(message);
@@ -306,36 +279,7 @@ export default function SignUp() {
     )
   );
 
-  const tabs = [
-    {
-      onClick: () => setAuthMethod(SignInType.EMAIL),
-      label: 'Email & Password',
-      isActive: authMethod === SignInType.EMAIL,
-      type: SignInType.EMAIL,
-    },
-    {
-      type: SignInType.WALLET,
-      onClick: handleWalletConnect,
-      label: 'Wallet',
-      isActive: authMethod === SignInType.WALLET,
-    },
-  ].map((el) => (
-    <Link
-      href={
-        pathName +
-        (el.type === SignInType.WALLET
-          ? createQueryString(searchParams, SignInType.WALLET, 'true')
-          : '')
-      }
-      key={el.label}
-      onClick={el.onClick}
-      className={`px-4 py-2 rounded-md ${
-        el.isActive ? 'bg-primary-500 text-white' : 'bg-gray-700 text-gray-300'
-      }`}
-    >
-      {el.label}
-    </Link>
-  ));
+  console.log(walletAddress);
 
   return (
     <div className='flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-black'>
@@ -347,34 +291,62 @@ export default function SignUp() {
         </div>
 
         <div className='mt-8 space-y-6'>
-          <div className='flex justify-center space-x-4 mb-6'>{tabs}</div>
+          <div className='flex justify-center space-x-4 mb-6'>
+            <Link
+              href={pathName}
+              onClick={() => setAuthMethod(SignInType.EMAIL)}
+              className={`px-4 py-2 rounded-md ${
+                authMethod === SignInType.EMAIL
+                  ? 'bg-primary-500 text-white'
+                  : 'bg-gray-700 text-gray-300'
+              }`}
+            >
+              Email & Password
+            </Link>
+            <Link
+              href={
+                pathName +
+                createQueryString(searchParams, SignInType.WALLET, 'true')
+              }
+              onClick={() => setAuthMethod(SignInType.WALLET)}
+              className={`px-4 py-2 rounded-md ${
+                authMethod === SignInType.WALLET
+                  ? 'bg-primary-500 text-white'
+                  : 'bg-gray-700 text-gray-300'
+              }`}
+            >
+              Wallet
+            </Link>
+          </div>
 
-          <form
-            className='mt-8 space-y-6'
-            onSubmit={
-              authMethod === SignInType.EMAIL
-                ? handleEmailSignUp
-                : handleWalletSignUp
-            }
-          >
-            {authMethod === SignInType.WALLET && (
-              <>
-                {walletAddress ? (
-                  <div className='mb-4 p-3 bg-gray-800 rounded-md'>
-                    <p className='text-sm text-gray-300'>Connected wallet:</p>
-                    <p className='text-xs text-gray-400 truncate'>
-                      {walletAddress}
-                    </p>
-                  </div>
-                ) : (
-                  <div className='text-center mb-4'>
-                    <p className='text-gray-300'>
-                      Connect your wallet to continue
-                    </p>
-                  </div>
-                )}
-              </>
-            )}
+          <form className='mt-8 space-y-6'>
+            {authMethod === SignInType.WALLET &&
+              (walletAddress ? (
+                <>
+                  {walletAddress ? (
+                    <div className='mb-4 p-3 bg-gray-800 rounded-md'>
+                      <p className='text-sm text-gray-300'>Connected wallet:</p>
+                      <p className='text-xs text-gray-400 truncate'>
+                        {walletAddress}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className='text-center mb-4'>
+                      <p className='text-gray-300'>
+                        Connect your wallet to continue
+                      </p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <TransactionBtn
+                  onClickWithSigner={handleWalletConnect}
+                  label='Wallet'
+                  isLoading={isConnecting}
+                  disabled={isConnecting}
+                  loadingLabel='Connecting...'
+                />
+              ))}
             <div className='rounded-md grid grid-cols-2 shadow-sm gap-4'>
               {formRenderer}
             </div>
@@ -384,16 +356,28 @@ export default function SignUp() {
             )}
 
             <div>
-              <Button
-                label='Create account'
-                isLoading={isLoading}
-                disabled={
-                  isLoading ||
-                  (authMethod === SignInType.WALLET ? !walletAddress : false)
-                }
-                loadingLabel='Creating account...'
-                type='submit'
-              />
+              {authMethod === SignInType.WALLET && walletAddress ? (
+                <TransactionBtn
+                  onClickWithSigner={handleWalletSignUp}
+                  label='Create account'
+                  isLoading={isConnecting}
+                  disabled={isConnecting || !walletAddress}
+                  loadingLabel='Creating account...'
+                  type='submit'
+                />
+              ) : (
+                <Button
+                  label='Create account'
+                  isLoading={isLoading}
+                  disabled={
+                    isLoading ||
+                    (authMethod === SignInType.WALLET ? !walletAddress : false)
+                  }
+                  loadingLabel='Creating account...'
+                  type='submit'
+                  onClick={handleEmailSignUp}
+                />
+              )}
             </div>
 
             <div className='text-center'>

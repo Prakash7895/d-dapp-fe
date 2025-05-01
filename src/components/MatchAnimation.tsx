@@ -143,7 +143,7 @@ const MatchAnimation: React.FC<MatchAnimationProps> = ({
               className='text-3xl font-bold text-primary-500 mb-4'
               variants={textVariants}
             >
-              {"It's a Match!"}
+              It's a Match!
             </motion.h2>
             <motion.div
               className='bg-gray-800/50 rounded-lg p-6 mb-6'
@@ -163,7 +163,7 @@ const MatchAnimation: React.FC<MatchAnimationProps> = ({
 
               {matchedProfile?.profile?.city && (
                 <div className='flex items-center justify-center text-gray-400 mb-3'>
-                  <MapPin className='w-4 h-4 mr-2' />
+                  <MapPin className='w-4 h-4 mr-2 shrink-0' />
                   <span>
                     {matchedProfile.profile.city},{' '}
                     {matchedProfile.profile.country}
@@ -172,22 +172,25 @@ const MatchAnimation: React.FC<MatchAnimationProps> = ({
               )}
 
               {matchedProfile?.profile?.bio && (
-                <p className='text-gray-300 text-center mb-4'>
-                  "{matchedProfile.profile.bio}"
+                <p className='text-gray-300 text-center mb-4 italic bg-gray-800 rounded px-3 py-2'>
+                  {matchedProfile.profile.bio.substring(0, 100)}
+                  {matchedProfile.profile.bio.length > 100 ? '...' : ''}
                 </p>
               )}
 
               {matchedProfile?.profile?.interests &&
                 matchedProfile.profile.interests.length > 0 && (
                   <div className='flex flex-wrap justify-center gap-2 mb-4'>
-                    {matchedProfile.profile.interests.map((interest, idx) => (
-                      <span
-                        key={idx}
-                        className='px-3 py-1 bg-primary-500/20 text-primary-400 rounded-full text-sm'
-                      >
-                        {interest}
-                      </span>
-                    ))}
+                    {matchedProfile.profile.interests
+                      .slice(0, 4)
+                      .map((interest, idx) => (
+                        <span
+                          key={idx}
+                          className='px-3 py-1 bg-primary-500/20 text-primary-400 rounded-full text-sm'
+                        >
+                          {interest}
+                        </span>
+                      ))}
                   </div>
                 )}
             </motion.div>
@@ -196,7 +199,7 @@ const MatchAnimation: React.FC<MatchAnimationProps> = ({
               className='bg-gray-800/50 rounded-lg p-4 mb-6'
               variants={textVariants}
             >
-              <p className='text-sm text-gray-400 mt-2'>
+              <p className='text-sm text-gray-400'>
                 A multi-signature wallet has been created for you both
               </p>
             </motion.div>
@@ -206,7 +209,7 @@ const MatchAnimation: React.FC<MatchAnimationProps> = ({
               variants={textVariants}
             >
               <Link
-                href={`/chat/${matchedProfile?.multiSigWallet?.id}`}
+                href={`/chat/${matchedProfile?.chatRoomId}`}
                 className='px-6 py-3 bg-primary-500 text-white rounded-full hover:bg-primary-600 transition-colors items-center'
                 onClick={onClose}
               >

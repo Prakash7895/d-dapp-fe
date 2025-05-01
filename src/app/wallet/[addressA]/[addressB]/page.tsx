@@ -223,9 +223,9 @@ export default function WalletPage({
                   return (
                     <div
                       key={owner.id}
-                      className='flex items-center justify-between p-2 bg-gray-800/50 rounded-lg'
+                      className='flex items-center justify-between gap-3 p-2 bg-gray-800/50 rounded-lg overflow-x-auto'
                     >
-                      <div className='flex items-center gap-3'>
+                      <div className='w-10 h-10 rounded-full shrink-0 bg-primary-500/10 flex items-center justify-center'>
                         {owner.profile?.profilePicture ? (
                           <img
                             src={owner.profile?.profilePicture}
@@ -233,24 +233,22 @@ export default function WalletPage({
                             className='w-10 h-10 rounded-full object-cover'
                           />
                         ) : (
-                          <div className='w-10 h-10 rounded-full bg-primary-500/10 flex items-center justify-center'>
-                            <span className='text-primary-500 text-sm font-medium'>
-                              {owner.profile?.firstName?.[0]}
-                              {owner.profile?.lastName?.[0]}
-                            </span>
-                          </div>
+                          <span className='text-primary-500 text-sm font-medium'>
+                            {owner.profile?.firstName?.[0]}
+                            {owner.profile?.lastName?.[0]}
+                          </span>
                         )}
-                        <div>
-                          <h4 className='text-white font-medium'>
-                            {owner.profile
-                              ? `${owner.profile.firstName} ${owner.profile.lastName}`
-                              : 'Unknown User'}
-                          </h4>
-                          <p className='text-xs text-gray-400 font-mono'>
-                            {owner.walletAddress?.slice(0, 6)}...
-                            {owner.walletAddress?.slice(-4)}
-                          </p>
-                        </div>
+                      </div>
+                      <div className='flex-1'>
+                        <h4 className='text-white font-medium truncate'>
+                          {owner.profile
+                            ? `${owner.profile.firstName} ${owner.profile.lastName}`
+                            : 'Unknown User'}
+                        </h4>
+                        <p className='text-xs text-gray-400 font-mono'>
+                          {owner.walletAddress?.slice(0, 6)}...
+                          {owner.walletAddress?.slice(-4)}
+                        </p>
                       </div>
                     </div>
                   );

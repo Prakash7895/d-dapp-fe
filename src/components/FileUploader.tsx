@@ -2,6 +2,7 @@
 import { useState, ReactNode } from 'react';
 import { toast } from 'react-toastify';
 import Button from './Button';
+import TransactionWrapper from './TransactionWrapper';
 
 interface FileUploaderProps {
   label?: string;
@@ -11,6 +12,7 @@ interface FileUploaderProps {
   isLoading?: boolean;
   preview?: string;
   isEditing?: boolean;
+  withTransactionWrapper?: boolean;
 }
 
 export default function FileUploader({
@@ -21,6 +23,7 @@ export default function FileUploader({
   isLoading,
   preview,
   isEditing,
+  withTransactionWrapper,
 }: FileUploaderProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(preview ?? null);
@@ -105,13 +108,27 @@ export default function FileUploader({
       </div>
 
       {contentAboveBtn}
-
-      <Button
-        label={btnLabel}
-        onClick={() => onSubmit(selectedFile!)}
-        disabled={isEditing ? isLoading : !selectedFile || isLoading}
-        isLoading={isLoading}
-      />
+      {withTransactionWrapper && selectedFile ? (
+        <TransactionWrapper
+          content={(disabled) => (
+            <Button
+              label={btnLabel}
+              onClick={() => onSubmit(selectedFile!)}
+              disabled={
+                disabled || (isEditing ? isLoading : !selectedFile || isLoading)
+              }
+              isLoading={isLoading}
+            />
+          )}
+        />
+      ) : (
+        <Button
+          label={btnLabel}
+          onClick={() => onSubmit(selectedFile!)}
+          disabled={isEditing ? isLoading : !selectedFile || isLoading}
+          isLoading={isLoading}
+        />
+      )}
     </div>
   );
 }

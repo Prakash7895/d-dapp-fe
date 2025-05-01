@@ -26,6 +26,7 @@ import { toast } from 'react-toastify';
 import { differenceInHours } from 'date-fns';
 import { useAppDispatch } from '@/store';
 import { updateUserProperty } from '@/store/UsersReducer';
+import TransactionWrapper from './TransactionWrapper';
 
 interface ProfileCardProps {
   profile: AllUsers;
@@ -90,26 +91,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   };
 
   const maxInterestsToShow = 4;
-
-  const likeBtn = (
-    <motion.button
-      {...(loggedInHasWallet
-        ? {
-            whileHover: { scale: 1.1 },
-            whileTap: { scale: 0.9 },
-          }
-        : {})}
-      onClick={() => (isWalletConnected ? onSwipe('right') : handleNudge())}
-      disabled={!loggedInHasWallet || nudging}
-      className='w-16 h-16 rounded-full bg-white/10 hover:enabled:bg-white/20 disabled:opacity-70 flex items-center justify-center'
-    >
-      {!currentUserHasWallet && loggedInHasWallet ? (
-        <Pointer className='h-8 w-8 text-yellow-500' />
-      ) : (
-        <Heart className='h-8 w-8 text-green-500' />
-      )}
-    </motion.button>
-  );
 
   const nudgeMessage = `Nudge ${profile?.profile?.firstName} to add a wallet!`;
 
@@ -236,19 +217,37 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
               </motion.button>
             </CardItem>
             <CardItem translateZ={75} as='div'>
-              {isWalletConnected ? (
-                likeBtn
-              ) : (
-                <AnimatedTooltip
-                  tooltipContent={
+              <TransactionWrapper
+                tooltipContent={{
+                  loggedInUserHasNoWallet:
+                    'Please add a wallet address to like this profile.',
+                  default:
                     loggedInHasWallet && !currentUserHasWallet
                       ? nudgeMessage
-                      : 'Please add a wallet address to like this profile.'
-                  }
-                >
-                  {likeBtn}
-                </AnimatedTooltip>
-              )}
+                      : undefined,
+                }}
+                content={(disabled) => (
+                  <motion.button
+                    {...(loggedInHasWallet
+                      ? {
+                          whileHover: { scale: 1.1 },
+                          whileTap: { scale: 0.9 },
+                        }
+                      : {})}
+                    onClick={() =>
+                      isWalletConnected ? onSwipe('right') : handleNudge()
+                    }
+                    disabled={!loggedInHasWallet || nudging || disabled}
+                    className='w-16 h-16 rounded-full bg-white/10 hover:enabled:bg-white/20 disabled:opacity-70 flex items-center justify-center'
+                  >
+                    {!currentUserHasWallet && loggedInHasWallet ? (
+                      <Pointer className='h-8 w-8 text-yellow-500' />
+                    ) : (
+                      <Heart className='h-8 w-8 text-green-500' />
+                    )}
+                  </motion.button>
+                )}
+              />
             </CardItem>
           </div>
         )}

@@ -106,12 +106,15 @@ export type AllUsers = UserResponse & {
 
 export type LikdedUser = AllUsers & {
   likedAt: string;
+  isMatched: boolean;
+  chatRoomId: string | null;
 };
 
 export type MatchedUser = AllUsers & {
   matchedAt: string;
   addressA: string;
   addressB: string;
+  chatRoomId: string;
 };
 
 export type UserByAddress = UserResponse & {
@@ -130,6 +133,7 @@ export type MatchedUserResponse = UserResponse & {
   multiSigWallet: Omit<MultiSigWallet, 'userA' | 'userB'>;
   userAId: string;
   userBId: string;
+  chatRoomId: string;
 };
 
 export interface Notification {

@@ -5,6 +5,7 @@ import React, { FC, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useStateContext } from './StateProvider';
 import Loader from './Loader';
+import { useSoulboundNFTContract } from './EthereumProvider';
 
 interface UserNftProps {
   tokenId: number;
@@ -15,20 +16,21 @@ const UserNft: FC<UserNftProps> = ({ tokenId }) => {
   const [imageUri, setImageUri] = useState('');
   const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const soulboundNFTContract = useSoulboundNFTContract();
 
   useEffect(() => {
     setLoading(true);
-    getUserTokenUriById(tokenId).then((res) => {
+    getUserTokenUriById(soulboundNFTContract, tokenId).then((res) => {
       if (res) {
         setImageUri(res);
       }
       setLoading(false);
     });
-  }, [tokenId]);
+  }, [tokenId, soulboundNFTContract]);
 
   const handleProfileNftChange = () => {
     setUpdating(true);
-    changeProfileNft(tokenId).then((res) => {
+    changeProfileNft(soulboundNFTContract, tokenId).then((res) => {
       if (res) {
         toast.success('Profile Photo updated successfully.');
         getUpdatedProfileNft();

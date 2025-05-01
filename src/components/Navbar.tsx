@@ -210,9 +210,11 @@ export default function Navbar() {
                         </div>
                       </div>
                       <div className='py-1'>
-                        <Link
-                          href='/profile'
-                          onClick={() => setIsMenuOpen(false)}
+                        <div
+                          onClick={() => {
+                            setIsMenuOpen(false);
+                            router.push('/profile');
+                          }}
                           className={`flex items-center justify-between px-4 py-3 text-sm text-gray-300 hover:bg-gray-700/50 transition-colors ${
                             pathname === '/profile' ? 'bg-gray-900' : ''
                           }`}
@@ -243,6 +245,7 @@ export default function Navbar() {
                                     exclusive features.
                                   </p>
                                   <Link
+                                    onClick={(e) => e.stopPropagation()}
                                     href='/profile/nfts'
                                     className='mt-3 inline-block text-primary-500 hover:underline font-medium'
                                   >
@@ -254,7 +257,7 @@ export default function Navbar() {
                               <BadgeInfo size={18} color='#f55' />
                             </AnimatedTooltip>
                           )}
-                        </Link>
+                        </div>
                         <div className='md:hidden flex flex-col'>
                           {discover}
                           {liked}

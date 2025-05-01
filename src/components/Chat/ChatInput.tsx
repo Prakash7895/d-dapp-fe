@@ -36,6 +36,7 @@ const ChatInput = () => {
     dispatch(addNewMessage(newMessage));
 
     sendMessage(message, activeRoomId, (savedMsg) => {
+      console.log('[handleSend] callback:', savedMsg);
       if (savedMsg) {
         console.log('[handleSend] savedMsg:', savedMsg.id);
         dispatch(

@@ -7,11 +7,14 @@ import {
   MapPin,
   Calendar,
   Wallet,
+  Mars,
+  Venus,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { FC } from 'react';
 import { MatchedUser } from '@/types/user';
 import Link from 'next/link';
+import { capitalizeFirstLetter } from '@/utils';
 
 const itemVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -25,6 +28,7 @@ const UserMatchCard: FC<MatchedUser> = ({
   profile,
   addressA,
   addressB,
+  chatRoomId,
 }) => {
   const name = `${profile.firstName} ${profile.lastName}`;
   return (
@@ -56,26 +60,34 @@ const UserMatchCard: FC<MatchedUser> = ({
       </div>
 
       <div className='p-6 space-y-4'>
-        <div className='flex items-center justify-between'>
-          <h3 className='text-xl font-semibold text-white'>
-            {name}, {profile.age}
+        <div className='flex flex-col gap-1 items-center justify-between'>
+          <h3 className='text-xl font-semibold text-white gap-2 w-full truncate'>
+            {capitalizeFirstLetter(profile.firstName || '')}{' '}
+            {capitalizeFirstLetter(profile.lastName || '')}
           </h3>
-          <span className='text-sm text-gray-400'>{lastActiveOn}</span>
+          <div className='flex items-center justify-start gap-2 mr-auto'>
+            {profile.gender === 'MALE' ? (
+              <Mars className='w-5 h-5 text-blue-400' />
+            ) : (
+              <Venus className='w-5 h-5 text-pink-400' />
+            )}
+            <span className='text-gray-400'>{profile.age} y/o</span>
+          </div>
         </div>
 
         {profile.city && (
           <div className='flex items-center text-gray-400 text-sm'>
-            <MapPin className='w-4 h-4 mr-2' />
-            <span>
+            <MapPin className='w-4 h-4 mr-2 shrink-0' />
+            <span className='truncate'>
               {profile.city}, {profile.country}
             </span>
           </div>
         )}
 
-        <p className='text-gray-300'>{profile.bio}</p>
+        <p className='text-gray-300 line-clamp-2'>{profile.bio}</p>
 
-        <div className='flex flex-wrap gap-2'>
-          {profile.interests?.map((interest, idx) => (
+        <div className='flex flex-wrap gap-2 items-center'>
+          {profile.interests?.slice(0, 3)?.map((interest, idx) => (
             <span
               key={idx}
               className='px-3 py-1 bg-primary-500/20 text-primary-400 rounded-full text-sm'
@@ -83,6 +95,11 @@ const UserMatchCard: FC<MatchedUser> = ({
               {interest}
             </span>
           ))}
+          {(profile.interests?.length || 0) > 3 && (
+            <span className='px-3 py-1 bg-primary-500/20 text-primary-400 rounded-full text-sm'>
+              +{profile.interests!.length - 3} more
+            </span>
+          )}
         </div>
 
         <div className='flex items-center justify-between pt-4 border-t border-gray-700'>
@@ -103,7 +120,7 @@ const UserMatchCard: FC<MatchedUser> = ({
               whileTap={{ scale: 0.95 }}
             >
               <Link
-                href={`/chat/ads`}
+                href={`/chat/${chatRoomId}`}
                 className='flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-full text-sm hover:bg-primary-600 transition-colors'
               >
                 <MessageCircle className='w-4 h-4' />

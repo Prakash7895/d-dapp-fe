@@ -37,9 +37,7 @@ const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   ) : (
     <Provider store={store}>
       <StateProvider>
-        <EthereumProvider>
-          <ChatProvider>{children}</ChatProvider>
-        </EthereumProvider>
+        <ChatProvider>{children}</ChatProvider>
       </StateProvider>
     </Provider>
   );
@@ -48,7 +46,9 @@ const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
 const RootProvider: FC<{ children: ReactNode }> = ({ children }) => (
   <>
     <ToastContainer />
-    <AuthProvider>{children}</AuthProvider>
+    <EthereumProvider>
+      <AuthProvider>{children}</AuthProvider>
+    </EthereumProvider>
   </>
 );
 

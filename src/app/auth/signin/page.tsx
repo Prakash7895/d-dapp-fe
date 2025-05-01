@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { connectWallet } from '@/contract';
-import { ethers } from 'ethers';
 import Link from 'next/link';
 import Button from '@/components/Button';
 import Input from '@/components/Input';
@@ -12,6 +10,9 @@ import useSession from '@/hooks/useSession';
 import { login } from '@/apiCalls';
 import { SignInType } from '@/types/user';
 import { createQueryString } from '@/utils';
+import TransactionBtn from '@/components/TransactionBtn';
+import { JsonRpcSigner } from 'ethers';
+import { useEthereum } from '@/components/EthereumProvider';
 
 export default function SignIn() {
   const router = useRouter();
@@ -22,6 +23,7 @@ export default function SignIn() {
   const [error, setError] = useState<string | React.ReactNode>('');
   const searchParams = useSearchParams();
   const wallet = searchParams.get('wallet');
+  const { connectedAddress } = useEthereum();
 
   const [authMethod, setAuthMethod] = useState<SignInType>(
     wallet ? SignInType.WALLET : SignInType.EMAIL
@@ -68,57 +70,49 @@ export default function SignIn() {
     }
   };
 
-  const handleWalletSignIn = async () => {
+  const handleWalletSignIn = async (signer: JsonRpcSigner) => {
     setIsLoading(true);
     setError('');
-
+    console.log('signer', signer);
     try {
-      // Connect wallet
-      const walletResult = await connectWallet();
-      const address = walletResult.address;
-
-      if (!address) {
-        throw new Error('Failed to connect wallet');
-      }
+      const address = await signer.getAddress();
+      console.log('address', address);
 
       // Create a message to sign
       const message = `${process.env.NEXT_PUBLIC_MESSAGE_TO_VERIFY}${address}`;
-
-      // Get the signer
-      const provider = new ethers.BrowserProvider(window.ethereum!);
-      const signer = await provider.getSigner();
-
+      console.log('message', message);
       // Sign the message
       const signature = await signer.signMessage(message);
+      console.log('address', address);
 
       // Sign in with the wallet
-      login({
+      const res = await login({
         type: SignInType.WALLET,
-        walletAddress: address,
+        walletAddress: address!,
         signedMessage: signature,
-      }).then(async (res) => {
-        if (res.status === 'success') {
-          sessionStorage.setItem('accessToken', res.data?.access_token!);
-          sessionStorage.setItem('refreshToken', res.data?.refresh_token!);
-          await fetchSession();
-          router.push('/');
-        } else {
-          if (res.message?.includes('sign up')) {
-            setError(
-              <>
-                {res.message}{' '}
-                <button
-                  onClick={() => router.push('/auth/signup')}
-                  className='text-primary-400 hover:text-primary-300 underline'
-                >
-                  Sign up now
-                </button>
-              </>
-            );
-          }
-        }
       });
-    } catch (error) {
+
+      if (res.status === 'success') {
+        sessionStorage.setItem('accessToken', res.data?.access_token!);
+        sessionStorage.setItem('refreshToken', res.data?.refresh_token!);
+        await fetchSession();
+        router.push('/');
+      } else {
+        if (res.message?.includes('sign up')) {
+          setError(
+            <>
+              {res.message}{' '}
+              <button
+                onClick={() => router.push('/auth/signup')}
+                className='text-primary-400 hover:text-primary-300 underline'
+              >
+                Sign up now
+              </button>
+            </>
+          );
+        }
+      }
+    } catch (error: any) {
       if ((error as Error).message.includes('User rejected')) {
         setError('You rejected the signature request. Please try again.');
       } else {
@@ -126,7 +120,7 @@ export default function SignIn() {
           (error as Error).message || 'An error occurred during wallet sign in'
         );
       }
-      console.error(error);
+      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -228,9 +222,21 @@ export default function SignIn() {
               )}
 
               <div>
-                <Button
-                  onClick={handleWalletSignIn}
-                  label='Connect Wallet'
+                {connectedAddress && (
+                  <div className='mb-4 p-3 bg-gray-800 rounded-md'>
+                    <p className='text-sm text-gray-300'>Connected wallet:</p>
+                    <p className='text-xs text-gray-400 truncate'>
+                      {connectedAddress}
+                    </p>
+                  </div>
+                )}
+                <TransactionBtn
+                  onClickWithSigner={handleWalletSignIn}
+                  label={
+                    !connectedAddress
+                      ? 'Connect Wallet'
+                      : 'Sign in with connected wallet address'
+                  }
                   isLoading={isLoading}
                   disabled={isLoading}
                   loadingLabel='Connecting...'

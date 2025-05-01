@@ -16,7 +16,7 @@ import { UserResponse } from '@/types/user';
 import { getUserInfo, getUserMultiSigWallets } from '@/apiCalls';
 import WalletHandler from './WalletHandler';
 import MatchListener from './MatchListener';
-import { useEthereum } from './EthereumProvider';
+import { useEthereum, useSoulboundNFTContract } from './EthereumProvider';
 import { formatEther } from 'ethers';
 
 interface ContextState {
@@ -47,6 +47,7 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [multiSigWallets, setMultiSigWallets] = useState<string[]>([]);
   const [totalBalance, setTotalBalance] = useState<number | null>(null);
   const { provider } = useEthereum();
+  const soulboundNFTContract = useSoulboundNFTContract();
 
   useEffect(() => {
     setLoading(true);
@@ -112,7 +113,7 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const getCurrUsersTokenIds = useCallback(
     () =>
       new Promise<boolean>((resolve) => {
-        getUserTokenIds()
+        getUserTokenIds(soulboundNFTContract, userInfo?.walletAddress!)
           .then((res) => {
             if (res) {
               setTokedIds(res);
@@ -123,17 +124,19 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
           })
           .catch(() => resolve(false));
       }),
-    []
+    [soulboundNFTContract, userInfo?.walletAddress]
   );
 
   const getUpdatedProfileNft = useCallback(
     () =>
-      getActiveProfileNft().then((p) => {
-        if (p) {
-          setActiveProfilePhoto(p);
+      getActiveProfileNft(soulboundNFTContract, userInfo?.walletAddress!).then(
+        (p) => {
+          if (p) {
+            setActiveProfilePhoto(p);
+          }
         }
-      }),
-    []
+      ),
+    [soulboundNFTContract, userInfo?.walletAddress]
   );
 
   const value = useMemo(

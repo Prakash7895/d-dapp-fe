@@ -3,7 +3,7 @@
 import { Loader2 } from 'lucide-react';
 import React, { FC, ReactNode } from 'react';
 
-interface ButtonProps {
+export interface ButtonProps {
   isLoading?: boolean;
   label?: string;
   type?: 'button' | 'submit' | 'reset';
@@ -23,7 +23,7 @@ const Button: FC<ButtonProps> = ({
   onClick,
   disabled,
   children,
-  className,
+  className = '',
   buttonType = 'primary',
 }) => {
   let btnClassName = `group space-x-2 relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-500 enabled:hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 transition-all ${className}`;

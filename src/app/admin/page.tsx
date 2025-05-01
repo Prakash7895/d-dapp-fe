@@ -81,7 +81,7 @@ const itemVariants = {
 };
 
 const AdminPage = () => {
-  const { address, provider } = useEthereum();
+  const { address, provider, connect } = useEthereum();
   const matchMakingContract = useMatchMakingContract();
   const soulboundNftContract = useSoulboundNFTContract();
 
@@ -109,6 +109,10 @@ const AdminPage = () => {
   const [isUpdating, setIsUpdating] = useState(false);
 
   const isOwner = address?.toLowerCase() === state.owner?.toLowerCase();
+
+  useEffect(() => {
+    connect();
+  }, []);
 
   const fetchContractState = async () => {
     if (!matchMakingContract || !soulboundNftContract) {
@@ -181,7 +185,9 @@ const AdminPage = () => {
           Number(newValues.expirationDays)
         );
       } else if (field === ActiveFields.MINT_FEE) {
-        tx = await soulboundNftContract.setAmount(Number(newValues.mintFee));
+        tx = await soulboundNftContract.setAmount(
+          parseEther(newValues.mintFee)
+        );
       } else if (field === ActiveFields.COMMISSION) {
         tx = await matchMakingContract.setCommission(
           Number(newValues.commission)

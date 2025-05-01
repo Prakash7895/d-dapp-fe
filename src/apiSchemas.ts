@@ -59,8 +59,16 @@ export const userUpdateSchema = z.object({
     .number({ message: 'Age is required' })
     .min(18, 'Age should be above 18.')
     .max(50, 'Age should be below 50.'),
-  lastName: z.string().nonempty('Last Name is required').trim(),
-  firstName: z.string().nonempty('First Name is required').trim(),
+  lastName: z
+    .string()
+    .nonempty('Last Name is required')
+    .trim()
+    .max(30, { message: 'Last Name must contain at most 30 character(s)' }),
+  firstName: z
+    .string()
+    .nonempty('First Name is required')
+    .trim()
+    .max(30, { message: 'First Name must contain at most 30 character(s)' }),
   gender: z.enum(GENDER, { message: 'Gender is required' }),
   sexualOrientation: z.enum(SEXUAL_ORIENTATION, {
     message: 'Sexual orientation is required',

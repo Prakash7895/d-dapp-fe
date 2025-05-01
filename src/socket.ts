@@ -39,6 +39,7 @@ enum EMIT_EVENTS {
   MESSAGE_RECEIVED = 'messageReceived',
   MESSAGE_READ = 'messageRead',
   LOG_OUT = 'logOut',
+  HEART_BEAT = 'heartbeat',
 }
 
 let socketObj: Socket | null = null;
@@ -46,6 +47,7 @@ const reconnectAttempts = 5;
 const reconnectDelay = 2000;
 let attempts = 0;
 let timeoutId: NodeJS.Timeout | null = null;
+let heartbeatInterval: NodeJS.Timeout | null = null;
 
 const connect = () => {
   console.log('Initializing socket...');
@@ -62,6 +64,17 @@ const connect = () => {
 const socketEventInitializer = (socket: Socket) => {
   socket.on('connect', () => {
     console.log('Socket connected:', socket?.id);
+
+    if (heartbeatInterval) {
+      clearInterval(heartbeatInterval);
+    }
+    heartbeatInterval = setInterval(() => {
+      if (socket.connected) {
+        socket.emit(EMIT_EVENTS.HEART_BEAT, (status: any) => {
+          console.log('Heartbeat sent', status);
+        });
+      }
+    }, 5000);
 
     attachListeners(socket!);
   });
@@ -205,13 +218,10 @@ const attachListeners = (socket: Socket) => {
   });
 
   socket.removeListener(CHAT_EVENTS.NEW_MATCH_EVENT);
-  socket.on(
-    CHAT_EVENTS.NEW_MATCH_EVENT,
-    (data: { matchedWith: MatchedUserResponse }) => {
-      console.log('NEW_MATCH_EVENT:', data);
-      store.dispatch(setMatchedWith(data.matchedWith));
-    }
-  );
+  socket.on(CHAT_EVENTS.NEW_MATCH_EVENT, (data: MatchedUserResponse) => {
+    console.log('NEW_MATCH_EVENT:', data);
+    store.dispatch(setMatchedWith(data));
+  });
 };
 
 const checkStatus = () => {

@@ -12,12 +12,13 @@ import React, {
 } from 'react';
 import { useStateContext } from './StateProvider';
 import { toast } from 'react-toastify';
-import { detectConnection, onAccountChange, onChainChange } from '@/contract';
+import { onAccountChange, onChainChange } from '@/contract';
 import WalletAlert from './WalletAlert';
 import {
   checkConnectedWalletAddress,
   saveConnectedWalletAddress,
 } from '@/apiCalls';
+import { useEthereum } from './EthereumProvider';
 
 const Context = createContext<{
   connected: boolean;
@@ -47,6 +48,7 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
   const [isCheckingAddress, setIsCheckingAddress] = useState(false);
   const [newAddressError, setNewAddressError] = useState<string | undefined>();
   const [canConnectToCurrAddress, setCanConnectToCurrAddress] = useState(false);
+  const { detectConnection } = useEthereum();
 
   const checkWalletStatus = useCallback(async () => {
     try {
