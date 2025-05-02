@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { formatEther, parseEther } from 'ethers';
-import { Wallet, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { formatEther } from 'ethers';
+import { Wallet, CheckCircle2, XCircle, Clock, Copy } from 'lucide-react';
 import { WalletInfo, ProposalStatus } from '@/types/wallet';
 import Button from '@/components/Button';
 import { toast } from 'react-toastify';
@@ -15,6 +15,13 @@ import { getMultiSigWalletAddress } from '@/apiCalls';
 import { UserResponse } from '@/types/user';
 import { useStateContext } from '@/components/StateProvider';
 import AnimatedTooltip from '@/components/AnimatedTooltip';
+import Loader from '@/components/Loader';
+import {
+  approveMultiSigProposal,
+  inactivateMultiSigProposal,
+  submitMultiSigProposal,
+} from '@/contract';
+import TransactionWrapper from '@/components/TransactionWrapper';
 
 export default function WalletPage({
   params,
@@ -33,12 +40,8 @@ export default function WalletPage({
 
   const walletContract = useMultiSigWalletContract(walletAddress);
 
-  console.log('walletAddress', walletAddress);
-  console.log('walletContract', walletContract);
-
   const fetchWalletInfo = async () => {
     if (!walletContract) return;
-    console.log('HELLLOOOOOO', walletAddress);
 
     try {
       const [_owners, requiredApprovals, balance] = await Promise.all([
@@ -47,12 +50,8 @@ export default function WalletPage({
         provider?.getBalance(walletAddress),
       ]);
       const owners = Array.from(_owners) as string[];
-      console.log('owners', owners);
-      console.log('requiredApprovals', requiredApprovals);
-      console.log('balance', balance);
 
       const proposalCount = await walletContract.getProposalCount();
-      console.log('proposalCount', proposalCount);
 
       const proposals = [];
       for (let i = 0; i < Number(proposalCount); i++) {
@@ -80,7 +79,6 @@ export default function WalletPage({
           status: Number(status),
         });
       }
-      console.log('proposals', proposals);
 
       setWalletInfo({
         address: walletAddress,
@@ -90,7 +88,7 @@ export default function WalletPage({
         proposals,
       });
     } catch (error) {
-      console.error('Error fetching wallet info:', error);
+      console.log('Error fetching wallet info:', error);
       toast.error('Failed to fetch wallet information');
     } finally {
       setIsLoading(false);
@@ -128,18 +126,13 @@ export default function WalletPage({
 
     setIsSubmitting(true);
     try {
-      const tx = await walletContract.submitProposal(
-        destination,
-        parseEther(amount)
-      );
-      await tx.wait();
+      await submitMultiSigProposal(walletContract, destination, amount);
       toast.success('Proposal submitted successfully');
       await fetchWalletInfo();
       setAmount('');
       setDestination('');
     } catch (error) {
-      console.error('Error submitting proposal:', error);
-      toast.error('Failed to submit proposal');
+      console.log('Error submitting proposal:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -149,13 +142,11 @@ export default function WalletPage({
     if (!walletContract) return;
 
     try {
-      const tx = await walletContract.approveProposal(index);
-      await tx.wait();
+      await approveMultiSigProposal(walletContract, index);
       toast.success('Proposal approved successfully');
       await fetchWalletInfo();
     } catch (error) {
       console.error('Error approving proposal:', error);
-      toast.error('Failed to approve proposal');
     }
   };
 
@@ -163,30 +154,24 @@ export default function WalletPage({
     if (!walletContract) return;
 
     try {
-      const tx = await walletContract.inactivateProposal(index);
-      await tx.wait();
+      await inactivateMultiSigProposal(walletContract, index);
       toast.success('Proposal inactivated successfully');
       await fetchWalletInfo();
     } catch (error) {
       console.error('Error inactivating proposal:', error);
-      toast.error('Failed to inactivate proposal');
     }
   };
 
   if (isLoading) {
     return (
-      <div className='min-h-screen bg-gray-900 flex items-center justify-center'>
-        <motion.div
-          className='w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full'
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-        />
+      <div className='bg-gray-900 h-full flex items-center justify-center'>
+        <Loader />
       </div>
     );
   }
 
   return (
-    <div className='min-h-screen bg-gray-900 p-8'>
+    <div className='bg-gray-900 p-8 h-full'>
       <motion.div
         initial={{ opacity: 0, y: 20, rotate: 0 }}
         animate={{ opacity: 1, y: 0, rotate: 0 }}
@@ -199,16 +184,35 @@ export default function WalletPage({
               <h1 className='text-2xl font-bold text-white'>
                 Multi-Signature Wallet
               </h1>
-              <small>{walletInfo?.address}</small>
+              <small className='flex items-center gap-1'>
+                {walletInfo?.address}{' '}
+                <AnimatedTooltip tooltipContent='Copy Wallet Address'>
+                  <Copy
+                    size={12}
+                    className='text-gray-400 cursor-pointer'
+                    onClick={() => {
+                      navigator.clipboard.writeText(walletInfo?.address!);
+                      toast.success('Wallet address copied to clipboard');
+                    }}
+                  />
+                </AnimatedTooltip>
+              </small>
             </div>
           </div>
 
           <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-8'>
             <div className='bg-gray-700/50 p-4 rounded-lg'>
               <h3 className='text-sm text-gray-400 mb-1'>Balance</h3>
-              <p className='text-xl font-semibold text-white'>
-                {walletInfo?.balance} ETH
-              </p>
+              {Number(walletInfo?.balance) <= 0 ? (
+                <p className='text-sm text-yellow-500'>
+                  This wallet currently has a balance of 0 ETH. Please deposit
+                  funds to initiate transactions or submit proposals.
+                </p>
+              ) : (
+                <p className='text-xl font-semibold text-white'>
+                  {walletInfo?.balance} ETH
+                </p>
+              )}
             </div>
             <div className='bg-gray-700/50 p-4 rounded-lg'>
               <h3 className='text-sm text-gray-400 mb-1'>Required Approvals</h3>
@@ -259,9 +263,15 @@ export default function WalletPage({
 
           <div className='space-y-6'>
             <div className='bg-gray-700/50 p-4 rounded-lg'>
-              <h3 className='text-lg font-semibold text-white mb-4'>
+              <h3 className='text-lg font-semibold text-white '>
                 Submit New Proposal
               </h3>
+              <p className='text-sm text-gray-400 mb-4'>
+                To initiate a transaction, submit a proposal by specifying the
+                destination address and the amount. Once both wallet owners
+                approve the proposal, the funds will be securely transferred to
+                the specified destination address.
+              </p>
               <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                 <input
                   type='text'
@@ -279,13 +289,35 @@ export default function WalletPage({
                   className='bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white w-full'
                 />
               </div>
-              <Button
-                onClick={submitProposal}
-                disabled={isSubmitting || !amount || !destination}
-                className='mt-4 w-full'
-                label='Submit Proposal'
-                loadingLabel='Submitting...'
-                isLoading={isSubmitting}
+              <TransactionWrapper
+                disabled={
+                  isSubmitting ||
+                  !amount ||
+                  !destination ||
+                  Number(amount) > Number(walletInfo?.balance)
+                }
+                tooltipContent={{
+                  default:
+                    Number(amount) > Number(walletInfo?.balance)
+                      ? "Entered amount is greater than wallet's balance"
+                      : 'Initiate a transaction by submitting a proposal',
+                }}
+                content={(disabled) => (
+                  <Button
+                    onClick={submitProposal}
+                    disabled={
+                      isSubmitting ||
+                      !amount ||
+                      !destination ||
+                      disabled ||
+                      Number(amount) > Number(walletInfo?.balance)
+                    }
+                    className='mt-4 w-full'
+                    label='Submit Proposal'
+                    loadingLabel='Submitting...'
+                    isLoading={isSubmitting}
+                  />
+                )}
               />
             </div>
 
@@ -354,7 +386,7 @@ export default function WalletPage({
                         </div>
                       </div>
                       <div className='flex gap-2 items-center'>
-                        {proposal.status === ProposalStatus.ACTIVE &&
+                        {proposal.status === ProposalStatus.ACTIVE ? (
                           !proposal.executed && (
                             <>
                               {userInfo?.walletAddress &&
@@ -373,7 +405,12 @@ export default function WalletPage({
                                 className='px-4 py-2 !bg-red-500 hover:!bg-red-600'
                               />
                             </>
-                          )}
+                          )
+                        ) : (
+                          <div className='bg-primary-500 text-white px-3 py-1 rounded-full text-xs flex items-center'>
+                            Inactive
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

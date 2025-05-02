@@ -504,7 +504,7 @@ const AdminPage = () => {
                       <h3 className='text-gray-400'>Like Expiration</h3>
                       <div className='flex items-center gap-2'>
                         <span className='text-white'>
-                          {state.expirationDays} days
+                          {state.expirationDays} minute(s)
                         </span>
                         {isOwner && (
                           <button

@@ -1,5 +1,5 @@
 'use client';
-import { Contract } from 'ethers';
+import { Contract, parseEther } from 'ethers';
 import { toast } from 'react-toastify';
 
 interface EthereumProvider {
@@ -56,7 +56,7 @@ export function onChainChange(callback: (chainId: string) => void): () => void {
   };
 }
 
-const handleLikeError = (error: any) => {
+const handleTransactionError = (error: any) => {
   if (error?.code === -32603) {
     if (error.message.includes('insufficient funds')) {
       toast.error('Insufficient funds to complete transaction');
@@ -96,7 +96,7 @@ export const likeProfile = async (
     await contract.like(targetAddress, { value: amount });
   } catch (error: unknown) {
     console.log('like profile error', error);
-    handleLikeError(error);
+    handleTransactionError(error);
     throw error;
   }
 };
@@ -114,7 +114,7 @@ export const unlikeProfile = async (
     await contract.unSetLikeOnExpiration(user1, user2);
   } catch (error: any) {
     console.log('unlike profile error', error);
-    handleLikeError(error);
+    handleTransactionError(error);
     throw error;
   }
 };
@@ -163,6 +163,7 @@ export const mintNewNft = async (
 
     return true;
   } catch (error: unknown) {
+    handleTransactionError(error);
     console.log('minting new Nft error', error);
     return false;
   }
@@ -186,15 +187,25 @@ export const getActiveProfileNft = async (
       throw new Error('Failed to fetch metadata');
     }
 
-    const metaData = await response.json();
+    // Check the Content-Type header
+    const contentType = response.headers.get('Content-Type') || '';
+    if (contentType.includes('application/json')) {
+      // Handle JSON response
+      const metaData = await response.json();
+      console.log('Metadata:', metaData);
 
-    const imageUrl = metaData?.image_gateway;
-
-    if (!imageUrl) {
-      throw new Error('Image URL not found in metadata');
+      const imageUrl = metaData?.image_gateway;
+      if (!imageUrl) {
+        throw new Error('Image URL not found in metadata');
+      }
+      return imageUrl;
+    } else if (contentType.includes('image/')) {
+      // Handle image response
+      const imageUrl = metaDataUri; // The URI itself is the image URL
+      return imageUrl;
+    } else {
+      throw new Error('Unsupported content type');
     }
-
-    return imageUrl;
   } catch (error: unknown) {
     console.log('getting active profile nft error', error);
     return false;
@@ -237,6 +248,7 @@ export const changeProfileNft = async (
 
     return true;
   } catch (error: unknown) {
+    handleTransactionError(error);
     console.log('Change profile nft error', error);
     return false;
   }
@@ -258,17 +270,82 @@ export const getUserTokenUriById = async (
       throw new Error('Failed to fetch metadata');
     }
 
-    const metaData = await response.json();
+    // Check the Content-Type header
+    const contentType = response.headers.get('Content-Type') || '';
+    if (contentType.includes('application/json')) {
+      // Handle JSON response
+      const metaData = await response.json();
+      console.log('Metadata:', metaData);
 
-    const imageUrl = metaData?.image_gateway;
-
-    if (!imageUrl) {
-      throw new Error('Image URL not found in metadata');
+      const imageUrl = metaData?.image_gateway;
+      if (!imageUrl) {
+        throw new Error('Image URL not found in metadata');
+      }
+      return imageUrl;
+    } else if (contentType.includes('image/')) {
+      // Handle image response
+      const imageUrl = metaDataUri; // The URI itself is the image URL
+      return imageUrl;
+    } else {
+      throw new Error('Unsupported content type');
     }
-
-    return imageUrl;
   } catch (error: unknown) {
     console.log('Get token uri by id error', error);
     return false;
+  }
+};
+
+export const submitMultiSigProposal = async (
+  contract: Contract | null,
+  destination: string,
+  amount: string
+) => {
+  if (!contract) {
+    console.log('Contract is null');
+    return null;
+  }
+  try {
+    const tx = await contract.submitProposal(destination, parseEther(amount));
+    await tx.wait();
+  } catch (error: any) {
+    console.log('submit proposal error', error);
+    handleTransactionError(error);
+    throw error;
+  }
+};
+
+export const approveMultiSigProposal = async (
+  contract: Contract | null,
+  index: number
+) => {
+  if (!contract) {
+    console.log('Contract is null');
+    return null;
+  }
+  try {
+    const tx = await contract.approveProposal(index);
+    await tx.wait();
+  } catch (error: any) {
+    console.log('approve proposal error', error);
+    handleTransactionError(error);
+    throw error;
+  }
+};
+
+export const inactivateMultiSigProposal = async (
+  contract: Contract | null,
+  index: number
+) => {
+  if (!contract) {
+    console.log('Contract is null');
+    return null;
+  }
+  try {
+    const tx = await contract.inactivateProposal(index);
+    await tx.wait();
+  } catch (error: any) {
+    console.log('inactivate proposal error', error);
+    handleTransactionError(error);
+    throw error;
   }
 };

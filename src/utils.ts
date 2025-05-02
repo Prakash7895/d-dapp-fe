@@ -1,5 +1,5 @@
 'use client';
-
+import { CID } from 'multiformats';
 import { ReadonlyURLSearchParams } from 'next/navigation';
 import { GENDER, SEXUAL_ORIENTATION } from './apiSchemas';
 
@@ -74,4 +74,24 @@ export const createQueryString = (
   params.set(name, value);
 
   return '?' + params.toString();
+};
+
+export const isValidCID = (value: string): boolean => {
+  try {
+    CID.parse(value); // Attempt to parse the CID
+    return true; // If parsing succeeds, it's a valid CID
+  } catch (error) {
+    return false; // If parsing fails, it's not a valid CID
+  }
+};
+
+export const isValidIPFSGatewayLink = (value: string): boolean => {
+  const ipfsRegex = /^https?:\/\/[^/]+\/ipfs\/([a-zA-Z0-9]+)$/;
+  const match = value.match(ipfsRegex);
+
+  if (match && match[1]) {
+    return isValidCID(match[1]); // Validate the extracted CID
+  }
+
+  return false; // Not a valid IPFS gateway link
 };

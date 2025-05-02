@@ -210,14 +210,14 @@ const MatchAnimation: React.FC<MatchAnimationProps> = ({
             >
               <Link
                 href={`/chat/${matchedProfile?.chatRoomId}`}
-                className='px-6 py-3 bg-primary-500 text-white rounded-full hover:bg-primary-600 transition-colors items-center'
+                className='px-6 py-3 bg-primary-500 text-white rounded-full hover:bg-primary-600 transition-colors flex items-center'
                 onClick={onClose}
               >
                 Start Chatting
               </Link>
               <Link
                 href={`/wallet/${matchedProfile?.multiSigWallet?.addressA}/${matchedProfile?.multiSigWallet?.addressB}`}
-                className='px-6 py-3 !bg-gray-700 text-white rounded-full hover:!bg-gray-600 transition-colors'
+                className='px-6 py-3 !bg-gray-700 text-white rounded-full hover:!bg-gray-600 transition-colors flex items-center'
                 onClick={onClose}
               >
                 View Shared Wallet

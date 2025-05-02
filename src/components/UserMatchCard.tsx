@@ -15,6 +15,7 @@ import { FC } from 'react';
 import { MatchedUser } from '@/types/user';
 import Link from 'next/link';
 import { capitalizeFirstLetter } from '@/utils';
+import { useRouter } from 'next/navigation';
 
 const itemVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -31,6 +32,7 @@ const UserMatchCard: FC<MatchedUser> = ({
   chatRoomId,
 }) => {
   const name = `${profile.firstName} ${profile.lastName}`;
+  const router = useRouter();
   return (
     <motion.div
       key={id}
@@ -116,16 +118,17 @@ const UserMatchCard: FC<MatchedUser> = ({
               Wallet
             </Link>
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              {...(chatRoomId
+                ? { whileHover: { scale: 1.05 }, whileTap: { scale: 0.95 } }
+                : {})}
+              disabled={!chatRoomId}
+              onClick={() => {
+                router.push(`/chat/${chatRoomId}`);
+              }}
+              className='flex items-center gap-2 px-4 py-2 bg-primary-500 disabled:opacity-75 text-white rounded-full text-sm hover:enabled:bg-primary-600 transition-colors'
             >
-              <Link
-                href={`/chat/${chatRoomId}`}
-                className='flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-full text-sm hover:bg-primary-600 transition-colors'
-              >
-                <MessageCircle className='w-4 h-4' />
-                Message
-              </Link>
+              <MessageCircle className='w-4 h-4' />
+              Message
             </motion.button>
           </div>
         </div>
