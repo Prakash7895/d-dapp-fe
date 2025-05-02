@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 import {
   AllUsers,
   ChatUser,
+  IUserData,
   LikdedUser,
   MatchedUser,
   Notification,
@@ -432,5 +433,14 @@ export const saveEmailOnlyLogin = (enable: boolean) =>
     .then((res) => res.data as ApiResponse)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update email only login');
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const getUserById = (id: string) =>
+  axiosInstance
+    .get(`/users/${id}`)
+    .then((res) => res.data as ApiResponse<IUserData>)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to get user by id');
       return { status: 'error' } as ApiResponse;
     });

@@ -153,3 +153,12 @@ export enum SignInType {
   EMAIL = 'email',
   WALLET = 'wallet',
 }
+
+export type IUserData = Omit<UserResponse, 'unreadNotifications'> & {
+  files: string[];
+  likedAt: string;
+  matchedAt: string | null;
+  chatRoomId: string | null;
+  nfts: string[];
+  isVerified: boolean;
+};

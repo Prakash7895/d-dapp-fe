@@ -114,8 +114,6 @@ export default function NftUploadMint({
     }
   };
 
-  console.log('CUD', cid);
-
   const handleCidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setCid(value);
@@ -179,13 +177,13 @@ export default function NftUploadMint({
             value={cid}
             onChange={handleCidChange}
             placeholder='e.g., bafybeibwzif... or https://ipfs.io/ipfs/bafybeibwzif...'
-            className={`w-full px-4 py-2 rounded-md bg-gray-800 text-gray-300 border ${
-              isCidValid ? 'border-gray-700' : 'border-red-500'
-            } focus:outline-none focus:ring-2 ${
-              isCidValid ? 'focus:ring-primary-500' : 'focus:ring-red-500'
+            className={`w-full px-4 py-2 rounded-md bg-gray-800 text-gray-300 ${
+              cid && !isCidValid ? 'border border-red-500' : ''
+            } focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+              cid && !isCidValid ? 'focus:!ring-red-500' : ''
             }`}
           />
-          {!isCidValid && (
+          {cid && !isCidValid && (
             <p className='text-sm text-red-500 mt-2'>
               Please enter a valid CID or IPFS gateway link.
             </p>

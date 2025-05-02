@@ -14,7 +14,7 @@ import React, {
   useState,
 } from 'react';
 import { toast } from 'react-toastify';
-import soulboundNftAbi from '@/abis/SooulboundNft.json';
+import soulboundNftAbi from '@/abis/SoulboundNft.json';
 import matchMakingAbi from '@/abis/MatchMaking.json';
 import walletAbi from '@/abis/SimpleMultiSig.json';
 

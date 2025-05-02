@@ -95,3 +95,28 @@ export const isValidIPFSGatewayLink = (value: string): boolean => {
 
   return false; // Not a valid IPFS gateway link
 };
+
+export const getImageFromNFT = async (src: string) => {
+  if (!src.startsWith('http://') && !src.startsWith('https://')) {
+    return `https://${src}.ipfs.w3s.link`;
+  }
+
+  const response = await fetch(src);
+  if (!response.ok) {
+    throw new Error('Failed to fetch metadata');
+  }
+
+  // Check the Content-Type header
+  const contentType = response.headers.get('Content-Type') || '';
+
+  if (contentType.includes('application/json')) {
+    // Handle JSON response
+    const metaData = await response.json();
+    console.log('Metadata:', metaData);
+
+    return metaData?.image_gateway;
+  } else if (contentType.includes('image/')) {
+    return src;
+  }
+  return '';
+};

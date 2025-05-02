@@ -37,7 +37,7 @@ const ProfileInfo = () => {
   const loc = `${userInfo?.profile?.city}, ${userInfo?.profile?.country}`;
 
   return (
-    <div className='max-w-[90vw] md:max-w-[80vw] mx-auto flex items-center gap-4 -mb-6'>
+    <div className='max-w-[90vw] md:max-w-[80vw] md:mx-24 lg:mx-52 mx-16 flex items-center gap-4 -mb-6'>
       <div className='border-[1px] shrink-0 border-gray-600 bg-white dark:bg-neutral-900 -bottom-4 rounded-lg overflow-hidden p-1 z-10'>
         <div className='h-24 w-24 md:h-36 md:w-36 relative group flex flex-col gap-2 items-center justify-center'>
           {activeProfilePhoto || profilePicture ? (

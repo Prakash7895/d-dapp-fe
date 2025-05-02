@@ -180,7 +180,14 @@ export const getActiveProfileNft = async (
   try {
     console.log('getting active profile nft');
 
-    const metaDataUri = await contract.getActiveProfileNft(address);
+    let metaDataUri = await contract.getActiveProfileNft(address);
+
+    if (
+      !metaDataUri.startsWith('http://') &&
+      !metaDataUri.startsWith('https://')
+    ) {
+      metaDataUri = `https://${metaDataUri}.ipfs.w3s.link`;
+    }
 
     const response = await fetch(metaDataUri);
     if (!response.ok) {
@@ -263,7 +270,14 @@ export const getUserTokenUriById = async (
     return null;
   }
   try {
-    const metaDataUri = await contract.tokenURI(id);
+    let metaDataUri = await contract.tokenURI(id);
+
+    if (
+      !metaDataUri.startsWith('http://') &&
+      !metaDataUri.startsWith('https://')
+    ) {
+      metaDataUri = `https://${metaDataUri}.ipfs.w3s.link`;
+    }
 
     const response = await fetch(metaDataUri);
     if (!response.ok) {

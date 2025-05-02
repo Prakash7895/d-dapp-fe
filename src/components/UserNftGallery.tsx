@@ -5,16 +5,26 @@ import { useStateContext } from './StateProvider';
 import Loader from './Loader';
 import MintNftModal from './MintNftModal';
 import UserNft from './UserNft';
+import { getUserTokenIds } from '@/contract';
+import { useSoulboundNFTContract } from './EthereumProvider';
 
 const UserNftGallery: React.FC = () => {
-  const { tokedIds, getCurrUsersTokenIds } = useStateContext();
+  const { tokedIds, userInfo, setTokedIds } = useStateContext();
   const [loading, setLoading] = useState(true);
+  const soulboundNFTContract = useSoulboundNFTContract();
 
   useEffect(() => {
     setLoading(true);
-    getCurrUsersTokenIds().then(() => setLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    getUserTokenIds(soulboundNFTContract, userInfo?.walletAddress!)
+      .then((res) => {
+        if (res) {
+          setTokedIds(res);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [soulboundNFTContract, userInfo?.walletAddress]);
 
   if (loading) {
     return (
