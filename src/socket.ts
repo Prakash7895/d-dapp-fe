@@ -105,7 +105,7 @@ const socketEventInitializer = (socket: Socket) => {
 };
 
 export const initializeSocket = () => {
-  if (typeof window === 'undefined') {
+  if (window && typeof window === 'undefined') {
     console.log('initializeSocket must be called in the browser');
     return;
   }
@@ -270,14 +270,14 @@ export const stopTyping = (roomId: string) => {
 
 export const markReadMessage = (
   messageId: string,
-  callback: (res: unknown) => void
+  callback: (res: { status: 'success' | 'error'; message: string }) => void
 ) => {
   console.log('CALLING MARK READ MESSAGE', checkStatus());
   if (checkStatus()) {
     socketObj?.emit(
       EMIT_EVENTS.MESSAGE_READ,
       { messageId },
-      (response: unknown) => {
+      (response: { status: 'success' | 'error'; message: string }) => {
         callback(response);
       }
     );

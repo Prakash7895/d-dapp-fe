@@ -4,11 +4,15 @@ import { FC, ReactNode, useEffect } from 'react';
 import ScreenLoader from './ScreenLoader';
 import StateProvider from './StateProvider';
 import useSession from '@/hooks/useSession';
-import EthereumProvider from './EthereumProvider';
 import { ToastContainer } from 'react-toastify';
 import ChatProvider from './Chat/ChatProvider';
 import { Provider } from 'react-redux';
 import { store } from '@/store';
+import dynamic from 'next/dynamic';
+
+const EthereumProvider = dynamic(() => import('./EthereumProvider'), {
+  ssr: false,
+});
 
 const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const { status } = useSession();
