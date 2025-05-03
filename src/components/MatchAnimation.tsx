@@ -59,7 +59,7 @@ const MatchAnimation: React.FC<MatchAnimationProps> = ({
       transition: {
         duration: 2,
         repeat: Infinity,
-        repeatType: 'reverse' as 'reverse',
+        repeatType: 'reverse' as const,
         ease: 'easeInOut',
       },
     },
@@ -143,7 +143,7 @@ const MatchAnimation: React.FC<MatchAnimationProps> = ({
               className='text-3xl font-bold text-primary-500 mb-4'
               variants={textVariants}
             >
-              It's a Match!
+              {"It's a Match!"}
             </motion.h2>
             <motion.div
               className='bg-gray-800/50 rounded-lg p-6 mb-6'

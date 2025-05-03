@@ -41,7 +41,7 @@ const UserTopBanner = () => {
   const handleLike = async () => {
     try {
       setIsLiking(true);
-      await likeProfile(matchMakingContract, userData?.walletAddress!);
+      await likeProfile(matchMakingContract, userData!.walletAddress!);
 
       toast.success('Profile liked successfully! 💝');
 
@@ -62,7 +62,8 @@ const UserTopBanner = () => {
       }, 2000);
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      console.log('Error liking profile:', error);
       return false;
     }
   };

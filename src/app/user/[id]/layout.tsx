@@ -9,7 +9,6 @@ import UserTopBanner from '@/components/UserTopBanner';
 import { setUserData, setUserLoading } from '@/store/UserReducer';
 import { getUserById } from '@/apiCalls';
 import { Lock } from 'lucide-react';
-import AnimatedTooltip from '@/components/AnimatedTooltip';
 import Link from 'next/link';
 import { useStateContext } from '@/components/StateProvider';
 
@@ -57,7 +56,7 @@ const UserLayoutPage = ({ children }: { children: ReactNode }) => {
 
   const tooltipContent = (
     <div className='text-sm text-gray-300'>
-      <p>Verify your account to view this user's photos.</p>
+      <p>{"Verify your account to view this user's photos."}</p>
       <p>
         To verify, mint your Profile NFT in the{' '}
         <Link

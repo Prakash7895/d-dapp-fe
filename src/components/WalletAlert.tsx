@@ -51,10 +51,7 @@ const WalletAlert: FC<WalletAlertProps> = ({
               <div className='mt-2 p-2 bg-yellow-600/20 rounded-md'>
                 <div className='text-sm text-yellow-900'>
                   <p>
-                    💡 For enhanced security, we recommend adding an email to
-                    your account. This ensures that no one else can log in using
-                    your wallet on this device. You can also enable 'Email-Only
-                    Login' for additional protection.
+                    {`💡 For enhanced security, we recommend adding an email to your account. This ensures that no one else can log in using your wallet on this device. You can also enable 'Email-Only Login' for additional protection.`}
                   </p>
                   <Link
                     href='/profile/security'

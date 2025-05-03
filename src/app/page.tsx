@@ -49,13 +49,13 @@ const HomePage = () => {
       }
       try {
         // Like the profile
-        await likeProfile(matchMakingContract, profile?.walletAddress!);
+        await likeProfile(matchMakingContract, profile.walletAddress!);
 
         toast.success('Profile liked successfully! 💝');
 
         return true;
-      } catch (error: any) {
-        toast.error(error?.message || 'Failed to like profile');
+      } catch (error: unknown) {
+        toast.error((error as Error)?.message || 'Failed to like profile');
         return false;
       }
     }
@@ -96,7 +96,9 @@ const HomePage = () => {
             transition={{ delay: 0.3 }}
           >
             <p className='text-gray-300 text-lg mb-4'>
-              We couldn't find any profiles matching your preferences right now.
+              {
+                "We couldn't find any profiles matching your preferences right now."
+              }
             </p>
             <ul className='text-gray-400 text-left mb-6 space-y-2'>
               <li>• Try adjusting your search preferences</li>

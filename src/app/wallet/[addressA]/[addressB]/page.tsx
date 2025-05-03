@@ -191,7 +191,7 @@ export default function WalletPage({
                     size={12}
                     className='text-gray-400 cursor-pointer'
                     onClick={() => {
-                      navigator.clipboard.writeText(walletInfo?.address!);
+                      navigator.clipboard.writeText(walletInfo!.address ?? '');
                       toast.success('Wallet address copied to clipboard');
                     }}
                   />

@@ -54,7 +54,7 @@ const usersSlice = createSlice({
         );
         state.users = [...existingUsers, ...(newUsers || [])];
         state.hasMore =
-          action.payload.data?.users?.length! >= action.payload.pageSize;
+          action.payload.data!.users.length! >= action.payload.pageSize;
         state.pageNo = action.payload.page;
       })
       .addCase(fetchUsers.rejected, (state) => {

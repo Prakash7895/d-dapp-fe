@@ -86,7 +86,8 @@ const useSession = (): {
           return;
         }
         fetchSession();
-      } catch (err: any) {
+      } catch (err: unknown) {
+        console.log('Error validating session:', err);
         lastValidationTime = currentTime;
         cachedSessionData = { expires: new Date(), user: null };
         setStatus('unauthenticated');

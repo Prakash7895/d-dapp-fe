@@ -55,7 +55,7 @@ const notificationSlice = createSlice({
         );
 
         state.notifications = [...existingData, ...(newNotifications || [])];
-        state.hasMore = action.payload.data?.length! >= PAGE_SIZE;
+        state.hasMore = action.payload.data!.length! >= PAGE_SIZE;
         state.pageNo = action.payload.page;
       })
       .addCase(fetchNotifications.rejected, (state) => {

@@ -106,7 +106,7 @@ const CardStack: React.FC<CardStackProps> = ({
             animate={{ scale: 1 }}
             className='text-3xl font-bold text-white mb-4'
           >
-            That's all for now!
+            {"That's all for now!"}
           </motion.h2>
           <motion.p
             initial={{ opacity: 0 }}
@@ -114,8 +114,7 @@ const CardStack: React.FC<CardStackProps> = ({
             transition={{ delay: 0.2 }}
             className='text-gray-300 text-lg mb-6'
           >
-            You've seen all available profiles. Check back later for more
-            potential matches!
+            {`You've seen all available profiles. Check back later for more potential matches!`}
           </motion.p>
           <motion.button
             whileHover={{ scale: 1.05 }}

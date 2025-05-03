@@ -111,7 +111,7 @@ const messageSlice = createSlice({
             state.messages = [...existingMessages, ...newMessages];
           }
         }
-        state.hasMore = action.payload?.data?.length! >= PAGE_SIZE;
+        state.hasMore = action.payload.data!.length! >= PAGE_SIZE;
         state.pageNo = action.payload.page;
       })
       .addCase(fetchMessages.rejected, (state) => {

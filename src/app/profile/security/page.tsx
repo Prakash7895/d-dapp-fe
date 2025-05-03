@@ -57,7 +57,7 @@ const Security = () => {
 
     setLoading(true);
     updateUserPassword({
-      pasword: formData.password,
+      password: formData.password,
       confirmPassword: formData.confirmPassword,
     })
       .then((res) => {
@@ -107,7 +107,7 @@ const Security = () => {
     }
   };
   const handleToggle = () => {
-    let prevValue = isEmailOnlyLogin;
+    const prevValue = isEmailOnlyLogin;
     setIsEmailOnlyLogin(!prevValue);
     saveEmailOnlyLogin(!prevValue).then((res) => {
       if (res.status === 'success') {
@@ -132,11 +132,11 @@ const Security = () => {
                 <AnimatedTooltip
                   tooltipContent={
                     <p className='max-w-xs'>
-                      Enable 'Email-Only Login' to enhance the security of your
+                      {`Enable 'Email-Only Login' to enhance the security of your
                       account. When enabled, you will be required to log in
                       using your email and password instead of your wallet. This
                       ensures that no one else can access your account using
-                      your wallet on shared or compromised devices.
+                      your wallet on shared or compromised devices.`}
                     </p>
                   }
                 >

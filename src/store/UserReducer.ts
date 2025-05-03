@@ -71,7 +71,7 @@ const userSlice = createSlice({
           }
         }
         state.files.hasMore =
-          action.payload?.data?.length! >= action.payload.pageSize;
+          action.payload.data!.length! >= action.payload.pageSize;
         state.files.pageNo = action.payload.page;
       })
       .addCase(fetchUserFiles.rejected, (state) => {
@@ -98,7 +98,7 @@ const userSlice = createSlice({
           }
         }
         state.nfts.hasMore =
-          action.payload?.data?.length! >= action.payload.pageSize;
+          action.payload.data!.length! >= action.payload.pageSize;
         state.nfts.pageNo = action.payload.page;
       })
       .addCase(fetchUserNfts.rejected, (state) => {

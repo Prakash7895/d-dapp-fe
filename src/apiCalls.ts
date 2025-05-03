@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 import {
   AllUsers,
   ChatUser,
+  IForm,
   IUserData,
   IUserFiles,
   IUserNfts,
@@ -24,6 +25,7 @@ import { S3File } from './hooks/useUserFiles';
 import axios from 'axios';
 import { MultiSigWallet } from './types/wallet';
 import { ChatMessage } from './types/message';
+import { FILE_ACCESS, UpdatePasswordSchemaType } from './apiSchemas';
 
 interface ApiResponse<T = null> {
   status: 'success' | 'error';
@@ -38,10 +40,15 @@ const axiosInstance = axios.create({
   },
 });
 
-let isRefreshing = false;
-let failedQueue: any[] = [];
+type FailedQueueItem = {
+  resolve: (token: string | null) => void;
+  reject: (error: unknown) => void;
+};
 
-const processQueue = (error: any, token: string | null = null) => {
+let isRefreshing = false;
+let failedQueue: FailedQueueItem[] = [];
+
+const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
@@ -119,7 +126,7 @@ axiosInstance.interceptors.request.use((config) => {
 
 export default axiosInstance;
 
-export const updateUserInfo = (data: any) =>
+export const updateUserInfo = (data: IForm) =>
   axiosInstance
     .put('/profile', data)
     .then((res) => res.data as ApiResponse<UserResponse>)
@@ -128,7 +135,7 @@ export const updateUserInfo = (data: any) =>
       return null;
     });
 
-export const updateUserPassword = (data: any) =>
+export const updateUserPassword = (data: UpdatePasswordSchemaType) =>
   axiosInstance
     .put('/profile/password', data)
     .then((res) => res.data as ApiResponse<UserResponse>)
@@ -183,7 +190,7 @@ export const deleteFile = (fileId: number) =>
       return { status: 'error' } as ApiResponse;
     });
 
-export const udpateFileAccess = (fileId: number, access: any) =>
+export const udpateFileAccess = (fileId: number, access: FILE_ACCESS) =>
   axiosInstance
     .put(`/profile/photo/${fileId}`, { access })
     .then((res) => res.data as ApiResponse)
@@ -302,7 +309,7 @@ export const checkConnectedWalletAddress = (walletAddress: string) =>
   axiosInstance
     .put('/profile/check-wallet-address', { walletAddress })
     .then((res) => res.data as ApiResponse)
-    .catch((err) => {
+    .catch(() => {
       // toast.error(err?.message || 'Failed to cehck wallet address');
       return { status: 'error' } as ApiResponse;
     });

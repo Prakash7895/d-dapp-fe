@@ -25,7 +25,6 @@ const itemVariants = {
 
 const UserMatchCard: FC<MatchedUser> = ({
   id,
-  lastActiveOn,
   matchedAt,
   profile,
   addressA,

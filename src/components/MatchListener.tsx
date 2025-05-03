@@ -18,7 +18,7 @@ const MatchListener: FC<{ children: ReactNode }> = ({ children }) => {
   useEffect(() => {
     if (
       matchedWith &&
-      [matchedWith.userAId, matchedWith.userBId].includes(userInfo?.id!)
+      [matchedWith.userAId, matchedWith.userBId].includes(userInfo!.id)
     ) {
       setShowMatch(true);
     } else {

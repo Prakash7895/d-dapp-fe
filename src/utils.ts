@@ -81,6 +81,7 @@ export const isValidCID = (value: string): boolean => {
     CID.parse(value); // Attempt to parse the CID
     return true; // If parsing succeeds, it's a valid CID
   } catch (error) {
+    console.log('Invalid CID:', error);
     return false; // If parsing fails, it's not a valid CID
   }
 };

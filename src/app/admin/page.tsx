@@ -197,9 +197,8 @@ const AdminPage = () => {
       await fetchContractState();
       setNewValues((prev) => ({ ...prev, [field]: '' }));
       toast.success(`Successfully updated ${field}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log(`Error updating ${field}:`, error);
-      console.log('MESSAGE', error.message);
       toast.error(`Failed to update ${field}`);
     } finally {
       setIsUpdating(false);
@@ -231,7 +230,7 @@ const AdminPage = () => {
       await fetchContractState(); // Refresh contract state
       toast.success('Successfully transferred funds to owner');
       setIsModalOpen(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log('Error transferring funds:', error);
       toast.error('Failed to transfer funds');
     } finally {
@@ -277,8 +276,9 @@ const AdminPage = () => {
             )}
           </ul>
           <p className='text-sm text-gray-500'>
-            Make sure you're on the correct network and the contracts are
-            deployed.
+            {
+              "Make sure you're on the correct network and the contracts are deployed."
+            }
           </p>
         </motion.div>
       </div>

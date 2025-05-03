@@ -56,7 +56,7 @@ const LikedPage = () => {
   };
 
   const handleUnlike = async (otherUserAddress: string) => {
-    const currentUserAddress = userInfo?.walletAddress!;
+    const currentUserAddress = userInfo!.walletAddress;
     if (!currentUserAddress || !otherUserAddress) {
       console.log('Wallet addresses not connected');
       return;

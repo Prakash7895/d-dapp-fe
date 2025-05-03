@@ -147,7 +147,7 @@ const chatSlice = createSlice({
             )
         );
         state.chats = [...existingChats, ...(newChats || [])];
-        state.hasMore = action.payload.data?.length! >= PAGE_SIZE;
+        state.hasMore = action.payload.data!.length! >= PAGE_SIZE;
         state.pageNo = action.payload.page;
       })
       .addCase(fetchChats.rejected, (state) => {

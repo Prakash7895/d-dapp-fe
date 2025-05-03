@@ -143,16 +143,16 @@ export type UserUpdateSchemaType = z.infer<typeof userUpdateSchema>;
 
 // export type AddWalletAddressSchemaType = z.infer<typeof addWalletAddressSchema>;
 
-// export const updatePasswordSchema = z
-//   .object({
-//     password: passwordSchema,
-//     confirmPassword: z.string().nonempty('Confirm Password is required.'),
-//   })
-//   .refine((data) => data.confirmPassword === data.password, {
-//     message: 'Password and confirm password should be same.',
-//   });
+export const updatePasswordSchema = z
+  .object({
+    password: passwordSchema,
+    confirmPassword: z.string().nonempty('Confirm Password is required.'),
+  })
+  .refine((data) => data.confirmPassword === data.password, {
+    message: 'Password and confirm password should be same.',
+  });
 
-// export type UpdatePasswordSchemaType = z.infer<typeof updatePasswordSchema>;
+export type UpdatePasswordSchemaType = z.infer<typeof updatePasswordSchema>;
 
 export enum FILE_ACCESS {
   PRIVATE = 'PRIVATE',

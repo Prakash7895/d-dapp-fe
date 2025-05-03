@@ -17,6 +17,7 @@ import { toast } from 'react-toastify';
 import soulboundNftAbi from '@/abis/SoulboundNft.json';
 import matchMakingAbi from '@/abis/MatchMaking.json';
 import walletAbi from '@/abis/SimpleMultiSig.json';
+import { handleTransactionError } from '@/contract';
 
 interface EthereumContextType {
   provider: BrowserProvider | null;
@@ -57,9 +58,9 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
         });
         console.log('accounts:', accounts);
         return accounts ?? [];
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.log('User rejected the request', err);
-        toast.error(err.message || 'Failed to detect connection');
+        toast.error((err as Error).message || 'Failed to detect connection');
         return [];
       }
     }
@@ -108,14 +109,9 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
       setIsConnected(true);
 
       return _signer;
-    } catch (error: any) {
-      console.error('Connection error:', error);
-      if (error.code === 4001) {
-        // User rejected the request
-        toast.error('Permission denied. Please allow wallet access.');
-      } else {
-        toast.error(error.message || 'Failed to connect to MetaMask');
-      }
+    } catch (error: unknown) {
+      console.log('Connection error:', error);
+      handleTransactionError(error);
       return null;
     } finally {
       setIsConnecting(false);
@@ -188,7 +184,10 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
 export const useEthereum = () => useContext(EthereumContext);
 
-export const useContract = (address: string, abi: any) => {
+export const useContract = (
+  address: string,
+  abi: Array<Record<string, unknown>>
+) => {
   const { signer, provider } = useEthereum();
   const [isDeployed, setIsDeployed] = useState(false);
 

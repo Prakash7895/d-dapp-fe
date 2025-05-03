@@ -70,7 +70,7 @@ const socketEventInitializer = (socket: Socket) => {
     }
     heartbeatInterval = setInterval(() => {
       if (socket.connected) {
-        socket.emit(EMIT_EVENTS.HEART_BEAT, (status: any) => {
+        socket.emit(EMIT_EVENTS.HEART_BEAT, (status: unknown) => {
           console.log('Heartbeat sent', status);
         });
       }
@@ -270,14 +270,14 @@ export const stopTyping = (roomId: string) => {
 
 export const markReadMessage = (
   messageId: string,
-  callback: (res: any) => void
+  callback: (res: unknown) => void
 ) => {
   console.log('CALLING MARK READ MESSAGE', checkStatus());
   if (checkStatus()) {
     socketObj?.emit(
       EMIT_EVENTS.MESSAGE_READ,
       { messageId },
-      (response: any) => {
+      (response: unknown) => {
         callback(response);
       }
     );

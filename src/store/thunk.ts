@@ -25,8 +25,8 @@ export const fetchMessages = createAsyncThunk(
       } else {
         return thunkAPI.rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.message);
+    } catch (error: unknown) {
+      return thunkAPI.rejectWithValue((error as Error).message);
     }
   }
 );
@@ -44,8 +44,8 @@ export const fetchChats = createAsyncThunk(
       } else {
         return thunkAPI.rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.message);
+    } catch (error: unknown) {
+      return thunkAPI.rejectWithValue((error as Error).message);
     }
   }
 );
@@ -63,8 +63,8 @@ export const fetchNotifications = createAsyncThunk(
       } else {
         return thunkAPI.rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.message);
+    } catch (error: unknown) {
+      return thunkAPI.rejectWithValue((error as Error).message);
     }
   }
 );
@@ -82,8 +82,8 @@ export const fetchUsers = createAsyncThunk(
       } else {
         return thunkAPI.rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.message);
+    } catch (error: unknown) {
+      return thunkAPI.rejectWithValue((error as Error).message);
     }
   }
 );
@@ -101,8 +101,8 @@ export const fetchUserFiles = createAsyncThunk(
       } else {
         return thunkAPI.rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.message);
+    } catch (error: unknown) {
+      return thunkAPI.rejectWithValue((error as Error).message);
     }
   }
 );
@@ -120,8 +120,8 @@ export const fetchUserNfts = createAsyncThunk(
       } else {
         return thunkAPI.rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.message);
+    } catch (error: unknown) {
+      return thunkAPI.rejectWithValue((error as Error).message);
     }
   }
 );

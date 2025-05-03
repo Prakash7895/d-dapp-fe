@@ -46,7 +46,7 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
   const [saving, setSaving] = useState(false);
 
   const [isCheckingAddress, setIsCheckingAddress] = useState(false);
-  const [newAddressError, setNewAddressError] = useState<string | undefined>();
+
   const [canConnectToCurrAddress, setCanConnectToCurrAddress] = useState(false);
   const { detectConnection } = useEthereum();
 
@@ -139,7 +139,6 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
 
   const handleConfirmNewAddress = async () => {
     setSaving(true);
-    setNewAddressError(undefined);
 
     try {
       const res = await saveConnectedWalletAddress(connectedAddress);
@@ -168,7 +167,6 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
       }
     } catch (error) {
       console.error('Error checking address:', error);
-      setNewAddressError('Failed to verify wallet address. Please try again.');
     } finally {
       setSaving(false);
     }

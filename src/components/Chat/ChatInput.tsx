@@ -28,7 +28,7 @@ const ChatInput = () => {
       read: false,
       received: false,
       roomId: activeRoomId,
-      senderId: userInfo?.id!,
+      senderId: userInfo!.id,
       id: new Date().getTime().toString(),
       updatedAt: new Date().toString(),
       pending: true,

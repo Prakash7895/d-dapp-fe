@@ -54,8 +54,8 @@ export default function SignIn() {
       login({ type: SignInType.EMAIL, email, password }).then(async (res) => {
         console.log('res', res);
         if (res.status === 'success') {
-          sessionStorage.setItem('accessToken', res.data?.access_token!);
-          sessionStorage.setItem('refreshToken', res.data?.refresh_token!);
+          sessionStorage.setItem('accessToken', res.data!.access_token!);
+          sessionStorage.setItem('refreshToken', res.data!.refresh_token!);
           await fetchSession();
           router.push('/');
         } else {
@@ -93,8 +93,8 @@ export default function SignIn() {
       });
 
       if (res.status === 'success') {
-        sessionStorage.setItem('accessToken', res.data?.access_token!);
-        sessionStorage.setItem('refreshToken', res.data?.refresh_token!);
+        sessionStorage.setItem('accessToken', res.data!.access_token);
+        sessionStorage.setItem('refreshToken', res.data!.refresh_token);
         await fetchSession();
         router.push('/');
       } else {
@@ -112,7 +112,7 @@ export default function SignIn() {
           );
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       if ((error as Error).message.includes('User rejected')) {
         setError('You rejected the signature request. Please try again.');
       } else {

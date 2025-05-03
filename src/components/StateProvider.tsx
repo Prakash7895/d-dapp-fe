@@ -76,7 +76,7 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
     if (userInfo?.walletAddress) {
       return getUserMultiSigWallets(userInfo.walletAddress).then((res) => {
         if (res.status === 'success') {
-          setMultiSigWallets(res.data?.multiSigWallets!);
+          setMultiSigWallets(res.data!.multiSigWallets);
         }
       });
     }
@@ -113,7 +113,7 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const getCurrUsersTokenIds = useCallback(
     () =>
       new Promise<boolean>((resolve) => {
-        getUserTokenIds(soulboundNFTContract, userInfo?.walletAddress!)
+        getUserTokenIds(soulboundNFTContract, userInfo!.walletAddress)
           .then((res) => {
             if (res) {
               setTokedIds(res);
@@ -129,7 +129,7 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const getUpdatedProfileNft = useCallback(
     () =>
-      getActiveProfileNft(soulboundNFTContract, userInfo?.walletAddress!).then(
+      getActiveProfileNft(soulboundNFTContract, userInfo!.walletAddress).then(
         (p) => {
           if (p) {
             setActiveProfilePhoto(p);

@@ -15,7 +15,7 @@ const UserNftGallery: React.FC = () => {
 
   useEffect(() => {
     setLoading(true);
-    getUserTokenIds(soulboundNFTContract, userInfo?.walletAddress!)
+    getUserTokenIds(soulboundNFTContract, userInfo!.walletAddress)
       .then((res) => {
         if (res) {
           setTokedIds(res);

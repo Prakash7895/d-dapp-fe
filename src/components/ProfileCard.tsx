@@ -155,7 +155,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           translateZ='60'
           className='text-neutral-500 mt-2 dark:text-neutral-300'
         >
-          {profile?.profile?.bio?.length! > 100
+          {profile?.profile?.bio?.length && profile.profile.bio.length > 100
             ? `${profile?.profile?.bio?.substring(0, 100)}...`
             : profile?.profile?.bio}
         </CardItem>

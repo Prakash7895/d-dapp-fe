@@ -56,11 +56,22 @@ export function onChainChange(callback: (chainId: string) => void): () => void {
   };
 }
 
-const handleTransactionError = (error: any) => {
-  if (error?.code === -32603) {
-    if (error.message.includes('insufficient funds')) {
+export const handleTransactionError = (error: unknown) => {
+  if (
+    error &&
+    typeof error === 'object' &&
+    'code' in error &&
+    error.code === -32603
+  ) {
+    if (
+      'message' in error &&
+      (error.message as string)?.includes('insufficient funds')
+    ) {
       toast.error('Insufficient funds to complete transaction');
-    } else if (error.message.includes('user rejected')) {
+    } else if (
+      'message' in error &&
+      (error.message as string)?.includes('user rejected')
+    ) {
       toast.error('Transaction rejected by user');
     } else {
       toast.error(
@@ -68,13 +79,20 @@ const handleTransactionError = (error: any) => {
       );
     }
   }
-  if (error.reason) {
+  if (error && typeof error === 'object' && 'reason' in error) {
     console.log('Revert reason:', error.reason);
     toast.error(`Transaction failed: ${error.reason}`);
-  } else if (error.data?.message) {
+  } else if (
+    error &&
+    typeof error === 'object' &&
+    'data' in error &&
+    error.data &&
+    typeof error.data === 'object' &&
+    'message' in error.data!
+  ) {
     console.log('Error message:', error.data.message);
     toast.error(`Transaction failed: ${error.data.message}`);
-  } else if (error.message) {
+  } else if (error && typeof error === 'object' && 'message' in error) {
     console.log('Error message:', error.message);
     toast.error(`Transaction failed: ${error.message}`);
   } else {
@@ -112,7 +130,7 @@ export const unlikeProfile = async (
   }
   try {
     await contract.unSetLikeOnExpiration(user1, user2);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.log('unlike profile error', error);
     handleTransactionError(error);
     throw error;
@@ -321,7 +339,7 @@ export const submitMultiSigProposal = async (
   try {
     const tx = await contract.submitProposal(destination, parseEther(amount));
     await tx.wait();
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.log('submit proposal error', error);
     handleTransactionError(error);
     throw error;
@@ -339,7 +357,7 @@ export const approveMultiSigProposal = async (
   try {
     const tx = await contract.approveProposal(index);
     await tx.wait();
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.log('approve proposal error', error);
     handleTransactionError(error);
     throw error;
@@ -357,7 +375,7 @@ export const inactivateMultiSigProposal = async (
   try {
     const tx = await contract.inactivateProposal(index);
     await tx.wait();
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.log('inactivate proposal error', error);
     handleTransactionError(error);
     throw error;
