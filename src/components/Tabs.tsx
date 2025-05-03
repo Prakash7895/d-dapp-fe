@@ -13,6 +13,7 @@ export type Tab = {
   onClick?: (val: string) => void;
   disabled?: boolean;
   tooltipContent?: ReactNode;
+  onMouseEnter?: () => void;
 };
 
 export const Tabs = ({
@@ -73,6 +74,7 @@ export const Tabs = ({
             style={{
               transformStyle: 'preserve-3d',
             }}
+            onMouseOver={tab.onMouseEnter}
           >
             {active.value === tab.value && (
               <motion.div

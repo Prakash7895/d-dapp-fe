@@ -110,6 +110,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         >
           <Link
             href={`/user/${profile.id}`}
+            prefetch
             className='flex items-center gap-2 w-full'
           >
             <h2 className='text-2xl font-bold text-white truncate'>

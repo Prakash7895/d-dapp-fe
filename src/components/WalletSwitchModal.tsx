@@ -25,6 +25,7 @@ const WalletSwitchModal: FC<WalletSwitchModalProps> = ({
           To use multiple wallets, please{' '}
           <Link
             href='/profile'
+            prefetch
             className='text-primary-400 hover:text-primary-300 underline'
           >
             add your email

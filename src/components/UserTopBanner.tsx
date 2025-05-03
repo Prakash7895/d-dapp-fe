@@ -154,6 +154,7 @@ const UserTopBanner = () => {
                       >
                         <Link
                           href={`/chat/${userData.chatRoomId}`}
+                          prefetch
                           className='flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-full text-sm hover:bg-primary-600 transition-colors'
                         >
                           <MessageCircle className='w-4 h-4' />

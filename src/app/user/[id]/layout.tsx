@@ -61,6 +61,7 @@ const UserLayoutPage = ({ children }: { children: ReactNode }) => {
         To verify, mint your Profile NFT in the{' '}
         <Link
           href='/profile/nfts'
+          prefetch
           onClick={(e) => e.stopPropagation()}
           className='text-blue-500 underline hover:text-blue-400'
         >

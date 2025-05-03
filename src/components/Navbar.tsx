@@ -88,6 +88,7 @@ export default function Navbar() {
   const discover = (
     <Link
       href='/'
+      prefetch
       className={`${className} ${activeClassName(pathname === '/')}`}
     >
       <Home className='h-5 w-5' />
@@ -98,6 +99,7 @@ export default function Navbar() {
   const liked = (
     <Link
       href='/liked'
+      prefetch
       className={`${className} ${activeClassName(pathname === '/liked')}`}
     >
       <Heart className='h-5 w-5' />
@@ -108,6 +110,7 @@ export default function Navbar() {
   const matches = (
     <Link
       href='/matches'
+      prefetch
       className={`${className} ${activeClassName(pathname === '/matches')}`}
     >
       <HeartHandshake className='h-5 w-5' />
@@ -118,6 +121,7 @@ export default function Navbar() {
   const messages = (
     <Link
       href='/chat'
+      prefetch
       className={`relative ${className} ${activeClassName(
         pathname.includes('/chat')
       )}`}
@@ -161,6 +165,7 @@ export default function Navbar() {
               <div className='flex w-full items-center space-x-4'>
                 <Link
                   href='/notifications'
+                  prefetch
                   className='relative flex shrink-0 items-center justify-center w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors'
                 >
                   <Bell className='h-5 w-5 text-gray-300' />
@@ -247,6 +252,7 @@ export default function Navbar() {
                                   <Link
                                     onClick={(e) => e.stopPropagation()}
                                     href='/profile/nfts'
+                                    prefetch
                                     className='mt-3 inline-block text-primary-500 hover:underline font-medium'
                                   >
                                     Verify your account now →
@@ -280,12 +286,14 @@ export default function Navbar() {
               <div className='flex items-center space-x-4'>
                 <Link
                   href='/auth/signin'
+                  prefetch
                   className='text-gray-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors'
                 >
                   Sign in
                 </Link>
                 <Link
                   href='/auth/signup'
+                  prefetch
                   className='bg-gradient-to-r from-primary-500 to-purple-500 text-white hover:opacity-90 px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-lg shadow-primary-500/20'
                 >
                   Sign up

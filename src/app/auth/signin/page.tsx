@@ -249,6 +249,7 @@ export default function SignIn() {
           <div className='text-center'>
             <Link
               href='/auth/signup'
+              prefetch
               className='text-primary-400 hover:text-primary-300'
             >
               {"Don't have an account? Sign up"}

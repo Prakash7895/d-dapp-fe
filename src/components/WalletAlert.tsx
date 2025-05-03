@@ -55,6 +55,7 @@ const WalletAlert: FC<WalletAlertProps> = ({
                   </p>
                   <Link
                     href='/profile/security'
+                    prefetch
                     className='mt-2 block items-center font-medium underline hover:text-yellow-900'
                   >
                     Add email in profile settings →

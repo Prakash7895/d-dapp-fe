@@ -59,6 +59,9 @@ const ProfileLayout = ({ children }: { children: ReactNode }) => {
             onClick: () => {
               router.push(el.path);
             },
+            onMouseEnter: () => {
+              router.prefetch(el.path);
+            },
           }))}
           containerClassName='mb-7'
           activeTabValue={activeTabValue}

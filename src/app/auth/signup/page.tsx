@@ -293,6 +293,7 @@ export default function SignUp() {
         <div className='mt-8 space-y-6'>
           <div className='flex justify-center space-x-4 mb-6'>
             <Link
+              prefetch
               href={pathName}
               onClick={() => setAuthMethod(SignInType.EMAIL)}
               className={`px-4 py-2 rounded-md ${
@@ -304,6 +305,7 @@ export default function SignUp() {
               Email & Password
             </Link>
             <Link
+              prefetch
               href={
                 pathName +
                 createQueryString(searchParams, SignInType.WALLET, 'true')
@@ -383,6 +385,7 @@ export default function SignUp() {
             <div className='text-center'>
               <Link
                 href='/auth/signin'
+                prefetch
                 className='text-primary-400 hover:text-primary-300'
               >
                 Already have an account? Sign in

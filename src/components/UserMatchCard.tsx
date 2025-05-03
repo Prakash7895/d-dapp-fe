@@ -40,7 +40,7 @@ const UserMatchCard: FC<MatchedUser> = ({
       whileHover={{ scale: 1.02 }}
       className='bg-gray-800 rounded-xl overflow-hidden'
     >
-      <Link href={`/user/${id}`}>
+      <Link href={`/user/${id}`} prefetch>
         <div className='relative h-64'>
           {profile.profilePicture ? (
             <img
@@ -117,6 +117,7 @@ const UserMatchCard: FC<MatchedUser> = ({
           <div className='flex items-center gap-2'>
             <Link
               href={`/wallet/${addressA}/${addressB}`}
+              prefetch
               className='flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-full text-sm hover:bg-gray-600 transition-colors'
             >
               <Wallet className='w-4 h-4' />
