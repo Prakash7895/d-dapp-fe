@@ -9,6 +9,7 @@ import {
   MapPin,
   Mars,
   MessageCircle,
+  SquareArrowOutUpRight,
   User,
   Venus,
   X,
@@ -120,28 +121,36 @@ const LikedPage = () => {
                 className='bg-gray-800 rounded-xl p-6 relative group w-full'
               >
                 {/* Profile Image */}
-                <div className='relative w-full h-48 mb-4 rounded-lg overflow-hidden'>
-                  {user.files && user.files.length > 0 ? (
-                    <img
-                      src={user.profile.profilePicture || user.files[0]}
-                      alt={`${user.profile.firstName}'s profile`}
-                      className='w-full h-full object-cover'
-                    />
-                  ) : (
-                    <div className='w-full h-full bg-gray-700 flex items-center justify-center'>
-                      <User className='w-16 h-16 text-gray-500' />
-                    </div>
-                  )}
+                <Link href={`/user/${user.id}`}>
+                  <div className='relative w-full h-48 mb-4 rounded-lg overflow-hidden'>
+                    {user.files && user.files.length > 0 ? (
+                      <img
+                        src={user.profile.profilePicture || user.files[0]}
+                        alt={`${user.profile.firstName}'s profile`}
+                        className='w-full h-full object-cover'
+                      />
+                    ) : (
+                      <div className='w-full h-full bg-gray-700 flex items-center justify-center'>
+                        <User className='w-16 h-16 text-gray-500' />
+                      </div>
+                    )}
 
-                  {/* Liked Indicator */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className='absolute top-4 right-4'
-                  >
-                    <Heart className='w-6 h-6 text-primary-500 fill-primary-500' />
-                  </motion.div>
-                </div>
+                    <div className='absolute top-4 flex items-center justify-end w-full px-4 gap-4'>
+                      <SquareArrowOutUpRight
+                        size={20}
+                        className='text-blue-300'
+                      />
+
+                      {/* Liked Indicator */}
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                      >
+                        <Heart className='w-6 h-6 text-primary-500 fill-primary-500 cursor-default' />
+                      </motion.div>
+                    </div>
+                  </div>
+                </Link>
 
                 {/* User Info */}
                 <div className='space-y-2'>
@@ -224,6 +233,7 @@ const LikedPage = () => {
                     ) : (
                       <TransactionWrapper
                         disabled={!matchMakingContract || !canUnlike}
+                        position='left'
                         tooltipContent={
                           canUnlike
                             ? {

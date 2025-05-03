@@ -1,4 +1,11 @@
-import { getChats, getMessages, getNotifications, getUsers } from '@/apiCalls';
+import {
+  getChats,
+  getMessages,
+  getNotifications,
+  getUserFiles,
+  getUserNfts,
+  getUsers,
+} from '@/apiCalls';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 export const fetchMessages = createAsyncThunk(
@@ -70,6 +77,44 @@ export const fetchUsers = createAsyncThunk(
   ) => {
     try {
       const response = await getUsers(pageNo, pageSize);
+      if (response.status === 'success') {
+        return { data: response.data, page: pageNo + 1, pageSize };
+      } else {
+        return thunkAPI.rejectWithValue(response.message);
+      }
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const fetchUserFiles = createAsyncThunk(
+  'user/fetchUserFiles',
+  async (
+    { id, pageNo, pageSize }: { id: string; pageNo: number; pageSize: number },
+    thunkAPI
+  ) => {
+    try {
+      const response = await getUserFiles(id, pageNo, pageSize);
+      if (response.status === 'success') {
+        return { data: response.data, page: pageNo + 1, pageSize };
+      } else {
+        return thunkAPI.rejectWithValue(response.message);
+      }
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const fetchUserNfts = createAsyncThunk(
+  'user/fetchUserNfts',
+  async (
+    { id, pageNo, pageSize }: { id: string; pageNo: number; pageSize: number },
+    thunkAPI
+  ) => {
+    try {
+      const response = await getUserNfts(id, pageNo, pageSize);
       if (response.status === 'success') {
         return { data: response.data, page: pageNo + 1, pageSize };
       } else {

@@ -96,6 +96,7 @@ export interface UserResponse {
   profile: UserProfile;
   walletAddress: string | null;
   unreadNotifications: number;
+  isVerified: boolean;
 }
 
 export type AllUsers = UserResponse & {
@@ -155,10 +156,27 @@ export enum SignInType {
 }
 
 export type IUserData = Omit<UserResponse, 'unreadNotifications'> & {
-  files: string[];
   likedAt: string;
   matchedAt: string | null;
   chatRoomId: string | null;
-  nfts: string[];
   isVerified: boolean;
 };
+
+export interface IUserNfts {
+  id: string;
+  walletAddress: string;
+  createdAt: Date;
+  updatedAt: Date;
+  tokenUri: string;
+  tokenId: number;
+  active: boolean;
+}
+
+export interface IUserFiles {
+  s3Key: string;
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string;
+  access: string;
+}

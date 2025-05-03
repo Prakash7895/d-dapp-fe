@@ -4,6 +4,7 @@ import chatReducer from './ChatReducer';
 import messageReducer from './MessageReducer';
 import matchReducer from './MatchReducer';
 import usersReducer from './UsersReducer';
+import UserReducer from './UserReducer';
 import notificationReducer from './NotificationReducer';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -14,6 +15,7 @@ export const store = configureStore({
     match: matchReducer,
     notification: notificationReducer,
     users: usersReducer,
+    user: UserReducer,
   },
 });
 

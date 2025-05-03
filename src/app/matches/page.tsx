@@ -6,6 +6,7 @@ import UserMatchCard from '@/components/UserMatchCard';
 import { getMatchedUsers } from '@/apiCalls';
 import { MatchedUser } from '@/types/user';
 import { useStateContext } from '@/components/StateProvider';
+import AnimatedTooltip from '@/components/AnimatedTooltip';
 
 const MatchesPage = () => {
   const [matches, setMatches] = useState<MatchedUser[]>([]);
@@ -41,12 +42,14 @@ const MatchesPage = () => {
           <h1 className='text-3xl font-bold text-white'>Your Matches</h1>
           <div className='flex items-center gap-6'>
             {!!totalBalance && (
-              <div className='flex items-center gap-2 bg-gray-800/50 px-4 py-2 rounded-lg'>
-                <Wallet className='text-primary-500 w-5 h-5' />
-                <span className='text-white font-medium'>
-                  {totalBalance || 0} ETH
-                </span>
-              </div>
+              <AnimatedTooltip tooltipContent='Total ETH Balance in all Multisig wallets'>
+                <div className='flex items-center gap-2 bg-gray-800/50 px-4 py-2 rounded-lg'>
+                  <Wallet className='text-primary-500 w-5 h-5' />
+                  <span className='text-white font-medium'>
+                    {totalBalance || 0} ETH
+                  </span>
+                </div>
+              </AnimatedTooltip>
             )}
             <div className='flex items-center gap-2'>
               <Heart className='text-primary-500 w-6 h-6' />

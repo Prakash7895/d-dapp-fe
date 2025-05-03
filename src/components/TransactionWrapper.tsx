@@ -13,6 +13,7 @@ interface TransactionWrapperProps {
     default?: ReactNode;
   };
   disabled?: boolean;
+  position?: 'top' | 'left' | 'right';
 }
 
 const TransactionWrapper: FC<TransactionWrapperProps> = ({
@@ -20,6 +21,7 @@ const TransactionWrapper: FC<TransactionWrapperProps> = ({
   tooltipContent,
   content,
   disabled,
+  position = 'top',
 }) => {
   const { userInfo } = useStateContext();
   const targetWalletAddress = userInfo?.walletAddress?.toLowerCase();
@@ -63,6 +65,7 @@ const TransactionWrapper: FC<TransactionWrapperProps> = ({
       disabled={isDisabled || disabled}
       tooltipContent={tooltipMessage}
       className='w-full'
+      position={position}
     >
       {content ? content(isDisabled) : children}
     </AnimatedTooltip>

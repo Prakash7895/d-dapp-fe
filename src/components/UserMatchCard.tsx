@@ -9,6 +9,7 @@ import {
   Wallet,
   Mars,
   Venus,
+  SquareArrowOutUpRight,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { FC } from 'react';
@@ -40,26 +41,31 @@ const UserMatchCard: FC<MatchedUser> = ({
       whileHover={{ scale: 1.02 }}
       className='bg-gray-800 rounded-xl overflow-hidden'
     >
-      <div className='relative h-64'>
-        {profile.profilePicture ? (
-          <img
-            src={profile.profilePicture}
-            alt={name}
-            className='w-full h-full object-cover'
-          />
-        ) : (
-          <div className='w-full h-full bg-gray-700 flex items-center justify-center'>
-            <User className='w-16 h-16 text-gray-500' />
+      <Link href={`/user/${id}`}>
+        <div className='relative h-64'>
+          {profile.profilePicture ? (
+            <img
+              src={profile.profilePicture}
+              alt={name}
+              className='w-full h-full object-cover'
+            />
+          ) : (
+            <div className='w-full h-full bg-gray-700 flex items-center justify-center'>
+              <User className='w-16 h-16 text-gray-500' />
+            </div>
+          )}
+          <div className='absolute top-4 flex items-center justify-end w-full px-4 gap-4'>
+            <SquareArrowOutUpRight size={20} className='text-blue-300' />
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className='bg-primary-500 rounded-full p-2'
+            >
+              <Heart className='w-5 h-5 text-white' />
+            </motion.div>
           </div>
-        )}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className='absolute top-4 right-4 bg-primary-500 rounded-full p-2'
-        >
-          <Heart className='w-5 h-5 text-white' />
-        </motion.div>
-      </div>
+        </div>
+      </Link>
 
       <div className='p-6 space-y-4'>
         <div className='flex flex-col gap-1 items-center justify-between'>

@@ -1,15 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import TabContenWrapper from './TabContenWrapper';
+import AnimatedTooltip from './AnimatedTooltip';
 
 export type Tab = {
-  title: string;
+  title: ReactNode;
   value: string;
   content?: string | React.ReactNode;
   onClick?: (val: string) => void;
+  disabled?: boolean;
+  tooltipContent?: ReactNode;
 };
 
 export const Tabs = ({
@@ -56,13 +59,14 @@ export const Tabs = ({
       >
         {propTabs.map((tab, idx) => (
           <button
-            key={tab.title}
+            key={tab.value}
             onClick={() => {
               moveSelectedTabToTop(idx);
               if (tab.onClick) {
                 tab.onClick(tab.value);
               }
             }}
+            disabled={tab.disabled}
             onMouseEnter={() => setHovering(true)}
             onMouseLeave={() => setHovering(false)}
             className={cn('relative px-4 py-2 rounded-full', tabClassName)}
@@ -81,9 +85,28 @@ export const Tabs = ({
               />
             )}
 
-            <span className='relative block text-black dark:text-white'>
-              {tab.title}
-            </span>
+            {tab.tooltipContent ? (
+              <AnimatedTooltip
+                disabled={tab.disabled}
+                tooltipContent={tab.tooltipContent}
+              >
+                <span
+                  className={`relative block text-black dark:text-white ${
+                    tab.disabled ? 'opacity-70' : ''
+                  }`}
+                >
+                  {tab.title}
+                </span>
+              </AnimatedTooltip>
+            ) : (
+              <span
+                className={`relative block text-black dark:text-white ${
+                  tab.disabled ? 'opacity-70' : ''
+                }`}
+              >
+                {tab.title}
+              </span>
+            )}
           </button>
         ))}
       </div>

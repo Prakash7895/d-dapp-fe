@@ -11,6 +11,8 @@ import {
   AllUsers,
   ChatUser,
   IUserData,
+  IUserFiles,
+  IUserNfts,
   LikdedUser,
   MatchedUser,
   Notification,
@@ -442,5 +444,23 @@ export const getUserById = (id: string) =>
     .then((res) => res.data as ApiResponse<IUserData>)
     .catch((err) => {
       toast.error(err?.message || 'Failed to get user by id');
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const getUserFiles = (id: string, pageNo: number, pageSize = 10) =>
+  axiosInstance
+    .get(`/users/${id}/photos?pageNo=${pageNo}&pageSize=${pageSize}`)
+    .then((res) => res.data as ApiResponse<IUserFiles[]>)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to update user info');
+      return { status: 'error' } as ApiResponse;
+    });
+
+export const getUserNfts = (id: string, pageNo: number, pageSize = 10) =>
+  axiosInstance
+    .get(`/users/${id}/nfts?pageNo=${pageNo}&pageSize=${pageSize}`)
+    .then((res) => res.data as ApiResponse<IUserNfts[]>)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to update user info');
       return { status: 'error' } as ApiResponse;
     });

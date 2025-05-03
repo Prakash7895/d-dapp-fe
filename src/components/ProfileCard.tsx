@@ -9,6 +9,7 @@ import {
   MapPin,
   Mars,
   Pointer,
+  SquareArrowOutUpRight,
   Transgender,
   User,
   Venus,
@@ -27,6 +28,7 @@ import { differenceInHours } from 'date-fns';
 import { useAppDispatch } from '@/store';
 import { updateUserProperty } from '@/store/UsersReducer';
 import TransactionWrapper from './TransactionWrapper';
+import Link from 'next/link';
 
 interface ProfileCardProps {
   profile: AllUsers;
@@ -106,7 +108,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           translateZ={50}
           className='text-xl z-50 font-bold text-neutral-600 w-full dark:text-white'
         >
-          <div className='flex items-center gap-2 w-full'>
+          <Link
+            href={`/user/${profile.id}`}
+            className='flex items-center gap-2 w-full'
+          >
             <h2 className='text-2xl font-bold text-white truncate'>
               {capitalizeFirstLetter(profile?.profile?.firstName || '')}{' '}
             </h2>
@@ -120,7 +125,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                 </AnimatedTooltip>
               )}
             </div>
-          </div>
+            <SquareArrowOutUpRight size={16} className='text-blue-300' />
+          </Link>
           <h3 className='flex items-center'>
             {profile?.profile?.age},{' '}
             {profile?.profile?.gender === 'MALE' ? (
