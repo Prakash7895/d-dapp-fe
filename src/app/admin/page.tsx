@@ -81,7 +81,7 @@ const itemVariants = {
 };
 
 const AdminPage = () => {
-  const { address, provider, connect } = useEthereum();
+  const { connectedAddress, provider, connect } = useEthereum();
   const matchMakingContract = useMatchMakingContract();
   const soulboundNftContract = useSoulboundNFTContract();
 
@@ -108,7 +108,8 @@ const AdminPage = () => {
   const [activeField, setActiveField] = useState<ActiveFields | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const isOwner = address?.toLowerCase() === state.owner?.toLowerCase();
+  const isOwner =
+    connectedAddress?.toLowerCase() === state.owner?.toLowerCase();
 
   useEffect(() => {
     connect();
@@ -317,7 +318,7 @@ const AdminPage = () => {
           <div className='bg-gray-700/50 p-4 rounded-lg flex items-center gap-3'>
             <AlertTriangle className='w-5 h-5 text-yellow-500 flex-shrink-0' />
             <p className='text-sm text-gray-300 text-left'>
-              Your address: {address || 'Not connected'}
+              Your address: {connectedAddress || 'Not connected'}
             </p>
           </div>
         </motion.div>

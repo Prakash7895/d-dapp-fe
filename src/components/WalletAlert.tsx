@@ -35,36 +35,41 @@ const WalletAlert: FC<WalletAlertProps> = ({
     <div className='bg-yellow-500 shadow-lg'>
       <div className='max-w-7xl mx-auto px-4 py-3'>
         <div className='flex items-center justify-between gap-4'>
-          <div className='flex-1'>
-            <h3 className='text-sm font-medium text-yellow-900'>{title}</h3>
-            <div className='mt-1 text-sm text-yellow-800'>
-              {isLoading ? (
-                <div className='flex items-center gap-2'>
-                  <Loader className='h-4 w-4 animate-spin' />
-                  <span>Checking wallet status...</span>
-                </div>
-              ) : (
-                message
-              )}
-            </div>
-            {showEmailRecommendation && (
-              <div className='mt-2 p-2 bg-yellow-600/20 rounded-md'>
-                <div className='text-sm text-yellow-900'>
-                  <p>
-                    {`💡 For enhanced security, we recommend adding an email to your account. This ensures that no one else can log in using your wallet on this device. You can also enable 'Email-Only Login' for additional protection.`}
-                  </p>
-                  <Link
-                    href='/profile/security'
-                    prefetch
-                    className='mt-2 block items-center font-medium underline hover:text-yellow-900'
-                  >
-                    Add email in profile settings →
-                  </Link>
-                </div>
+          {showEmailRecommendation ? (
+            <div className='flex-1 mt-2 p-2 bg-yellow-600/20 rounded-md'>
+              <div className='text-sm text-yellow-900'>
+                <p>
+                  {`💡 For enhanced security, we recommend adding an email to your account. This ensures that no one else can log in using your wallet on this device. You can also enable 'Email-Only Login' for additional protection.`}
+                </p>
+                <Link
+                  href='/profile/security'
+                  prefetch
+                  className='mt-2 block items-center font-medium underline hover:text-yellow-900'
+                >
+                  Add email in profile settings →
+                </Link>
               </div>
-            )}
-          </div>
-          <div className='flex items-center gap-2'>
+            </div>
+          ) : (
+            <div className='flex-1'>
+              <h3 className='text-sm font-medium text-yellow-900'>{title}</h3>
+              <div className='mt-1 text-sm text-yellow-800'>
+                {isLoading ? (
+                  <div className='flex items-center gap-2'>
+                    <Loader className='h-4 w-4 animate-spin' />
+                    <span>Checking wallet status...</span>
+                  </div>
+                ) : typeof message === 'string' ? (
+                  message
+                    .split('\n')
+                    .map((line, index) => <p key={index}>{line}</p>)
+                ) : (
+                  message
+                )}
+              </div>
+            </div>
+          )}
+          <div className='flex shrink-0 items-center gap-2'>
             {showConnectBtn && (
               <Button
                 onClick={connect}

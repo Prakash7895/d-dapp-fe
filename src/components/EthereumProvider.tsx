@@ -22,7 +22,6 @@ import { handleTransactionError } from '@/contract';
 interface EthereumContextType {
   provider: BrowserProvider | null;
   signer: JsonRpcSigner | null;
-  address: string | null;
   connectedAddress: string | null;
   chainId: string | null;
   isConnecting: boolean;
@@ -40,7 +39,6 @@ const EthereumContext = createContext<EthereumContextType>(
 const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [provider, setProvider] = useState<BrowserProvider | null>(null);
   const [signer, setSigner] = useState<JsonRpcSigner | null>(null);
-  const [address, setAddress] = useState<string | null>(null);
   const [chainId, setChainId] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
@@ -70,6 +68,7 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
   useEffect(() => {
     detectConnection().then((accounts) => {
       if (accounts && accounts.length > 0) {
+        setIsConnected(true);
         setConnectedAddress(accounts[0]?.toLowerCase());
         connect();
       } else {
@@ -105,7 +104,7 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
       const _address = await _signer.getAddress();
       console.log('Connected _address:', _address);
       setSigner(_signer);
-      setAddress(_address);
+      setConnectedAddress(_address);
       setIsConnected(true);
 
       return _signer;
@@ -121,7 +120,6 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const disconnect = () => {
     setProvider(null);
     setSigner(null);
-    setAddress(null);
     setChainId(null);
     setIsConnected(false);
     setConnectedAddress('');
@@ -166,7 +164,6 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
       value={{
         provider,
         signer,
-        address,
         chainId,
         isConnecting,
         isConnected,
