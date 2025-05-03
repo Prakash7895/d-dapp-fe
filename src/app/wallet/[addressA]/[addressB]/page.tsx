@@ -146,7 +146,7 @@ export default function WalletPage({
       toast.success('Proposal approved successfully');
       await fetchWalletInfo();
     } catch (error) {
-      console.error('Error approving proposal:', error);
+      console.log('Error approving proposal:', error);
     }
   };
 
@@ -158,7 +158,7 @@ export default function WalletPage({
       toast.success('Proposal inactivated successfully');
       await fetchWalletInfo();
     } catch (error) {
-      console.error('Error inactivating proposal:', error);
+      console.log('Error inactivating proposal:', error);
     }
   };
 

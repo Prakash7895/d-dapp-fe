@@ -51,7 +51,7 @@ const CardStack: React.FC<CardStackProps> = ({
       }
     } catch (error) {
       // Reset the card if there was an error
-      console.error('Swipe error:', error);
+      console.log('Swipe error:', error);
       setDirection(null);
       setIsAnimating(false);
     }

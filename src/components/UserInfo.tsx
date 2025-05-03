@@ -240,12 +240,11 @@ const UserInfo: React.FC = () => {
       };
     });
   };
-  console.log('formData', formData);
+
   const handleSave = async () => {
     if (!userInfo) return;
 
     const validationResult = userUpdateSchema.safeParse(formData);
-    console.log('validationResult', validationResult);
 
     if (!validationResult.success) {
       const err = validationResult.error.issues.reduce<{
@@ -275,7 +274,7 @@ const UserInfo: React.FC = () => {
         }
       })
       .catch((err) => {
-        console.error('Error updating profile:', err);
+        console.log('Error updating profile:', err);
         toast.error('Failed to update profile. Please try again.');
       })
       .finally(() => {

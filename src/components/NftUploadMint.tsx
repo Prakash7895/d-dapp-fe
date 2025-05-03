@@ -70,12 +70,10 @@ export default function NftUploadMint({
       setIsLoading(true);
       mintNFT(formData)
         .then((res) => {
-          console.log('res', res);
           if (res.status === 'success') {
             if (res.data?.metadataUrl) {
               mintNewNft(soulboundNftContract, res.data?.metadataUrl)
                 .then((r) => {
-                  console.log('R', r);
                   toast.success('Profile NFT minted successfully');
                   setIsLoading(false);
                   onSuccess();

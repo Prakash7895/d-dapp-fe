@@ -110,7 +110,7 @@ export default function SignUp() {
           ? error.message
           : 'An error occurred during registration'
       );
-      console.error(error);
+      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -126,7 +126,7 @@ export default function SignUp() {
       setAuthMethod(SignInType.WALLET);
     } catch (error) {
       setError('An error occurred while connecting wallet');
-      console.error(error);
+      console.log(error);
     }
   };
 
@@ -278,8 +278,6 @@ export default function SignUp() {
       />
     )
   );
-
-  console.log(walletAddress);
 
   return (
     <div className='flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-black'>

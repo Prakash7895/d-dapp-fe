@@ -27,7 +27,6 @@ const TransactionWrapper: FC<TransactionWrapperProps> = ({
   const targetWalletAddress = userInfo?.walletAddress?.toLowerCase();
   const { signer } = useEthereum();
   const [connectedAddress, setConnectedAddress] = useState('');
-  console.log('connectedAddress', connectedAddress);
 
   useEffect(() => {
     signer?.getAddress().then((address) => {

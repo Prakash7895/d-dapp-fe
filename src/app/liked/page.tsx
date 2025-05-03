@@ -47,7 +47,7 @@ const LikedPage = () => {
 
   const fetchLikedUsers = async () => {
     const response = await getLikedUsers(1, 10);
-    console.log('response', response);
+
     if (response.status === 'success' && response.data) {
       setUsers(response.data.users);
       setTotal(response.data.total);
@@ -58,7 +58,6 @@ const LikedPage = () => {
   const handleUnlike = async (otherUserAddress: string) => {
     const currentUserAddress = userInfo!.walletAddress;
     if (!currentUserAddress || !otherUserAddress) {
-      console.log('Wallet addresses not connected');
       return;
     }
 

@@ -35,7 +35,7 @@ const UserLayoutPage = ({ children }: { children: ReactNode }) => {
           }
         })
         .catch((err) => {
-          console.error('Error fetching user data:', err);
+          console.log('Error fetching user data:', err);
         })
         .finally(() => {
           dispatch(setUserLoading(false));

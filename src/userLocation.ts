@@ -5,7 +5,6 @@ async function getLocationFromIP() {
     // Using a free IP geolocation service
     const response = await fetch('https://ipapi.co/json/');
     const data = await response.json();
-    console.log('LOCATION DATa', data);
     return {
       city: data.city,
       country: data.country_name,
@@ -13,7 +12,6 @@ async function getLocationFromIP() {
       longitude: data.longitude,
     };
   } catch (error) {
-    console.log('Error getting location from IP:', error);
     return null;
   }
 }

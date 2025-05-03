@@ -25,7 +25,6 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
       const [entry] = entries;
 
       if (entry.isIntersecting && hasMore && !isLoading) {
-        console.log('Loading more data...');
         onLoadMore();
       }
     };

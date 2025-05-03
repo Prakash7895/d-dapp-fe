@@ -113,7 +113,6 @@ export const getImageFromNFT = async (src: string) => {
   if (contentType.includes('application/json')) {
     // Handle JSON response
     const metaData = await response.json();
-    console.log('Metadata:', metaData);
 
     return metaData?.image_gateway;
   } else if (contentType.includes('image/')) {

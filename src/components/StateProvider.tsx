@@ -92,16 +92,13 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
       let totalWei = BigInt(0);
       for (let i = 0; i < multiSigWallets.length; i++) {
         const bal = await provider?.getBalance(multiSigWallets[i]);
-        console.log('BAL:', bal!.toString());
+
         if (bal) {
           total += +formatEther(bal);
           totalWei += bal;
         }
       }
-      console.log('total:', total);
-      const totalEth = parseFloat(formatEther(totalWei));
-      console.log('Total in Wei:', totalWei.toString());
-      console.log('Total in ETH:', totalEth);
+
       setTotalBalance(total);
     }
   }, [provider, multiSigWallets, setTotalBalance]);

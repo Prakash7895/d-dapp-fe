@@ -69,8 +69,6 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
 
   const handleAccountChange = useCallback(
     async (accounts: string[]) => {
-      console.log('accounts:', accounts);
-
       if (accounts.length === 0) {
         setConnectedToValidAddress(false);
         toast.info('Wallet disconnected');
@@ -133,7 +131,7 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
         toast.error(res.message);
       }
     } catch (error) {
-      console.error('Error checking address:', error);
+      console.log('Error checking address:', error);
     } finally {
       setSaving(false);
     }

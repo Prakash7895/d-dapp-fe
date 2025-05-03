@@ -10,9 +10,7 @@ const MatchListener: FC<{ children: ReactNode }> = ({ children }) => {
   const [showMatch, setShowMatch] = useState(false);
 
   const { matchedWith } = useAppSelector('match');
-  console.log('matchedWith:', matchedWith);
-  console.log('userInfo?.id:', userInfo?.id);
-  console.log('showMatch:', showMatch);
+
   const dispatch = useAppDispatch();
 
   useEffect(() => {

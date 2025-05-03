@@ -69,7 +69,7 @@ const Security = () => {
         }
       })
       .catch((err) => {
-        console.error('Error updating password:', err);
+        console.log('Error updating password:', err);
         toast.error('Failed to update password. Please try again.');
       })
       .finally(() => {
@@ -100,7 +100,7 @@ const Security = () => {
         setFormData({ confirmPassword: '', password: '', email: '' });
       }
     } catch (error) {
-      console.error('Error adding email:', error);
+      console.log('Error adding email:', error);
       toast.error('Failed to add email. Please try again.');
     } finally {
       setLoading(false);

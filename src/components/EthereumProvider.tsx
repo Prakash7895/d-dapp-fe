@@ -50,11 +50,10 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const detectConnection = useCallback(async () => {
     if (isWalletPresent) {
       try {
-        console.log('detecting connection');
         const accounts = await window.ethereum?.request({
           method: 'eth_accounts',
         });
-        console.log('accounts:', accounts);
+
         return accounts ?? [];
       } catch (err: unknown) {
         console.log('User rejected the request', err);
@@ -87,7 +86,6 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
     setIsConnecting(true);
     try {
       // Request accounts
-      console.log('Requesting accounts...');
       await window.ethereum.request({ method: 'eth_requestAccounts' });
 
       // Initialize provider
@@ -102,7 +100,7 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
       // Get signer and address
       const _signer = await _provider.getSigner();
       const _address = await _signer.getAddress();
-      console.log('Connected _address:', _address);
+
       setSigner(_signer);
       setConnectedAddress(_address);
       setIsConnected(true);
@@ -129,9 +127,7 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
     // Setup event listeners
     if (window.ethereum) {
       window.ethereum.on('accountsChanged', (acc: string[]) => {
-        console.log('ACC', acc);
         if (acc.length === 0) {
-          console.log('No accounts found');
           disconnect();
         } else {
           setConnectedAddress(acc[0]?.toLowerCase());
@@ -144,7 +140,6 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
       });
 
       window.ethereum.on('disconnect', (d) => {
-        console.log('disconnect', d);
         toast.error('Disconnected from wallet');
         disconnect();
       });

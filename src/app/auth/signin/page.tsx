@@ -52,7 +52,6 @@ export default function SignIn() {
 
     try {
       login({ type: SignInType.EMAIL, email, password }).then(async (res) => {
-        console.log('res', res);
         if (res.status === 'success') {
           sessionStorage.setItem('accessToken', res.data!.access_token!);
           sessionStorage.setItem('refreshToken', res.data!.refresh_token!);
@@ -64,7 +63,7 @@ export default function SignIn() {
       });
     } catch (error) {
       setError((error as Error).message || 'An error occurred during sign in');
-      console.error(error);
+      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -73,17 +72,15 @@ export default function SignIn() {
   const handleWalletSignIn = async (signer: JsonRpcSigner) => {
     setIsLoading(true);
     setError('');
-    console.log('signer', signer);
+
     try {
       const address = await signer.getAddress();
-      console.log('address', address);
 
       // Create a message to sign
       const message = `${process.env.NEXT_PUBLIC_MESSAGE_TO_VERIFY}${address}`;
-      console.log('message', message);
+
       // Sign the message
       const signature = await signer.signMessage(message);
-      console.log('address', address);
 
       // Sign in with the wallet
       const res = await login({
