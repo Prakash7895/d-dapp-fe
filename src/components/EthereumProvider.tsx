@@ -139,7 +139,7 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
         console.log('CHAIN', c);
       });
 
-      window.ethereum.on('disconnect', (d) => {
+      window.ethereum.on('disconnect', () => {
         toast.error('Disconnected from wallet');
         disconnect();
       });

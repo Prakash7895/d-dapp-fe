@@ -12,6 +12,7 @@ async function getLocationFromIP() {
       longitude: data.longitude,
     };
   } catch (error) {
+    console.log('Error :', error);
     return null;
   }
 }

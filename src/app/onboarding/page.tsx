@@ -10,7 +10,10 @@ import { z } from 'zod';
 import { OnboardingFormSchema, onboardingSchema } from '@/apiSchemas';
 import Button from '@/components/Button';
 import AppLogo from '@/components/AppLogo';
-import { useStateContext } from '@/components/StateProvider';
+import {
+  checkIfUserOnboarded,
+  useStateContext,
+} from '@/components/StateProvider';
 import Loader from '@/components/Loader';
 
 const OnboardingPage = () => {
@@ -31,7 +34,7 @@ const OnboardingPage = () => {
   } = useStateContext();
 
   useEffect(() => {
-    if (userInfo && userInfo.profile && userInfo.profile.profilePicture) {
+    if (userInfo && checkIfUserOnboarded(userInfo)) {
       router.replace('/');
     }
   }, [userInfo]);
@@ -112,10 +115,7 @@ const OnboardingPage = () => {
     }
   };
 
-  console.log('Form Data:', formData);
-  console.log('Errors:', errors);
-
-  if (isUserInfoLoading || userInfo?.profile?.profilePicture || !userInfo) {
+  if (isUserInfoLoading || checkIfUserOnboarded(userInfo!)) {
     return (
       <div className='flex items-center justify-center min-h-screen bg-gray-800'>
         <Loader />

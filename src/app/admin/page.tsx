@@ -39,6 +39,7 @@ interface ContractState {
   balanceMatchMaking: string;
   balanceSoulboundNft: string;
   matchMakingMaxAmountCanWithdraw: string;
+  soulboundMaxAmountCanWithdraw: string;
 }
 
 const enum ActiveFields {
@@ -96,6 +97,7 @@ const AdminPage = () => {
     balanceMatchMaking: '',
     balanceSoulboundNft: '',
     matchMakingMaxAmountCanWithdraw: '',
+    soulboundMaxAmountCanWithdraw: '',
   });
   const [newValues, setNewValues] = useState({
     [ActiveFields.AMOUNT]: '',
@@ -107,6 +109,9 @@ const AdminPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeField, setActiveField] = useState<ActiveFields | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [transferringFrom, setTransferringFrom] = useState<
+    'matchMaking' | 'soulboundNft'
+  >('matchMaking');
 
   const isOwner =
     connectedAddress?.toLowerCase() === state.owner?.toLowerCase();
@@ -131,6 +136,7 @@ const AdminPage = () => {
         balanceMatchMaking,
         nftOwner,
         mintFee,
+        soulbound_maxAmountCanWithdraw,
         balanceSoulboundNft,
       ] = await Promise.all([
         // MatchMaking Contract
@@ -143,6 +149,7 @@ const AdminPage = () => {
         // SoulboundNFT Contract
         soulboundNftContract.s_owner(),
         soulboundNftContract.s_mintFee(),
+        soulboundNftContract.s_maxAmountCanWithdraw(),
         provider?.getBalance(process.env.NEXT_PUBLIC_SOULBOUND_NFT_ADDRESS!),
       ]);
 
@@ -157,6 +164,9 @@ const AdminPage = () => {
         balanceMatchMaking: formatEther(balanceMatchMaking!),
         balanceSoulboundNft: formatEther(balanceSoulboundNft!),
         matchMakingMaxAmountCanWithdraw: formatEther(s_maxAmountCanWithdraw),
+        soulboundMaxAmountCanWithdraw: formatEther(
+          soulbound_maxAmountCanWithdraw
+        ),
       });
     } catch (error) {
       console.log('Error fetching contract state:', error);
@@ -222,11 +232,14 @@ const AdminPage = () => {
   };
 
   const handleTransferToOwner = async (amount: string) => {
-    if (!matchMakingContract || !isOwner) return;
+    if (!matchMakingContract || !soulboundNftContract || !isOwner) return;
 
     try {
       setIsUpdating(true);
-      const tx = await matchMakingContract.transferToOwner(parseEther(amount));
+      const tx = await (transferringFrom === 'matchMaking'
+        ? matchMakingContract
+        : soulboundNftContract
+      ).transferToOwner(parseEther(amount));
       await tx.wait();
       await fetchContractState(); // Refresh contract state
       toast.success('Successfully transferred funds to owner');
@@ -461,7 +474,10 @@ const AdminPage = () => {
                       <h3 className='text-gray-400'>Max Amount Withdrawable</h3>
                       <div className='flex items-center gap-4'>
                         <Button
-                          onClick={() => handleOpenModal(ActiveFields.TRANSFER)}
+                          onClick={() => {
+                            setTransferringFrom('matchMaking');
+                            handleOpenModal(ActiveFields.TRANSFER);
+                          }}
                           label='Transfer to Owner'
                           className='px-4 py-2 bg-primary-500 hover:enabled:bg-primary-600 !w-fit'
                           disabled={
@@ -604,6 +620,31 @@ const AdminPage = () => {
                             <Edit2 className='w-4 h-4 text-gray-400' />
                           </button>
                         )}
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    variants={itemVariants}
+                    className='bg-gray-700/50 p-4 rounded-lg'
+                  >
+                    <div className='flex items-center justify-between'>
+                      <h3 className='text-gray-400'>Max Amount Withdrawable</h3>
+                      <div className='flex items-center gap-4'>
+                        <Button
+                          onClick={() => {
+                            setTransferringFrom('soulboundNft');
+                            handleOpenModal(ActiveFields.TRANSFER);
+                          }}
+                          label='Transfer to Owner'
+                          className='px-4 py-2 bg-primary-500 hover:enabled:bg-primary-600 !w-fit'
+                          disabled={
+                            !isOwner || !+state.soulboundMaxAmountCanWithdraw
+                          }
+                        />
+                        <p className='font-mono text-sm text-right text-gray-300'>
+                          {`${state.soulboundMaxAmountCanWithdraw} ETH`}
+                        </p>
                       </div>
                     </div>
                   </motion.div>

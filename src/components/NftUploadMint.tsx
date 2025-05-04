@@ -53,7 +53,7 @@ export default function NftUploadMint({
     return isValidCID(value) || isValidIPFSGatewayLink(value);
   };
 
-  const handleMint = async (file?: File) => {
+  const handleMint = async (file?: File | null) => {
     if (!soulboundNftContract) {
       toast.error('Soulbound NFT contract not found');
       return;
@@ -73,7 +73,7 @@ export default function NftUploadMint({
           if (res.status === 'success') {
             if (res.data?.metadataUrl) {
               mintNewNft(soulboundNftContract, res.data?.metadataUrl)
-                .then((r) => {
+                .then(() => {
                   toast.success('Profile NFT minted successfully');
                   setIsLoading(false);
                   onSuccess();

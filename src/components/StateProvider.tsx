@@ -40,11 +40,11 @@ interface ContextState {
 
 const Context = createContext<ContextState>({} as ContextState);
 
-const checkIfUserOnboarded = (data: UserResponse) => {
+export const checkIfUserOnboarded = (data: UserResponse) => {
   return !!(
-    data.profile.profilePicture &&
-    data.profile.bio &&
-    data.profile.city
+    data?.profile?.profilePicture &&
+    data?.profile?.bio &&
+    data?.profile?.city
   );
 };
 
@@ -113,13 +113,12 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const getMulitSigBalances = useCallback(async () => {
     if (multiSigWallets.length) {
       let total = 0;
-      let totalWei = BigInt(0);
+
       for (let i = 0; i < multiSigWallets.length; i++) {
         const bal = await provider?.getBalance(multiSigWallets[i]);
 
         if (bal) {
           total += +formatEther(bal);
-          totalWei += bal;
         }
       }
 

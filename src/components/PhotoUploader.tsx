@@ -45,7 +45,10 @@ const PhotoUploader: FC<PhotoUploaderProps> = ({
     </div>
   );
 
-  const onSubmit = async (file: File) => {
+  const onSubmit = async (file: File | null) => {
+    if (!file) {
+      return;
+    }
     try {
       const formData = new FormData();
       if (!isEditing) {
