@@ -26,7 +26,6 @@ export const metadata: Metadata = {
     'blockchain-powered matchmaking',
   ],
   authors: [{ name: 'ChainMatch Team' }],
-  viewport: 'width=device-width, initial-scale=1.0',
   openGraph: {
     title: 'ChainMatch - Decentralized Dating App',
     description:
@@ -53,6 +52,8 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport = 'width=device-width, initial-scale=1.0';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -60,6 +61,32 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
+      <head>
+        <link
+          rel='icon'
+          href='/favicon-512x512.png'
+          sizes='512x512'
+          type='image/png'
+        />
+        <link
+          rel='icon'
+          href='/favicon-192x192.png'
+          sizes='192x192'
+          type='image/png'
+        />
+        <link
+          rel='icon'
+          href='/favicon-32x32.png'
+          sizes='32x32'
+          type='image/png'
+        />
+        <link
+          rel='icon'
+          href='/favicon-16x16.png'
+          sizes='16x16'
+          type='image/png'
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen flex flex-col`}
       >
