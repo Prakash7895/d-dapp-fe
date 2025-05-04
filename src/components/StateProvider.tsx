@@ -18,6 +18,7 @@ import WalletHandler from './WalletHandler';
 import MatchListener from './MatchListener';
 import { useEthereum, useSoulboundNFTContract } from './EthereumProvider';
 import { formatEther } from 'ethers';
+import { usePathname, useRouter } from 'next/navigation';
 
 interface ContextState {
   selectedAddress: string;
@@ -34,9 +35,18 @@ interface ContextState {
   getMulitSigBalances: () => Promise<void>;
   multiSigWallets: string[];
   fetchMultiSigWallets: () => Promise<void> | undefined;
+  loading: boolean;
 }
 
 const Context = createContext<ContextState>({} as ContextState);
+
+const checkIfUserOnboarded = (data: UserResponse) => {
+  return !!(
+    data.profile.profilePicture &&
+    data.profile.bio &&
+    data.profile.city
+  );
+};
 
 const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [selectedAddress, setSelectedAddress] = useState('');
@@ -48,6 +58,8 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [totalBalance, setTotalBalance] = useState<number | null>(null);
   const { provider } = useEthereum();
   const soulboundNFTContract = useSoulboundNFTContract();
+  const router = useRouter();
+  const pathName = usePathname();
 
   useEffect(() => {
     setLoading(true);
@@ -58,10 +70,22 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
           'savedWalletAddress',
           JSON.stringify(res.data!.walletAddress ?? null)
         );
-        setLoading(false);
       }
     });
   }, []);
+
+  useEffect(() => {
+    if (userInfo) {
+      if (pathName === '/onboarding') {
+        setLoading(false);
+      }
+      if (!checkIfUserOnboarded(userInfo)) {
+        router.replace('/onboarding');
+      } else {
+        setLoading(false);
+      }
+    }
+  }, [userInfo, pathName]);
 
   useEffect(() => {
     if (userInfo) {
@@ -152,6 +176,7 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
       getMulitSigBalances,
       multiSigWallets,
       fetchMultiSigWallets,
+      loading,
     }),
     [
       selectedAddress,
@@ -168,6 +193,7 @@ const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
       getMulitSigBalances,
       multiSigWallets,
       fetchMultiSigWallets,
+      loading,
     ]
   );
 

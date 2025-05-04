@@ -19,6 +19,7 @@ import {
   saveConnectedWalletAddress,
 } from '@/apiCalls';
 import { useEthereum } from './EthereumProvider';
+import { usePathname } from 'next/navigation';
 
 const Context = createContext<{
   connectedToValidAddress: boolean;
@@ -40,6 +41,7 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
   const [isCheckingAddress, setIsCheckingAddress] = useState(false);
   const [canConnectToCurrAddress, setCanConnectToCurrAddress] = useState(false);
   const { isConnected, connectedAddress } = useEthereum();
+  const pathName = usePathname();
 
   useEffect(() => {
     if (connectedAddress && !targetWalletAddress) {
@@ -262,7 +264,7 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
 
   return (
     <Context.Provider value={value}>
-      {(showAlert || showEmailRecommendation) && (
+      {pathName !== '/onboarding' && (showAlert || showEmailRecommendation) && (
         <WalletAlert
           title={getTitle()}
           message={getMessage()}

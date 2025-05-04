@@ -19,7 +19,10 @@ const ProfilePictureUploader: FC<ProfilePictureUploaderProps> = ({
   const { setUserInfo } = useStateContext();
   const [loading, setLoading] = useState(false);
 
-  const onSubmit = async (file: File) => {
+  const onSubmit = async (file: File | null) => {
+    if (!file) {
+      return;
+    }
     try {
       const formData = new FormData();
       formData.append('file', file);

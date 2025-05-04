@@ -20,6 +20,7 @@ import { useStateContext } from './StateProvider';
 import { disconnectSocket } from '@/socket';
 import { useAppSelector } from '@/store';
 import AnimatedTooltip from './AnimatedTooltip';
+import AppLogo from './AppLogo';
 
 export default function Navbar() {
   const { data: session, clearSession } = useSession();
@@ -144,9 +145,14 @@ export default function Navbar() {
           {/* Logo and Main Navigation */}
           <div className='flex items-center space-x-8'>
             <Link href='/' className='flex items-center space-x-2'>
-              <span className='text-2xl font-bold bg-gradient-to-r from-primary-500 to-purple-500 bg-clip-text text-transparent'>
-                Dating DApp
-              </span>
+              <AppLogo
+                showText={false}
+                logoClassName='text-2xl'
+                className='flex items-center'
+                imageWidth='4rem'
+                imageHeight='8rem'
+                shadowSpread={10}
+              />
             </Link>
 
             {session && (

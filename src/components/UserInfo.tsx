@@ -154,7 +154,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
   );
 };
 
-const interestOptions = [
+export const interestOptions = [
   'Art',
   'Cooking',
   'Dancing',

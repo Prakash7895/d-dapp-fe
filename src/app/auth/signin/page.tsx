@@ -13,6 +13,7 @@ import { createQueryString } from '@/utils';
 import TransactionBtn from '@/components/TransactionBtn';
 import { JsonRpcSigner } from 'ethers';
 import { useEthereum } from '@/components/EthereumProvider';
+import AppLogo from '@/components/AppLogo';
 
 export default function SignIn() {
   const router = useRouter();
@@ -134,10 +135,11 @@ export default function SignIn() {
   }
 
   return (
-    <div className='flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-black'>
+    <div className='flex min-h-screen flex-col items-center justify-center gap-10 py-12 px-4 sm:px-6 lg:px-8 bg-black'>
+      <AppLogo className='flex flex-col items-center space-x-3' />
       <div className='w-full max-w-md space-y-8'>
         <div>
-          <h2 className='mt-6 text-center text-3xl font-bold tracking-tight text-white'>
+          <h2 className='mt-6 text-center text-2xl font-bold tracking-tight text-white'>
             Sign in to your account
           </h2>
         </div>

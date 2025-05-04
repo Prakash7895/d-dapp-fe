@@ -1,5 +1,5 @@
 'use client';
-import { useState, ReactNode } from 'react';
+import { useState, ReactNode, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import Button from './Button';
 import TransactionWrapper from './TransactionWrapper';
@@ -8,7 +8,7 @@ interface FileUploaderProps {
   label?: string;
   contentAboveBtn?: ReactNode;
   btnLabel?: string;
-  onSubmit: (file: File) => void;
+  onSubmit: (file: File | null) => void;
   isLoading?: boolean;
   preview?: string;
   isEditing?: boolean;
@@ -48,6 +48,12 @@ export default function FileUploader({
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
   };
+
+  useEffect(() => {
+    if (!btnLabel) {
+      onSubmit(selectedFile);
+    }
+  }, [btnLabel, selectedFile]);
 
   return (
     <div>
@@ -121,13 +127,15 @@ export default function FileUploader({
             />
           )}
         />
-      ) : (
+      ) : btnLabel ? (
         <Button
           label={btnLabel}
           onClick={() => onSubmit(selectedFile!)}
           disabled={isEditing ? isLoading : !selectedFile || isLoading}
           isLoading={isLoading}
         />
+      ) : (
+        <></>
       )}
     </div>
   );

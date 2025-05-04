@@ -19,6 +19,7 @@ import useSession from '@/hooks/useSession';
 import axiosInstance from '@/apiCalls';
 import TransactionBtn from '@/components/TransactionBtn';
 import { useEthereum } from '@/components/EthereumProvider';
+import AppLogo from '@/components/AppLogo';
 
 export default function SignUp() {
   const router = useRouter();
@@ -90,25 +91,18 @@ export default function SignUp() {
       }
 
       // Create user with email/password
-      axiosInstance
-        .post('/users', {
-          ...formData,
-          age: +formData.age,
-          ...location,
-        })
-        .then(() => {
-          router.push('/auth/signin');
-        })
-        .catch((err) => {
-          throw new Error(err.message || 'Failed to register');
-        });
+      await axiosInstance.post('/users', {
+        ...formData,
+        age: +formData.age,
+        ...location,
+      });
+
+      router.push('/auth/signin');
 
       // Redirect to sign in page
     } catch (error) {
       setError(
-        error instanceof Error
-          ? error.message
-          : 'An error occurred during registration'
+        (error as Error).message || 'An error occurred during registration'
       );
       console.log(error);
     } finally {
@@ -280,10 +274,11 @@ export default function SignUp() {
   );
 
   return (
-    <div className='flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-black'>
+    <div className='flex min-h-screen flex-col items-center justify-center gap-3 py-12 px-4 sm:px-6 lg:px-8 bg-black'>
+      <AppLogo className='flex flex-col items-center space-x-3' />
       <div className='w-full max-w-md space-y-8'>
         <div>
-          <h2 className='mt-6 text-center text-3xl font-bold tracking-tight text-white'>
+          <h2 className='mt-6 text-center text-2xl font-bold tracking-tight text-white'>
             Create your account
           </h2>
         </div>

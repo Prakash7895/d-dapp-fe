@@ -471,3 +471,16 @@ export const getUserNfts = (id: string, pageNo: number, pageSize = 10) =>
       toast.error(err?.message || 'Failed to update user info');
       return { status: 'error' } as ApiResponse;
     });
+
+export const onboardUser = (data: FormData) =>
+  axiosInstance
+    .put('/profile/onboard', data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    .then((res) => res.data as ApiResponse<UserResponse>)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to save wallet address');
+      return { status: 'error' } as ApiResponse;
+    });

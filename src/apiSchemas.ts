@@ -1,7 +1,7 @@
 // import { isAddress } from 'ethers';
 import { z } from 'zod';
 
-export const GENDER = ['MALE', 'FEMALE', 'NON-BINARY', 'OTHER'] as const;
+export const GENDER = ['MALE', 'FEMALE', 'OTHER'] as const;
 
 export enum GENDER_PREFERENCES {
   'MALE' = 'MALE',
@@ -193,3 +193,29 @@ export enum FILE_ACCESS {
 //   liker: walletAddressSchema,
 //   target: walletAddressSchema,
 // });
+
+export const onboardingSchema = z.object({
+  profilePicture: z
+    .instanceof(File)
+    .nullable()
+    .or(z.null())
+    .refine((file) => file === null || file instanceof File, {
+      message: 'Profile picture must be null or a valid File.',
+    }),
+  bio: z
+    .string()
+    .min(10, { message: 'Bio must be at least 50 characters long.' }),
+  city: z
+    .string()
+    .min(2, { message: 'City is required.' })
+    .max(30, { message: 'Upto 50 characters are allowed.' }),
+  country: z
+    .string()
+    .min(2, { message: 'Country is required.' })
+    .max(20, { message: 'Upto 50 characters are allowed.' }),
+  interests: z
+    .array(z.string())
+    .min(1, { message: 'At least one interest is required.' }),
+});
+
+export type OnboardingFormSchema = z.infer<typeof onboardingSchema>;
