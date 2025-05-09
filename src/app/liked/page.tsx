@@ -38,7 +38,7 @@ const LikedPage = () => {
   useEffect(() => {
     async function fetchLikeExpirationDays() {
       if (matchMakingContract) {
-        const minutes = await matchMakingContract?.s_likeExpirationDays();
+        const minutes = await matchMakingContract?.s_likeExpMinutes();
         setLikeExpirationMinutes(Number(minutes));
       }
     }
@@ -61,11 +61,7 @@ const LikedPage = () => {
       return;
     }
 
-    await unlikeProfile(
-      matchMakingContract,
-      currentUserAddress,
-      otherUserAddress
-    );
+    await unlikeProfile(matchMakingContract, otherUserAddress);
   };
 
   if (loading) {

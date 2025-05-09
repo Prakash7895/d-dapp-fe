@@ -121,15 +121,14 @@ export const likeProfile = async (
 
 export const unlikeProfile = async (
   contract: Contract | null,
-  user1: string,
-  user2: string
+  user: string
 ) => {
-  if (!contract || !user1 || !user2) {
+  if (!contract || !user) {
     console.log('Contract or user addresses are null');
     return null;
   }
   try {
-    await contract.unSetLikeOnExpiration(user1, user2);
+    await contract.unSetLikeOnExpiration(user);
   } catch (error: unknown) {
     console.log('unlike profile error', error);
     handleTransactionError(error);
@@ -168,13 +167,33 @@ export const mintNewNft = async (
     return null;
   }
   try {
+    const transaction = await contract.mintNewNft(tokenUri);
+    await transaction.wait();
+
+    return true;
+  } catch (error: unknown) {
+    handleTransactionError(error);
+    console.log('minting new Nft error', error);
+    return false;
+  }
+};
+
+export const verifyUser = async (
+  contract: Contract | null,
+  tokenUri: string
+) => {
+  if (!contract || !tokenUri) {
+    console.log('Contract or tokenUri is null');
+    return null;
+  }
+  try {
     const mintFeeInWei = await contract.s_mintFee();
 
     if (!mintFeeInWei) {
       throw new Error('Failed to get mint fee');
     }
 
-    const transaction = await contract.createUserProfile(tokenUri, {
+    const transaction = await contract.verifyUser(tokenUri, {
       value: mintFeeInWei,
     });
     await transaction.wait();

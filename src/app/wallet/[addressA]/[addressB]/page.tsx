@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { formatEther } from 'ethers';
-import { Wallet, CheckCircle2, XCircle, Clock, Copy } from 'lucide-react';
+import { Wallet, XCircle, Clock, Copy, CheckCircle } from 'lucide-react';
 import { WalletInfo, ProposalStatus } from '@/types/wallet';
 import Button from '@/components/Button';
 import { toast } from 'react-toastify';
@@ -44,38 +44,32 @@ export default function WalletPage({
     if (!walletContract) return;
 
     try {
-      const [_owners, requiredApprovals, balance] = await Promise.all([
-        walletContract.getOwners(),
-        walletContract.getRequiredApprovals(),
+      const [_owner1, _owner2, balance] = await Promise.all([
+        walletContract.s_owner1(),
+        walletContract.s_owner2(),
         provider?.getBalance(walletAddress),
       ]);
-      const owners = Array.from(_owners) as string[];
+
+      const owners = [_owner1, _owner2].map((owner) => owner.toLowerCase());
 
       const proposalCount = await walletContract.getProposalCount();
 
       const proposals = [];
       for (let i = 0; i < Number(proposalCount); i++) {
-        const [destination, amount, approvals, executed, status] =
-          await walletContract.getProposal(i);
+        const [destination, amount, status] = await walletContract.getProposal(
+          i
+        );
 
         const approved: { [key: string]: boolean } = {};
 
-        approved[owners[0].toLowerCase()] = await walletContract.isApproved(
-          i,
-          owners[0]
-        );
+        approved[owners[0]] = await walletContract.isApproved(i, owners[0]);
 
-        approved[owners[1].toLowerCase()] = await walletContract.isApproved(
-          i,
-          owners[1]
-        );
+        approved[owners[1]] = await walletContract.isApproved(i, owners[1]);
 
         proposals.push({
           destination,
           amount: formatEther(amount),
-          approvals: Number(approvals),
           approved,
-          executed,
           status: Number(status),
         });
       }
@@ -83,9 +77,9 @@ export default function WalletPage({
       setWalletInfo({
         address: walletAddress,
         owners,
-        requiredApprovals: Number(requiredApprovals),
         balance: formatEther(balance!),
         proposals,
+        requiredApprovals: owners.length,
       });
     } catch (error) {
       console.log('Error fetching wallet info:', error);
@@ -330,8 +324,8 @@ export default function WalletPage({
                   <div key={index} className='bg-gray-800 p-4 rounded-lg'>
                     <div className='flex items-center justify-between mb-2'>
                       <div className='flex items-center gap-2'>
-                        {proposal.executed ? (
-                          <CheckCircle2 className='w-4 h-4 text-green-500' />
+                        {proposal.status === ProposalStatus.EXECUTED ? (
+                          <CheckCircle className='w-4 h-4 text-green-500' />
                         ) : proposal.status === ProposalStatus.ACTIVE ? (
                           <Clock className='w-4 h-4 text-yellow-500' />
                         ) : (
@@ -351,8 +345,13 @@ export default function WalletPage({
                     <div className='flex items-center justify-between'>
                       <div className='flex items-center gap-2'>
                         <span className='text-sm text-gray-400'>
-                          Approvals: {proposal.approvals}/
-                          {walletInfo.requiredApprovals}
+                          Approvals:{' '}
+                          {
+                            Object.keys(proposal.approved).filter(
+                              (e) => proposal.approved[e]
+                            ).length
+                          }
+                          /{walletInfo.requiredApprovals}
                         </span>
                         <div className='flex gap-2 ml-2'>
                           {walletInfo.owners.map((owner) => (
@@ -387,28 +386,32 @@ export default function WalletPage({
                       </div>
                       <div className='flex gap-2 items-center'>
                         {proposal.status === ProposalStatus.ACTIVE ? (
-                          !proposal.executed && (
-                            <>
-                              {userInfo?.walletAddress &&
-                                !proposal.approved[
-                                  userInfo.walletAddress?.toLowerCase()
-                                ] && (
-                                  <Button
-                                    onClick={() => approveProposal(index)}
-                                    label='Approve'
-                                    className='px-4 py-2'
-                                  />
-                                )}
-                              <Button
-                                onClick={() => inactivateProposal(index)}
-                                label='Cancel'
-                                className='px-4 py-2 !bg-red-500 hover:!bg-red-600'
-                              />
-                            </>
-                          )
+                          <>
+                            {userInfo?.walletAddress &&
+                              !proposal.approved[
+                                userInfo.walletAddress?.toLowerCase()
+                              ] && (
+                                <Button
+                                  onClick={() => approveProposal(index)}
+                                  label='Approve'
+                                  className='px-4 py-2'
+                                />
+                              )}
+                            <Button
+                              onClick={() => inactivateProposal(index)}
+                              label='Cancel'
+                              className='px-4 py-2 !bg-red-500 hover:!bg-red-600'
+                            />
+                          </>
+                        ) : proposal.status === ProposalStatus.EXECUTED ? (
+                          <div className='text-white px-3 py-1 rounded-full text-xs flex items-center gap-2'>
+                            <CheckCircle className='w-4 h-4 text-green-500' />{' '}
+                            Succesfully Executed
+                          </div>
                         ) : (
-                          <div className='bg-primary-500 text-white px-3 py-1 rounded-full text-xs flex items-center'>
-                            Inactive
+                          <div className='text-gray-300 px-3 py-1 rounded-full text-xs flex items-center gap-2'>
+                            <XCircle className='w-4 h-4 text-red-500' />{' '}
+                            Discarded
                           </div>
                         )}
                       </div>

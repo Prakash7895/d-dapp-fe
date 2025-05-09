@@ -2,12 +2,8 @@
   {
     "type": "constructor",
     "inputs": [
-      { "name": "_owners", "type": "address[]", "internalType": "address[]" },
-      {
-        "name": "_requiredApprovals",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
+      { "name": "_owner1", "type": "address", "internalType": "address" },
+      { "name": "_owner2", "type": "address", "internalType": "address" }
     ],
     "stateMutability": "nonpayable"
   },
@@ -23,15 +19,6 @@
   },
   {
     "type": "function",
-    "name": "getOwners",
-    "inputs": [],
-    "outputs": [
-      { "name": "", "type": "address[]", "internalType": "address[]" }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "getProposal",
     "inputs": [
       { "name": "index", "type": "uint256", "internalType": "uint256" }
@@ -39,8 +26,6 @@
     "outputs": [
       { "name": "destination", "type": "address", "internalType": "address" },
       { "name": "amount", "type": "uint256", "internalType": "uint256" },
-      { "name": "approvals", "type": "uint256", "internalType": "uint256" },
-      { "name": "executed", "type": "bool", "internalType": "bool" },
       {
         "name": "status",
         "type": "uint8",
@@ -52,13 +37,6 @@
   {
     "type": "function",
     "name": "getProposalCount",
-    "inputs": [],
-    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "getRequiredApprovals",
     "inputs": [],
     "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
     "stateMutability": "view"
@@ -84,8 +62,15 @@
   },
   {
     "type": "function",
-    "name": "s_owners",
-    "inputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "name": "s_owner1",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "s_owner2",
+    "inputs": [],
     "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
     "stateMutability": "view"
   },
@@ -100,21 +85,12 @@
         "internalType": "address payable"
       },
       { "name": "amount", "type": "uint256", "internalType": "uint256" },
-      { "name": "approvals", "type": "uint256", "internalType": "uint256" },
-      { "name": "executed", "type": "bool", "internalType": "bool" },
       {
         "name": "status",
         "type": "uint8",
         "internalType": "enum ProposalStatus"
       }
     ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "s_requiredApprovals",
-    "inputs": [],
-    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
     "stateMutability": "view"
   },
   {

@@ -3,14 +3,13 @@ import { UserResponse } from './user';
 export enum ProposalStatus {
   INACTIVE = 0,
   ACTIVE = 1,
+  EXECUTED = 2,
 }
 
 export interface Proposal {
   destination: string;
   amount: string;
-  approvals: number;
   approved: { [key: string]: boolean };
-  executed: boolean;
   status: ProposalStatus;
 }
 

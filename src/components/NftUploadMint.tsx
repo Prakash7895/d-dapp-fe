@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { mintNewNft } from '@/contract';
+import { mintNewNft, verifyUser } from '@/contract';
 import FileUploader from './FileUploader';
 import { mintNFT } from '@/apiCalls';
 import { useSoulboundNFTContract } from './EthereumProvider';
@@ -19,8 +19,10 @@ enum MintType {
 
 export default function NftUploadMint({
   onSuccess,
+  verify,
 }: {
   onSuccess: () => void;
+  verify?: boolean;
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [mintFee, setMintFee] = useState<number>(0);
@@ -72,11 +74,16 @@ export default function NftUploadMint({
         .then((res) => {
           if (res.status === 'success') {
             if (res.data?.metadataUrl) {
-              mintNewNft(soulboundNftContract, res.data?.metadataUrl)
-                .then(() => {
-                  toast.success('Profile NFT minted successfully');
+              (verify
+                ? verifyUser(soulboundNftContract, res.data?.metadataUrl)
+                : mintNewNft(soulboundNftContract, res.data?.metadataUrl)
+              )
+                .then((r) => {
+                  if (r) {
+                    toast.success('Profile NFT minted successfully');
+                    onSuccess();
+                  }
                   setIsLoading(false);
-                  onSuccess();
                 })
                 .catch((err) => {
                   setIsLoading(false);
@@ -99,11 +106,16 @@ export default function NftUploadMint({
       }
 
       setIsLoading(true);
-      mintNewNft(soulboundNftContract, cid)
-        .then(() => {
-          toast.success('Profile NFT minted successfully');
+      (verify
+        ? verifyUser(soulboundNftContract, cid)
+        : mintNewNft(soulboundNftContract, cid)
+      )
+        .then((r) => {
+          if (r) {
+            toast.success('Profile NFT minted successfully');
+            onSuccess();
+          }
           setIsLoading(false);
-          onSuccess();
         })
         .catch((err) => {
           setIsLoading(false);

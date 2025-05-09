@@ -8,9 +8,14 @@ import TransactionWrapper from './TransactionWrapper';
 interface MintNftModalProps {
   trigger: ReactNode;
   triggerClassName?: string;
+  verify?: boolean;
 }
 
-const MintNftModal: FC<MintNftModalProps> = ({ trigger, triggerClassName }) => {
+const MintNftModal: FC<MintNftModalProps> = ({
+  trigger,
+  triggerClassName,
+  verify,
+}) => {
   const [open, setOpen] = useState(false);
   const { getCurrUsersTokenIds, getUpdatedProfileNft } = useStateContext();
 
@@ -26,6 +31,7 @@ const MintNftModal: FC<MintNftModalProps> = ({ trigger, triggerClassName }) => {
       <ModalBody className='max-w-[50%]'>
         <ModalContent>
           <NftUploadMint
+            verify={verify}
             onSuccess={() => {
               getUpdatedProfileNft();
               getCurrUsersTokenIds();

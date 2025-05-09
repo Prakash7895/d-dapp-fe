@@ -20,7 +20,7 @@ const MessageHeader = () => {
           <img
             src={activeChat?.profilePicture}
             alt=''
-            className='w-10 h-10 rounded-full'
+            className='w-10 h-10 rounded-full object-cover'
           />
         ) : (
           <User className='w-10 h-10 rounded-full' />

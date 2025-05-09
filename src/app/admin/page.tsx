@@ -142,7 +142,7 @@ const AdminPage = () => {
         // MatchMaking Contract
         matchMakingContract.s_amount(),
         matchMakingContract.s_owner(),
-        matchMakingContract.s_likeExpirationDays(),
+        matchMakingContract.s_likeExpMinutes(),
         matchMakingContract.s_commission(),
         matchMakingContract.s_maxAmountCanWithdraw(),
         provider?.getBalance(process.env.NEXT_PUBLIC_MATCH_MAKING_ADDRESS!),
