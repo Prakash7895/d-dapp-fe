@@ -22,13 +22,13 @@ const MatchesPage = () => {
 
   useEffect(() => {
     if (!loading && data.length === 0 && hasMore) {
-      dispatch(fetchMatchedUsers({ pageNo: 1, pageSize: 6 }));
+      dispatch(fetchMatchedUsers({ pageNo: 1, pageSize: 20 }));
     }
   }, [data, loading, hasMore]);
 
   const handleLoadMore = () => {
     if (!loading && hasMore) {
-      dispatch(fetchMatchedUsers({ pageNo, pageSize: 6 }));
+      dispatch(fetchMatchedUsers({ pageNo, pageSize: 20 }));
     }
   };
 

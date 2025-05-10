@@ -54,13 +54,13 @@ const LikedPage = () => {
 
   useEffect(() => {
     if (!loading && data.length === 0 && hasMore) {
-      dispatch(fetchLikedUsers({ pageNo: 1, pageSize: 6 }));
+      dispatch(fetchLikedUsers({ pageNo: 1, pageSize: 20 }));
     }
   }, [data, loading, hasMore]);
 
   const handleLoadMore = () => {
     if (!loading && hasMore) {
-      dispatch(fetchLikedUsers({ pageNo, pageSize: 6 }));
+      dispatch(fetchLikedUsers({ pageNo, pageSize: 20 }));
     }
   };
 
