@@ -7,6 +7,7 @@ interface InfiniteScrollProps {
   isLoading: boolean; // Whether data is currently being loaded
   direction?: 'top-to-bottom' | 'bottom-to-top'; // Scroll direction
   className?: string; // Additional class names for styling
+  style?: React.CSSProperties;
 }
 
 const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
@@ -16,6 +17,7 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
   isLoading,
   direction = 'top-to-bottom',
   className = '',
+  style,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -51,6 +53,7 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
       className={`overflow-y-auto h-full ${
         direction === 'bottom-to-top' ? 'flex flex-col-reverse' : ''
       } ${className}`}
+      style={style}
     >
       {children}
 

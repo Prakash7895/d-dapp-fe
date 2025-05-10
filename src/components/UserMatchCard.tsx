@@ -109,7 +109,7 @@ const UserMatchCard: FC<MatchedUser> = ({
           )}
         </div>
 
-        <div className='flex items-center justify-between pt-4 border-t border-gray-700'>
+        <div className='flex flex-col gap-y-4 items-center justify-between pt-4 border-t border-gray-700'>
           <div className='flex items-center text-gray-400 text-sm'>
             <Calendar className='w-4 h-4 mr-2' />
             Matched {formatDistanceToNow(matchedAt)} ago

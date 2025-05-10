@@ -32,7 +32,7 @@ const WalletAlert: FC<WalletAlertProps> = ({
 }) => {
   const { connect } = useEthereum();
   return (
-    <div className='bg-yellow-500 shadow-lg'>
+    <div id='alert-handler' className='bg-yellow-500 shadow-lg'>
       <div className='max-w-7xl mx-auto px-4 py-3'>
         <div className='flex items-center justify-between gap-4'>
           {showEmailRecommendation ? (

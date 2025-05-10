@@ -1,5 +1,7 @@
 import {
   getChats,
+  getLikedUsers,
+  getMatchedUsers,
   getMessages,
   getNotifications,
   getUserFiles,
@@ -115,6 +117,44 @@ export const fetchUserNfts = createAsyncThunk(
   ) => {
     try {
       const response = await getUserNfts(id, pageNo, pageSize);
+      if (response.status === 'success') {
+        return { data: response.data, page: pageNo + 1, pageSize };
+      } else {
+        return thunkAPI.rejectWithValue(response.message);
+      }
+    } catch (error: unknown) {
+      return thunkAPI.rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+export const fetchLikedUsers = createAsyncThunk(
+  'liked/fetchUsers',
+  async (
+    { pageNo, pageSize }: { pageNo: number; pageSize: number },
+    thunkAPI
+  ) => {
+    try {
+      const response = await getLikedUsers(pageNo, pageSize);
+      if (response.status === 'success') {
+        return { data: response.data, page: pageNo + 1, pageSize };
+      } else {
+        return thunkAPI.rejectWithValue(response.message);
+      }
+    } catch (error: unknown) {
+      return thunkAPI.rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+export const fetchMatchedUsers = createAsyncThunk(
+  'matched/fetchUsers',
+  async (
+    { pageNo, pageSize }: { pageNo: number; pageSize: number },
+    thunkAPI
+  ) => {
+    try {
+      const response = await getMatchedUsers(pageNo, pageSize);
       if (response.status === 'success') {
         return { data: response.data, page: pageNo + 1, pageSize };
       } else {

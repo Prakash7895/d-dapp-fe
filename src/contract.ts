@@ -128,7 +128,8 @@ export const unlikeProfile = async (
     return null;
   }
   try {
-    await contract.unSetLikeOnExpiration(user);
+    const transaction = await contract.unSetLikeOnExpiration(user);
+    await transaction.wait();
   } catch (error: unknown) {
     console.log('unlike profile error', error);
     handleTransactionError(error);
