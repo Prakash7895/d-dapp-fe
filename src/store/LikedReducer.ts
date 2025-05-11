@@ -44,7 +44,7 @@ const likedUsersSlice = createSlice({
 
         state.data = [...existingData, ...(newData || [])];
         state.hasMore =
-          action.payload.data?.users!.length! >= action.payload.pageSize;
+          (action.payload.data?.users!.length ?? 0) >= action.payload.pageSize;
         state.pageNo = action.payload.page;
         state.total = action.payload.data?.total ?? 0;
       })
