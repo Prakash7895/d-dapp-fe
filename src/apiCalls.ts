@@ -33,10 +33,12 @@ interface ApiResponse<T = null> {
   message?: string;
 }
 
+console.log('process.env.NEXT_PUBLIC_ORIGIN', process.env.NEXT_PUBLIC_ORIGIN);
 const axiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BE_END_POINT,
   headers: {
     'Content-Type': 'application/json',
+    Origin: process.env.NEXT_PUBLIC_ORIGIN || 'http://localhost:3000',
   },
 });
 
