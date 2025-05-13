@@ -20,7 +20,7 @@ const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const isAuthRoute = pathname.startsWith('/auth/sign');
+  const isAuthRoute = pathname.startsWith('/auth');
   const isAdminRoute = pathname.startsWith('/admin');
 
   useEffect(() => {

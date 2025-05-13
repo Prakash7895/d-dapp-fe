@@ -24,7 +24,7 @@ const useSession = (): {
   const router = useRouter();
   const pathName = usePathname();
 
-  const isAuthRoute = pathName.startsWith('/auth/sign');
+  const isAuthRoute = pathName.startsWith('/auth');
   const isAdminRoute = pathName.startsWith('/admin');
 
   const clearSession = useCallback(() => {

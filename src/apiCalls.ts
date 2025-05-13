@@ -484,3 +484,12 @@ export const onboardUser = (data: FormData) =>
       toast.error(err?.message || 'Failed to save wallet address');
       return { status: 'error' } as ApiResponse;
     });
+
+export const resetUserPassword = ({ email }: { email?: string }) =>
+  axiosInstance
+    .post('/auth/reset-password', { email })
+    .then((res) => res.data as ApiResponse)
+    .catch((err) => {
+      toast.error(err?.message || 'Failed to send reset password email');
+      return { status: 'error', message: err?.message } as ApiResponse;
+    });

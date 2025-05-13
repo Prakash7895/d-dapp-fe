@@ -7,13 +7,14 @@ import Button from '@/components/Button';
 import Input from '@/components/Input';
 import ScreenLoader from '@/components/ScreenLoader';
 import useSession from '@/hooks/useSession';
-import { login } from '@/apiCalls';
+import { login, resetUserPassword } from '@/apiCalls';
 import { SignInType } from '@/types/user';
 import { createQueryString } from '@/utils';
 import TransactionBtn from '@/components/TransactionBtn';
 import { JsonRpcSigner } from 'ethers';
 import { useEthereum } from '@/components/EthereumProvider';
 import AppLogo from '@/components/AppLogo';
+import { toast } from 'react-toastify';
 
 export default function SignIn() {
   const router = useRouter();
@@ -25,6 +26,7 @@ export default function SignIn() {
   const searchParams = useSearchParams();
   const wallet = searchParams.get('wallet');
   const { connectedAddress } = useEthereum();
+  const [resetPassword, setResetPassword] = useState(false);
 
   const [authMethod, setAuthMethod] = useState<SignInType>(
     wallet ? SignInType.WALLET : SignInType.EMAIL
@@ -52,16 +54,37 @@ export default function SignIn() {
     setError('');
 
     try {
-      login({ type: SignInType.EMAIL, email, password }).then(async (res) => {
-        if (res.status === 'success') {
-          sessionStorage.setItem('accessToken', res.data!.access_token!);
-          sessionStorage.setItem('refreshToken', res.data!.refresh_token!);
-          await fetchSession();
-          router.push('/');
-        } else {
-          setError(res?.message || 'An error occurred');
-        }
-      });
+      const res = await login({ type: SignInType.EMAIL, email, password });
+      if (res.status === 'success') {
+        sessionStorage.setItem('accessToken', res.data!.access_token!);
+        sessionStorage.setItem('refreshToken', res.data!.refresh_token!);
+        await fetchSession();
+        router.push('/');
+      } else {
+        setError(res?.message || 'An error occurred');
+      }
+    } catch (error) {
+      setError((error as Error).message || 'An error occurred during sign in');
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const res = await resetUserPassword({ email });
+      if (res.status === 'success') {
+        toast.success('Password reset email sent. Please check your inbox.');
+        setEmail('');
+        setResetPassword(false);
+      } else {
+        setError(res?.message || 'An error occurred');
+      }
     } catch (error) {
       setError((error as Error).message || 'An error occurred during sign in');
       console.log(error);
@@ -140,41 +163,46 @@ export default function SignIn() {
       <div className='w-full max-w-md space-y-8'>
         <div>
           <h2 className='mt-6 text-center text-2xl font-bold tracking-tight text-white'>
-            Sign in to your account
+            {resetPassword ? 'Reset your password' : 'Sign in to your account'}
           </h2>
         </div>
 
         <div className='mt-8 space-y-6'>
-          <div className='flex justify-center space-x-4 mb-6'>
-            <Link
-              href={pathName}
-              onClick={() => setAuthMethod(SignInType.EMAIL)}
-              className={`px-4 py-2 rounded-md ${
-                authMethod === SignInType.EMAIL
-                  ? 'bg-primary-500 text-white'
-                  : 'bg-gray-700 text-gray-300'
-              }`}
-            >
-              Email & Password
-            </Link>
-            <Link
-              href={
-                pathName +
-                createQueryString(searchParams, SignInType.WALLET, 'true')
-              }
-              onClick={() => setAuthMethod(SignInType.WALLET)}
-              className={`px-4 py-2 rounded-md ${
-                authMethod === SignInType.WALLET
-                  ? 'bg-primary-500 text-white'
-                  : 'bg-gray-700 text-gray-300'
-              }`}
-            >
-              Wallet
-            </Link>
-          </div>
+          {!resetPassword && (
+            <div className='flex justify-center space-x-4 mb-6'>
+              <Link
+                href={pathName}
+                onClick={() => setAuthMethod(SignInType.EMAIL)}
+                className={`px-4 py-2 rounded-md ${
+                  authMethod === SignInType.EMAIL
+                    ? 'bg-primary-500 text-white'
+                    : 'bg-gray-700 text-gray-300'
+                }`}
+              >
+                Email & Password
+              </Link>
+              <Link
+                href={
+                  pathName +
+                  createQueryString(searchParams, SignInType.WALLET, 'true')
+                }
+                onClick={() => setAuthMethod(SignInType.WALLET)}
+                className={`px-4 py-2 rounded-md ${
+                  authMethod === SignInType.WALLET
+                    ? 'bg-primary-500 text-white'
+                    : 'bg-gray-700 text-gray-300'
+                }`}
+              >
+                Wallet
+              </Link>
+            </div>
+          )}
 
           {authMethod === SignInType.EMAIL ? (
-            <form className='mt-8 space-y-6' onSubmit={handleEmailSignIn}>
+            <form
+              className='mt-8 space-y-6'
+              onSubmit={resetPassword ? handleResetPassword : handleEmailSignIn}
+            >
               <div className='rounded-md shadow-sm -space-y-px'>
                 <Input
                   label='Email address'
@@ -185,19 +213,21 @@ export default function SignIn() {
                   autoComplete='email'
                   placeholder='Email address'
                   labelClassName='sr-only'
-                  inputClassName='rounded-b-none'
+                  inputClassName={resetPassword ? '' : 'rounded-b-none'}
                 />
-                <Input
-                  label='Password'
-                  name='password'
-                  type='password'
-                  onChange={(e) => setPassword(e.target.value)}
-                  value={password}
-                  autoComplete='current-password'
-                  placeholder='Password'
-                  labelClassName='sr-only'
-                  inputClassName='rounded-t-none'
-                />
+                {!resetPassword && (
+                  <Input
+                    label='Password'
+                    name='password'
+                    type='password'
+                    onChange={(e) => setPassword(e.target.value)}
+                    value={password}
+                    autoComplete='current-password'
+                    placeholder='Password'
+                    labelClassName='sr-only'
+                    inputClassName='rounded-t-none'
+                  />
+                )}
               </div>
 
               {error && (
@@ -206,10 +236,12 @@ export default function SignIn() {
 
               <div>
                 <Button
-                  label='Sign in'
+                  label={resetPassword ? 'Reset Password' : 'Sign in'}
                   isLoading={isLoading}
                   disabled={isLoading}
-                  loadingLabel='Signing in...'
+                  loadingLabel={
+                    resetPassword ? 'Sending email...' : 'Signing in...'
+                  }
                   type='submit'
                 />
               </div>
@@ -242,6 +274,32 @@ export default function SignIn() {
                   type='submit'
                 />
               </div>
+            </div>
+          )}
+
+          {resetPassword ? (
+            <div
+              className='text-center'
+              onClick={() => {
+                setAuthMethod(SignInType.EMAIL);
+                setResetPassword(false);
+              }}
+            >
+              <p className='text-primary-400 hover:text-primary-300 cursor-pointer'>
+                Sign in
+              </p>
+            </div>
+          ) : (
+            <div
+              className='text-center'
+              onClick={() => {
+                setAuthMethod(SignInType.EMAIL);
+                setResetPassword(true);
+              }}
+            >
+              <p className='text-primary-400 hover:text-primary-300 cursor-pointer'>
+                Forgot your password? Reset it here
+              </p>
             </div>
           )}
 
