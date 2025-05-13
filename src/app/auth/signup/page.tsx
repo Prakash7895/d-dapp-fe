@@ -152,7 +152,9 @@ export default function SignUp() {
       }
 
       // Create a message to sign
-      const message = `${process.env.NEXT_PUBLIC_MESSAGE_TO_VERIFY}${walletAddress}`;
+      const message = `${
+        process.env.NEXT_PUBLIC_MESSAGE_TO_VERIFY
+      }${walletAddress.toLowerCase()}`;
 
       // Sign the message
       const signature = await signer.signMessage(message);

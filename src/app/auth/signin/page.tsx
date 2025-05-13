@@ -101,7 +101,9 @@ export default function SignIn() {
       const address = await signer.getAddress();
 
       // Create a message to sign
-      const message = `${process.env.NEXT_PUBLIC_MESSAGE_TO_VERIFY}${address}`;
+      const message = `${
+        process.env.NEXT_PUBLIC_MESSAGE_TO_VERIFY
+      }${address.toLowerCase()}`;
 
       // Sign the message
       const signature = await signer.signMessage(message);
