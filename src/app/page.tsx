@@ -54,7 +54,8 @@ const HomePage = () => {
         toast.success('Profile liked successfully! 💝');
 
         return true;
-      } catch (error: unknown) {
+      } catch (err) {
+        console.log('failed liking profile', err);
         // toast.error((error as Error)?.message || 'Failed to like profile');
         return false;
       }

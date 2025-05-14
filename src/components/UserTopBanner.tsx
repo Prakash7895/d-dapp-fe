@@ -16,7 +16,7 @@ import { motion } from 'framer-motion';
 import { useEthereum, useMatchMakingContract } from './EthereumProvider';
 import { likeProfile } from '@/contract';
 import { toast } from 'react-toastify';
-import { formatDistanceToNowStrict, set } from 'date-fns';
+import { formatDistanceToNowStrict } from 'date-fns';
 import { useStateContext } from './StateProvider';
 import AnimatedTooltip from './AnimatedTooltip';
 import { capitalizeFirstLetter } from '@/utils';
