@@ -49,7 +49,17 @@ const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
 const RootProvider: FC<{ children: ReactNode }> = ({ children }) => (
   <>
-    <ToastContainer />
+    <ToastContainer
+      position='top-right'
+      theme='dark'
+      toastStyle={{
+        backgroundColor: '#1f2937',
+        color: '#ffffff',
+        borderRadius: '8px',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        padding: '16px',
+      }}
+    />
     <EthereumProvider>
       <AuthProvider>{children}</AuthProvider>
     </EthereumProvider>
