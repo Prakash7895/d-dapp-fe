@@ -20,6 +20,7 @@ import {
 } from '@/apiCalls';
 import { useEthereum } from './EthereumProvider';
 import { usePathname } from 'next/navigation';
+import { CHAIN_ID } from './TransactionWrapper';
 
 const Context = createContext<{
   connectedToValidAddress: boolean;
@@ -40,7 +41,8 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
 
   const [isCheckingAddress, setIsCheckingAddress] = useState(false);
   const [canConnectToCurrAddress, setCanConnectToCurrAddress] = useState(false);
-  const { isConnected, connectedAddress } = useEthereum();
+  const { isConnected, connectedAddress, isWalletPresent, chainId } =
+    useEthereum();
   const pathName = usePathname();
 
   useEffect(() => {
@@ -139,10 +141,16 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
     }
   };
 
+  const isCorrectChain = chainId === CHAIN_ID;
+
   const getTitle = () => {
     // Not connected state
-    if (!isConnected) {
+    if (!isConnected || !isWalletPresent) {
       return 'Wallet Connection Required';
+    }
+
+    if (!isCorrectChain) {
+      return 'Wrong Network';
     }
 
     // Checking state
@@ -183,6 +191,15 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
   };
 
   const getMessage = () => {
+    // Wallet not present
+    if (!isWalletPresent) {
+      return 'No wallet detected. Please install a wallet like MetaMask or use a supported browser to connect your wallet.';
+    }
+
+    if (!isCorrectChain) {
+      return 'You are connected to the wrong network. Please switch to the Amoy network to proceed.';
+    }
+
     // Not connected state
     if (!isConnected) {
       return 'Please connect your wallet to continue using the app.';
@@ -264,18 +281,19 @@ const WalletHandler: FC<{ children: ReactNode }> = ({ children }) => {
 
   return (
     <Context.Provider value={value}>
-      {pathName !== '/onboarding' && (showAlert || showEmailRecommendation) && (
-        <WalletAlert
-          title={getTitle()}
-          message={getMessage()}
-          showConnectBtn={!isConnected}
-          showSaveBtn={!targetWalletAddress && !!connectedAddress}
-          onSave={handleConfirmNewAddress}
-          isLoading={isCheckingAddress}
-          isSaving={saving}
-          showEmailRecommendation={showEmailRecommendation}
-        />
-      )}
+      {pathName !== '/onboarding' &&
+        (showAlert || showEmailRecommendation || !isCorrectChain) && (
+          <WalletAlert
+            title={getTitle()}
+            message={getMessage()}
+            showConnectBtn={!isConnected && isWalletPresent}
+            showSaveBtn={!targetWalletAddress && !!connectedAddress}
+            onSave={handleConfirmNewAddress}
+            isLoading={isCheckingAddress}
+            isSaving={saving}
+            showEmailRecommendation={showEmailRecommendation}
+          />
+        )}
       {children}
     </Context.Provider>
   );

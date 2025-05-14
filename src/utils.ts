@@ -120,3 +120,10 @@ export const getImageFromNFT = async (src: string) => {
   }
   return '';
 };
+
+export const arrayToString = (arr?: string | string[]) => {
+  if (Array.isArray(arr)) {
+    return arr.join(', ');
+  }
+  return arr;
+};

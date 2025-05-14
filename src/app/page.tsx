@@ -55,7 +55,7 @@ const HomePage = () => {
 
         return true;
       } catch (error: unknown) {
-        toast.error((error as Error)?.message || 'Failed to like profile');
+        // toast.error((error as Error)?.message || 'Failed to like profile');
         return false;
       }
     }

@@ -204,7 +204,7 @@ export const onboardingSchema = z.object({
     }),
   bio: z
     .string()
-    .min(10, { message: 'Bio must be at least 50 characters long.' }),
+    .min(50, { message: 'Bio must be at least 50 characters long.' }),
   city: z
     .string()
     .min(2, { message: 'City is required.' })

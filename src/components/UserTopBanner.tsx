@@ -13,10 +13,10 @@ import {
 import React, { useState } from 'react';
 import TransactionWrapper from './TransactionWrapper';
 import { motion } from 'framer-motion';
-import { useMatchMakingContract } from './EthereumProvider';
+import { useEthereum, useMatchMakingContract } from './EthereumProvider';
 import { likeProfile } from '@/contract';
 import { toast } from 'react-toastify';
-import { formatDistanceToNowStrict } from 'date-fns';
+import { formatDistanceToNowStrict, set } from 'date-fns';
 import { useStateContext } from './StateProvider';
 import AnimatedTooltip from './AnimatedTooltip';
 import { capitalizeFirstLetter } from '@/utils';
@@ -30,6 +30,7 @@ const UserTopBanner = () => {
     user: { data: userData },
   } = useAppSelector('user');
   const matchMakingContract = useMatchMakingContract();
+  const { provider, connectedAddress } = useEthereum();
   const { userInfo } = useStateContext();
   const params = useParams();
   const userId = params.id as string;
@@ -41,6 +42,22 @@ const UserTopBanner = () => {
   const handleLike = async () => {
     try {
       setIsLiking(true);
+      const balance = await provider?.getBalance(connectedAddress!);
+      console.log('Wallet balance (in wei):', balance, balance!.toString());
+
+      // Get the required amount for the transaction
+      const amount = await matchMakingContract?.s_amount();
+      console.log('Required amount (in wei):', amount, amount.toString());
+
+      // Ensure the wallet has enough balance
+      if ((balance ?? 0) < amount) {
+        toast.error(
+          'Insufficient funds to like the profile. Please add more funds to your wallet.'
+        );
+        setIsLiking(false);
+        return null;
+      }
+
       await likeProfile(matchMakingContract, userData!.walletAddress!);
 
       toast.success('Profile liked successfully! 💝');

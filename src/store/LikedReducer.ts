@@ -28,6 +28,7 @@ const likedUsersSlice = createSlice({
       );
       state.data = updatedUsers;
     },
+    resetLikedUsers: () => initialState,
   },
   extraReducers(builder) {
     builder
@@ -50,10 +51,11 @@ const likedUsersSlice = createSlice({
       })
       .addCase(fetchLikedUsers.rejected, (state) => {
         state.loading = false;
+        state.hasMore = false;
         console.log('Failed to fetch liked users');
       });
   },
 });
 
-export const { removeUser } = likedUsersSlice.actions;
+export const { removeUser, resetLikedUsers } = likedUsersSlice.actions;
 export default likedUsersSlice.reducer;

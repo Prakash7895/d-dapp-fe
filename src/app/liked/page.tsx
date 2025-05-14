@@ -24,6 +24,7 @@ import { fetchLikedUsers } from '@/store/thunk';
 import { useAppDispatch, useAppSelector } from '@/store';
 import Loader from '@/components/Loader';
 import useRemainingHeight from '@/hooks/useRemainingHeight';
+import { resetLikedUsers } from '@/store/LikedReducer';
 
 const LikedPage = () => {
   const [likeExpirationMinutes, setLikeExpirationMinutes] = useState(0);
@@ -58,6 +59,12 @@ const LikedPage = () => {
     }
   }, [data, loading, hasMore]);
 
+  useEffect(() => {
+    return () => {
+      dispatch(resetLikedUsers());
+    };
+  }, []);
+
   const handleLoadMore = () => {
     if (!loading && hasMore) {
       dispatch(fetchLikedUsers({ pageNo, pageSize: 20 }));
@@ -66,7 +73,7 @@ const LikedPage = () => {
 
   const height = useRemainingHeight();
 
-  if (loading && !data) {
+  if (loading && (!data || data.length === 0)) {
     return (
       <div className='flex items-center h-full justify-center'>
         <Loader />

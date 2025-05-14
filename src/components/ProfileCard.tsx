@@ -29,6 +29,7 @@ import { useAppDispatch } from '@/store';
 import { updateUserProperty } from '@/store/UsersReducer';
 import TransactionWrapper from './TransactionWrapper';
 import Link from 'next/link';
+import { useEthereum, useMatchMakingContract } from './EthereumProvider';
 
 interface ProfileCardProps {
   profile: AllUsers;
@@ -55,6 +56,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   const { userInfo, activeProfilePhoto } = useStateContext();
   const isNftMinted = !!activeProfilePhoto;
   const [nudging, setNudging] = useState(false);
+  const { provider, connectedAddress } = useEthereum();
+  const matchMakingContract = useMatchMakingContract();
 
   const loggedInHasWallet = !!userInfo?.walletAddress;
   const currentUserHasWallet = !!profile?.walletAddress;
@@ -95,6 +98,25 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   const maxInterestsToShow = 4;
 
   const nudgeMessage = `Nudge ${profile?.profile?.firstName} to add a wallet!`;
+
+  const checkBalanceAndSwipe = async () => {
+    const balance = await provider?.getBalance(connectedAddress!);
+    console.log('Wallet balance (in wei):', balance, balance!.toString());
+
+    // Get the required amount for the transaction
+    const amount = await matchMakingContract?.s_amount();
+    console.log('Required amount (in wei):', amount, amount.toString());
+
+    // Ensure the wallet has enough balance
+    if ((balance ?? 0) < amount) {
+      toast.error(
+        'Insufficient funds to like the profile. Please add more funds to your wallet.'
+      );
+      return null;
+    }
+
+    onSwipe('right');
+  };
 
   return (
     <CardContainer
@@ -242,7 +264,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                         }
                       : {})}
                     onClick={() =>
-                      isWalletConnected ? onSwipe('right') : handleNudge()
+                      isWalletConnected ? checkBalanceAndSwipe() : handleNudge()
                     }
                     disabled={!loggedInHasWallet || nudging || disabled}
                     className='w-16 h-16 rounded-full bg-white/10 hover:enabled:bg-white/20 disabled:opacity-70 flex items-center justify-center'

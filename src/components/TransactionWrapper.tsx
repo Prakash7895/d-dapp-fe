@@ -16,6 +16,8 @@ interface TransactionWrapperProps {
   position?: 'top' | 'left' | 'right';
 }
 
+export const CHAIN_ID = 80002;
+
 const TransactionWrapper: FC<TransactionWrapperProps> = ({
   children,
   tooltipContent,
@@ -25,12 +27,19 @@ const TransactionWrapper: FC<TransactionWrapperProps> = ({
 }) => {
   const { userInfo } = useStateContext();
   const targetWalletAddress = userInfo?.walletAddress?.toLowerCase();
-  const { signer } = useEthereum();
+  const { signer, provider } = useEthereum();
   const [connectedAddress, setConnectedAddress] = useState('');
+  const [chainId, setChainId] = useState<number | null>(null);
 
   useEffect(() => {
     signer?.getAddress().then((address) => {
       setConnectedAddress(address.toLowerCase());
+    });
+
+    provider?.getNetwork().then((network) => {
+      const _chainId = Number(network.chainId);
+
+      setChainId(_chainId);
     });
   }, [signer]);
 
@@ -53,6 +62,11 @@ const TransactionWrapper: FC<TransactionWrapperProps> = ({
         0,
         6
       )}...${targetWalletAddress?.substring(38)}.`;
+    isDisabled = true;
+  } else if (chainId !== CHAIN_ID) {
+    tooltipMessage =
+      tooltipContent?.default ??
+      'You are connected to the wrong network. Please switch to the Amoy network to proceed.';
     isDisabled = true;
   } else {
     tooltipMessage =

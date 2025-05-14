@@ -10,17 +10,11 @@ const useRemainingHeight = () => {
 
       const alertHandlerHeight = alertHandler?.offsetHeight || 0;
       const navBarHeight = navBar?.offsetHeight || 0;
-      console.log('alertHandler', alertHandler);
-      console.log('alertHandlerHeight', alertHandlerHeight);
-      console.log('navBar', navBar);
-      console.log('navBarHeight', navBarHeight);
 
       const totalHeight = window.innerHeight;
       const calculatedHeight =
         totalHeight - (alertHandlerHeight + navBarHeight);
 
-      console.log('totalHeight', totalHeight);
-      console.log('calculatedHeight', calculatedHeight);
       setRemainingHeight(calculatedHeight);
     };
 

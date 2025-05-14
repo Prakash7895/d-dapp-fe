@@ -21,7 +21,9 @@ const initialState: MatchesState = {
 const likedUsersSlice = createSlice({
   name: 'likedUsers',
   initialState,
-  reducers: {},
+  reducers: {
+    resetMatchedUsers: () => initialState,
+  },
   extraReducers(builder) {
     builder
       .addCase(fetchMatchedUsers.pending, (state) => {
@@ -43,9 +45,11 @@ const likedUsersSlice = createSlice({
       })
       .addCase(fetchMatchedUsers.rejected, (state) => {
         state.loading = false;
+        state.hasMore = false;
         console.log('Failed to fetch matched users');
       });
   },
 });
 
+export const { resetMatchedUsers } = likedUsersSlice.actions;
 export default likedUsersSlice.reducer;

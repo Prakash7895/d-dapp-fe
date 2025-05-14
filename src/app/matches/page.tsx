@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from '@/store';
 import useRemainingHeight from '@/hooks/useRemainingHeight';
 import Loader from '@/components/Loader';
 import { fetchMatchedUsers } from '@/store/thunk';
+import { resetMatchedUsers } from '@/store/MatchesReducer';
 
 const MatchesPage = () => {
   const { totalBalance, getMulitSigBalances } = useStateContext();
@@ -32,9 +33,15 @@ const MatchesPage = () => {
     }
   };
 
+  useEffect(() => {
+    return () => {
+      dispatch(resetMatchedUsers());
+    };
+  }, []);
+
   const height = useRemainingHeight();
 
-  if (loading && !data) {
+  if (loading && (!data || data.length === 0)) {
     return (
       <div className='flex items-center h-full justify-center'>
         <Loader />

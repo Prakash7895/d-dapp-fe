@@ -163,28 +163,17 @@ export default function SignUp() {
       const { password, email, ...restFormData } = formData;
 
       // Create user with wallet address
-      axiosInstance
-        .post('/users', {
-          ...restFormData,
-          age: +restFormData.age,
-          walletAddress: walletAddress.toLowerCase(),
-          signature,
-          ...location,
-        })
-        .then((res) => {
-          const data = res.data;
-          toast.success(data?.message);
-          router.push(`/auth/signin?${SignInType.WALLET}=true`);
-        })
-        .catch((error) => {
-          setError(
-            error ? error.message : 'An error occurred during registration'
-          );
-          console.log(error);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+      const res = await axiosInstance.post('/users', {
+        ...restFormData,
+        age: +restFormData.age,
+        walletAddress: walletAddress.toLowerCase(),
+        signature,
+        ...location,
+      });
+
+      const data = res.data;
+      toast.success(data?.message);
+      router.push(`/auth/signin?${SignInType.WALLET}=true`);
     } catch (error) {
       setError(
         error instanceof Error

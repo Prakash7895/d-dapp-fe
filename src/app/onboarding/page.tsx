@@ -15,6 +15,7 @@ import {
   useStateContext,
 } from '@/components/StateProvider';
 import Loader from '@/components/Loader';
+import { arrayToString } from '@/utils';
 
 const OnboardingPage = () => {
   const router = useRouter();
@@ -100,12 +101,15 @@ const OnboardingPage = () => {
       formDataToSubmit.append('interests', JSON.stringify(formData.interests));
 
       const response = await onboardUser(formDataToSubmit);
+
       if (response?.status === 'success') {
         setUserInfo(response.data!);
         toast.success('Profile completed successfully!');
         router.push('/'); // Redirect to the home page
       } else {
-        toast.error(response?.message || 'Failed to complete onboarding.');
+        toast.error(
+          arrayToString(response?.message) || 'Failed to complete onboarding.'
+        );
       }
     } catch (error) {
       console.error('Error completing onboarding:', error);

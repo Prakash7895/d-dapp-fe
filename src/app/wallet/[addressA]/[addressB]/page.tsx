@@ -21,7 +21,7 @@ import {
   inactivateMultiSigProposal,
   submitMultiSigProposal,
 } from '@/contract';
-import TransactionWrapper from '@/components/TransactionWrapper';
+import TransactionWrapper, { CHAIN_ID } from '@/components/TransactionWrapper';
 
 export default function WalletPage({
   params,
@@ -34,7 +34,7 @@ export default function WalletPage({
   const [destination, setDestination] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [walletAddress, setWalletAddress] = useState('');
-  const { provider } = useEthereum();
+  const { provider, connect, chainId } = useEthereum();
   const [ownerUsers, setOwnerUsers] = useState<UserResponse[]>([]);
   const { userInfo } = useStateContext();
 
@@ -155,6 +155,40 @@ export default function WalletPage({
       console.log('Error inactivating proposal:', error);
     }
   };
+
+  if (!provider) {
+    return (
+      <div className='bg-gray-900 h-full flex items-center justify-center'>
+        <div className='text-center'>
+          <h2 className='text-2xl font-bold text-white mb-4'>
+            Wallet Not Connected
+          </h2>
+          <p className='text-gray-400 mb-6'>
+            Please connect your wallet to access the Multi-Signature Wallet.
+          </p>
+          <Button
+            onClick={connect}
+            label='Connect Wallet'
+            className='px-6 py-3'
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (chainId !== CHAIN_ID) {
+    return (
+      <div className='bg-gray-900 h-full flex items-center justify-center'>
+        <div className='text-center'>
+          <h2 className='text-2xl font-bold text-white mb-4'>Wrong Network</h2>
+          <p className='text-gray-400 mb-6'>
+            You are connected to the wrong network. Please switch to the Amoy
+            network to access the Multi-Signature Wallet.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

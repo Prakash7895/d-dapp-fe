@@ -23,7 +23,7 @@ interface EthereumContextType {
   provider: BrowserProvider | null;
   signer: JsonRpcSigner | null;
   connectedAddress: string | null;
-  chainId: string | null;
+  chainId: number | null;
   isConnecting: boolean;
   isConnected: boolean;
   connect: () => Promise<JsonRpcSigner | null>;
@@ -39,7 +39,7 @@ const EthereumContext = createContext<EthereumContextType>(
 const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [provider, setProvider] = useState<BrowserProvider | null>(null);
   const [signer, setSigner] = useState<JsonRpcSigner | null>(null);
-  const [chainId, setChainId] = useState<string | null>(null);
+  const [chainId, setChainId] = useState<number | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [connectedAddress, setConnectedAddress] = useState('');
@@ -94,7 +94,7 @@ const EthereumProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
       // Get chain ID
       const network = await _provider.getNetwork();
-      const _chainId = network.chainId.toString(16);
+      const _chainId = Number(network.chainId);
       setChainId(_chainId);
 
       // Get signer and address

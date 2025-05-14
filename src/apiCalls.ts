@@ -163,7 +163,7 @@ export const uploadPhoto = (formData: FormData) =>
     .then((res) => res.data as ApiResponse)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const getFiles = (pageNo: number, pageSize = 10) =>
@@ -178,7 +178,7 @@ export const getFiles = (pageNo: number, pageSize = 10) =>
     )
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const deleteFile = (fileId: number) =>
@@ -187,7 +187,7 @@ export const deleteFile = (fileId: number) =>
     .then((res) => res.data as ApiResponse)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const udpateFileAccess = (fileId: number, access: FILE_ACCESS) =>
@@ -196,7 +196,7 @@ export const udpateFileAccess = (fileId: number, access: FILE_ACCESS) =>
     .then((res) => res.data as ApiResponse)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const uploadProfilePicture = (formData: FormData) =>
@@ -209,7 +209,7 @@ export const uploadProfilePicture = (formData: FormData) =>
     .then((res) => res.data as ApiResponse<UserResponse>)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const getSignedUrl = (key: string) =>
@@ -218,7 +218,7 @@ export const getSignedUrl = (key: string) =>
     .then((res) => res.data as ApiResponse<string>)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const getUsers = (pageNo: number, pageSize = 10) =>
@@ -229,7 +229,7 @@ export const getUsers = (pageNo: number, pageSize = 10) =>
     )
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const login = ({
@@ -270,7 +270,7 @@ export const logout = () =>
     .then((res) => res.data as ApiResponse)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const getLikedUsers = (pageNo: number, pageSize = 10) =>
@@ -281,7 +281,7 @@ export const getLikedUsers = (pageNo: number, pageSize = 10) =>
     )
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const mintNFT = (formData: FormData) =>
@@ -302,16 +302,16 @@ export const mintNFT = (formData: FormData) =>
     )
     .catch((err) => {
       toast.error(err?.message || 'Failed to mint NFT');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const checkConnectedWalletAddress = (walletAddress: string) =>
   axiosInstance
     .put('/profile/check-wallet-address', { walletAddress })
     .then((res) => res.data as ApiResponse)
-    .catch(() => {
+    .catch((err) => {
       // toast.error(err?.message || 'Failed to cehck wallet address');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const saveConnectedWalletAddress = (walletAddress: string) =>
@@ -320,7 +320,7 @@ export const saveConnectedWalletAddress = (walletAddress: string) =>
     .then((res) => res.data as ApiResponse)
     .catch((err) => {
       toast.error(err?.message || 'Failed to save wallet address');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const addEmail = (data: {
@@ -333,7 +333,7 @@ export const addEmail = (data: {
     .then((res) => res.data as ApiResponse)
     .catch((err) => {
       toast.error(err?.message || 'Failed to save wallet address');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const getMatchedUsers = (pageNo: number, pageSize = 10) =>
@@ -344,7 +344,7 @@ export const getMatchedUsers = (pageNo: number, pageSize = 10) =>
     )
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const getMultiSigWalletAddress = (addressA: string, addressB: string) =>
@@ -353,7 +353,7 @@ export const getMultiSigWalletAddress = (addressA: string, addressB: string) =>
     .then((res) => res.data as ApiResponse<MultiSigWallet>)
     .catch((err) => {
       toast.error(err?.message || 'Failed to get multi sig wallet');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const getUserByAddress = (address: string) =>
@@ -362,15 +362,15 @@ export const getUserByAddress = (address: string) =>
     .then((res) => res.data as ApiResponse<UserByAddress>)
     .catch((err) => {
       toast.error(err?.message || 'Failed to get user by address');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const getUserMultiSigWallets = (address: string) =>
   axiosInstance
     .get(`/users/my-multi-sig-wallets/${address}`)
     .then((res) => res.data as ApiResponse<{ multiSigWallets: string[] }>)
-    .catch(() => {
-      return { status: 'error' } as ApiResponse;
+    .catch((err) => {
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const getChats = (pageNo: number, pageSize = 10) =>
@@ -379,7 +379,7 @@ export const getChats = (pageNo: number, pageSize = 10) =>
     .then((res) => res.data as ApiResponse<ChatUser[]>)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const getMessages = (roomId: string, pageNo: number, pageSize = 10) =>
@@ -388,7 +388,7 @@ export const getMessages = (roomId: string, pageNo: number, pageSize = 10) =>
     .then((res) => res.data as ApiResponse<ChatMessage[]>)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const markMessagesReceived = () =>
@@ -397,7 +397,7 @@ export const markMessagesReceived = () =>
     .then((res) => res.data as ApiResponse)
     .catch((err) => {
       toast.error(err?.message || 'Failed to save wallet address');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const getNotifications = (pageNo: number, pageSize = 10) =>
@@ -406,7 +406,7 @@ export const getNotifications = (pageNo: number, pageSize = 10) =>
     .then((res) => res.data as ApiResponse<Notification[]>)
     .catch((err) => {
       toast.error(err?.message || 'Failed to get notifications');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const markNotificationRead = (notificationId: string) =>
@@ -415,7 +415,7 @@ export const markNotificationRead = (notificationId: string) =>
     .then((res) => res.data as ApiResponse)
     .catch((err) => {
       toast.error(err?.message || 'Failed to mark notification as read');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const deleteNotification = (notificationId: string) =>
@@ -424,7 +424,7 @@ export const deleteNotification = (notificationId: string) =>
     .then((res) => res.data as ApiResponse)
     .catch((err) => {
       toast.error(err?.message || 'Failed to delete notification');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const postNudge = (userId: string) =>
@@ -433,7 +433,7 @@ export const postNudge = (userId: string) =>
     .then((res) => res.data as ApiResponse)
     .catch((err) => {
       toast.error(err?.message || 'Failed to nudge user');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const saveEmailOnlyLogin = (enable: boolean) =>
@@ -442,7 +442,7 @@ export const saveEmailOnlyLogin = (enable: boolean) =>
     .then((res) => res.data as ApiResponse)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update email only login');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const getUserById = (id: string) =>
@@ -451,7 +451,7 @@ export const getUserById = (id: string) =>
     .then((res) => res.data as ApiResponse<IUserData>)
     .catch((err) => {
       toast.error(err?.message || 'Failed to get user by id');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const getUserFiles = (id: string, pageNo: number, pageSize = 10) =>
@@ -460,7 +460,7 @@ export const getUserFiles = (id: string, pageNo: number, pageSize = 10) =>
     .then((res) => res.data as ApiResponse<IUserFiles[]>)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const getUserNfts = (id: string, pageNo: number, pageSize = 10) =>
@@ -469,7 +469,7 @@ export const getUserNfts = (id: string, pageNo: number, pageSize = 10) =>
     .then((res) => res.data as ApiResponse<IUserNfts[]>)
     .catch((err) => {
       toast.error(err?.message || 'Failed to update user info');
-      return { status: 'error' } as ApiResponse;
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const onboardUser = (data: FormData) =>
@@ -481,8 +481,8 @@ export const onboardUser = (data: FormData) =>
     })
     .then((res) => res.data as ApiResponse<UserResponse>)
     .catch((err) => {
-      toast.error(err?.message || 'Failed to save wallet address');
-      return { status: 'error' } as ApiResponse;
+      toast.error(err?.message || 'Failed to udpate user info');
+      return { status: 'error', message: err?.message } as ApiResponse;
     });
 
 export const resetUserPassword = ({ email }: { email?: string }) =>
