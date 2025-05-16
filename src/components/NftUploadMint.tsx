@@ -171,7 +171,7 @@ export default function NftUploadMint({
           contentAboveBtn={
             <div className='mb-6'>
               <p className='text-sm text-gray-400'>
-                Minting Fee: {mintFee} ETH
+                Minting Fee: {mintFee} POL
               </p>
             </div>
           }

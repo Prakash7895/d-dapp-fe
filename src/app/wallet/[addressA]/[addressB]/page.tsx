@@ -233,12 +233,12 @@ export default function WalletPage({
               <h3 className='text-sm text-gray-400 mb-1'>Balance</h3>
               {Number(walletInfo?.balance) <= 0 ? (
                 <p className='text-sm text-yellow-500'>
-                  This wallet currently has a balance of 0 ETH. Please deposit
+                  This wallet currently has a balance of 0 POL. Please deposit
                   funds to initiate transactions or submit proposals.
                 </p>
               ) : (
                 <p className='text-xl font-semibold text-white'>
-                  {walletInfo?.balance} ETH
+                  {walletInfo?.balance} POL
                 </p>
               )}
             </div>
@@ -311,7 +311,7 @@ export default function WalletPage({
                 <input
                   type='number'
                   step='0.001'
-                  placeholder='Amount (ETH)'
+                  placeholder='Amount (POL)'
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   className='bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white w-full'
@@ -370,7 +370,7 @@ export default function WalletPage({
                         </span>
                       </div>
                       <span className='text-primary-400'>
-                        {proposal.amount} ETH
+                        {proposal.amount} POL
                       </span>
                     </div>
                     <p className='text-sm text-gray-400 mb-2'>

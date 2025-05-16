@@ -59,7 +59,7 @@ const UserNftGallery: React.FC = () => {
       <div className='text-center p-8 bg-gray-800 rounded-lg'>
         <h3 className='text-xl font-semibold text-white mb-4'>No NFTs Found</h3>
         <p className='text-gray-300 mb-4'>
-          {`Minting your first NFT costs ${mintFee} ETH. This will verify your profile, enhance your reach, and increase your authenticity on the platform.`}
+          {`Minting your first NFT costs ${mintFee} POL. This will verify your profile, enhance your reach, and increase your authenticity on the platform.`}
         </p>
         <MintNftModal
           verify={true}

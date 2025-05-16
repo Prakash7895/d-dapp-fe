@@ -371,9 +371,9 @@ const AdminPage = () => {
                 className='w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white'
                 placeholder={
                   activeField === ActiveFields.TRANSFER
-                    ? 'Enter amount to transfer in ETH'
+                    ? 'Enter amount to transfer in POL'
                     : activeField === 'amount'
-                    ? 'Enter amount in ETH'
+                    ? 'Enter amount in POL'
                     : 'Enter number of days'
                 }
               />
@@ -460,7 +460,7 @@ const AdminPage = () => {
                       <h3 className='text-gray-400'>Contract Balance</h3>
                       <div className='flex items-center gap-2'>
                         <span className='font-mono text-sm text-gray-300'>
-                          {state.balanceMatchMaking} ETH
+                          {state.balanceMatchMaking} POL
                         </span>
                       </div>
                     </div>
@@ -485,7 +485,7 @@ const AdminPage = () => {
                           }
                         />
                         <p className='font-mono text-sm text-right text-gray-300'>
-                          {`${state.matchMakingMaxAmountCanWithdraw} ETH`}
+                          {`${state.matchMakingMaxAmountCanWithdraw} POL`}
                         </p>
                       </div>
                     </div>
@@ -499,7 +499,7 @@ const AdminPage = () => {
                     <div className='flex items-center justify-between'>
                       <h3 className='text-gray-400'>Like Amount</h3>
                       <div className='flex items-center gap-2'>
-                        <span className='text-white'>{state.amount} ETH</span>
+                        <span className='text-white'>{state.amount} POL</span>
                         {isOwner && (
                           <button
                             onClick={() => handleOpenModal(ActiveFields.AMOUNT)}
@@ -609,7 +609,7 @@ const AdminPage = () => {
                     <div className='flex items-center justify-between'>
                       <h3 className='text-gray-400'>Mint Fee</h3>
                       <div className='flex items-center gap-2'>
-                        <span className='text-white'>{state.mintFee} ETH</span>
+                        <span className='text-white'>{state.mintFee} POL</span>
                         {isOwner && (
                           <button
                             onClick={() =>
@@ -643,7 +643,7 @@ const AdminPage = () => {
                           }
                         />
                         <p className='font-mono text-sm text-right text-gray-300'>
-                          {`${state.soulboundMaxAmountCanWithdraw} ETH`}
+                          {`${state.soulboundMaxAmountCanWithdraw} POL`}
                         </p>
                       </div>
                     </div>
